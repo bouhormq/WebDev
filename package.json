@@ -1,0 +1,16 @@
+{
+  "name": "organizasso-workspace",
+  "version": "1.0.0",
+  "description": "Workspace root for Organiz'asso frontend and backend",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "npx concurrently \"npm run dev --prefix organizasso-frontend\" \"npm run server --prefix organizasso-backend\""
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+} 
