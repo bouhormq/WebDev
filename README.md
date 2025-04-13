@@ -23,7 +23,7 @@ When a member logs in, they gain access to the main page, which includes the ope
     * Create messages:
         * In reply to an existing message
         * Or to start a new discussion
-    * View their own profile, which contains at least the list of messages they’ve posted. From their profile, they can delete their own messages.
+    * View their own profile, which contains at least the list of messages they've posted. From their profile, they can delete their own messages.
     * View the profiles of other members
     * Search for messages by specifying keywords, a time range of publication, or the author.
 
@@ -36,28 +36,40 @@ When a member logs in, they gain access to the main page, which includes the ope
 
 ---
 
-**Technology Stack Overview:**
-* **Frontend:** React
-* **Backend:** Node.js (implied)
-* **Database & Authentication:** MongoDB
+## Project Status (April 2025)
 
-*(Revision Note: This version aligns the component structure with the provided dependency graph image (`image_e23876.jpg`), reinstating `LoginForm` and `RegisterForm` as separate components. It retains other previous updates like the technology stack, exclusion of Redux/Mongoose, and inclusion of the `Footer` component based on text feedback.)*
+All core functionalities outlined in the specifications have been implemented. 
+
+**Known Limitations/TODOs:**
+*   **Search by Author:** The backend currently does not support filtering search results by author username. Searching by keyword and date range is functional.
+*   **Author Name in Search Results:** Search results currently do not include the author's username (only their ID).
+
+---
+
+**Technology Stack Overview:**
+* **Frontend:** React (Vite), Tailwind CSS, shadcn/ui, react-hook-form, zod, date-fns
+* **Backend:** Node.js, Express.js
+* **Database & Authentication:** MongoDB (Mongoose not used), JWT, bcrypt
+
+*(Revision Note: This version reflects the current tech stack and implementation status.)*
 
 ## 1. Functionalities *(Derived from Specifications)*
 
 * **Users**
-    * **Registration:** Users can create an account to become members (requires admin approval).
-    * **Login:** Members can log in to access site features.
-    * **Message Creation:** Members can create messages, either replying to existing threads or starting new ones (in Open Forum).
-    * **Message Deletion:** Members can delete their own messages (likely via profile).
-    * **Search:** Members can search for messages by keywords, publication date, or author.
-    * **Profile Management:** Members can view their own profiles and those of other users.
-    * **Logout:** Ability to log out from the site.
+    * ✅ **Registration:** Users can create an account (requires admin approval).
+    * ✅ **Login:** Members can log in (pending users receive an error).
+    * ✅ **Message Creation:**
+        * ✅ Reply to existing threads (Open & Closed Forums).
+        * ✅ Start new discussion threads (Open & Closed Forums).
+    * ✅ **Message Deletion:** Members can delete their own messages via their profile.
+    * ☑️ **Search:** Members can search messages by keywords and publication date range. *(Author search backend pending)*.
+    * ✅ **Profile Management:** Members can view their own profiles and those of other users.
+    * ✅ **Logout:** Ability to log out.
 * **Administrators**
-    * **Open Forum Access:** (Implied, as they are members)
-    * **Closed Forum Access:** Reserved for board members (administrators).
-    * **User Management:** Administrators can grant or revoke administrator status and approve/reject new registrations.
-    * **Message Creation/Viewing:** (Implied, in both forums)
+    * ✅ **Open Forum Access:** 
+    * ✅ **Closed Forum Access:**
+    * ✅ **User Management:** Approve/reject registrations, grant/revoke admin status (with confirmation, prevents self-action).
+    * ✅ **Message Creation/Viewing:** (Implied, in both forums)
 
 ## 2. Information Circulating in the Application
 
@@ -73,7 +85,7 @@ When a member logs in, they gain access to the main page, which includes the ope
     * Messages within threads.
     * Message content, author, publication date.
 
-## 3. List of React Components (Reflecting Dependency Graph Image)
+## 3. List of React Components
 
 ### `App` (Main Component)
 * **Function:** Main component managing routing and displaying pages based on the user's authentication status and the current route. Uses React Router (or similar) for navigation.
@@ -276,29 +288,6 @@ When a member logs in, they gain access to the main page, which includes the ope
     * `isOwnProfile`: boolean (derived from comparing `profileUserId` and `currentUserId`)
 * **Contains:** `UserInfo`, `UserMessages`.
 
-### `OtherProfilePage`
-* **Function:** *(Consider removing/merging)* This component seems redundant if `ProfilePage` handles both own and other profiles via props/route params. The graph shows it separate, but functionality likely overlaps entirely with `ProfilePage` when viewing someone else.
-* **Props:** (Same as `ProfilePage` essentially)
-* **State:** (Same as `ProfilePage`)
-* **Contains:** `UserInfo`, `UserMessages`.
-
-### `UserInfo`
-* **Function:** Displays personal information for a user profile.
-* **Props:**
-    * `user`: object (user data)
-    * `isCurrentUserProfile`: boolean (indicates if this is the logged-in user's own profile being viewed)
-* **State:** None
-* **Contains:** Display elements for user details (username, join date, etc.).
-
-### `UserMessages`
-* **Function:** Displays a list of messages published by the user whose profile is being viewed. Allows deletion if it's the user's own profile.
-* **Props:**
-    * `messages`: array (user's messages)
-    * `isOwnProfile`: boolean (determines if delete option is shown)
-    * `onDelete`: function (passed to MessageItem, handles message deletion via profile)
-* **State:** (Potentially state for sorting/filtering messages)
-* **Contains:** List/table of `MessageItem` components, sorting/filtering controls.
-
 ### `SearchPage`
 * **Function:** Interface for searching messages based on criteria.
 * **Props:**
@@ -335,77 +324,90 @@ Visually represented in the provided dependency graph image (`image_e23876.jpg`)
 
 ---
 
-## Proposed Frontend Folder Structure & File Descriptions (Updated)
+## Project Structure
 
-This structure organizes the React application by feature/type for better maintainability, reflecting the reinstated `LoginForm` and `RegisterForm`.
+```
+.
+├── organizasso-backend/
+│   ├── config/         # Database connection (db.js)
+│   ├── controllers/    # Request handling logic for each route type
+│   ├── middleware/     # Custom middleware (authMiddleware.js)
+│   ├── node_modules/   # Backend dependencies (usually gitignored)
+│   ├── routes/         # API route definitions
+│   ├── .env            # Environment variables (DB URI, JWT secret, etc.)
+│   ├── .gitignore      # Files ignored by Git for backend
+│   ├── package.json    # Backend dependencies and scripts
+│   ├── package-lock.json
+│   └── server.js       # Main Express server setup
+│
+├── organizasso-frontend/
+│   ├── public/         # Static assets (index.html, icons)
+│   ├── src/
+│   │   ├── assets/     # Static assets used in components (images, svgs)
+│   │   ├── components/ # Reusable UI components
+│   │   │   ├── Admin/
+│   │   │   ├── Auth/       # (Currently empty or misc auth components)
+│   │   │   ├── Common/
+│   │   │   ├── Forum/
+│   │   │   ├── Layout/
+│   │   │   ├── Profile/
+│   │   │   ├── Search/
+│   │   │   └── ui/       # Shadcn/ui components (generated)
+│   │   ├── contexts/   # React Context (AuthContext.jsx)
+│   │   ├── hooks/      # Custom React hooks (useAuth.js, useApi.js [placeholder])
+│   │   ├── lib/        # Utility libraries (e.g., Shadcn utils.js)
+│   │   ├── pages/      # Top-level page components corresponding to routes
+│   │   ├── services/   # API call functions (apiClient.js, etc.)
+│   │   ├── styles/     # Additional global or scoped styles
+│   │   ├── utils/      # General utility functions (helpers.js [placeholder])
+│   │   ├── App.jsx       # Main application component (routing, context)
+│   │   ├── App.css       # Component-specific styles for App.jsx
+│   │   └── main.jsx      # Application entry point (renders App)
+│   ├── .env            # Frontend environment variables
+│   ├── .gitignore      # Files ignored by Git for frontend
+│   ├── components.json # Shadcn/ui configuration
+│   ├── eslint.config.js # ESLint configuration
+│   ├── index.html      # Root HTML file (entry)
+│   ├── jsconfig.json   # JS configuration (paths)
+│   ├── package.json    # Frontend dependencies and scripts
+│   ├── package-lock.json
+│   ├── postcss.config.js # PostCSS configuration (for Tailwind)
+│   ├── tailwind.config.js # Tailwind CSS configuration
+│   └── vite.config.js  # Vite build configuration
+│
+├── .git/             # Git repository data
+├── .gitignore        # Root gitignore (optional, can rely on specific ones)
+├── package.json      # Root package.json (if managing both with Lerna/Nx, otherwise might not exist)
+├── README.md         # This file
+└── TESTING_GUIDE.md  # Manual testing steps
+```
 
+**File/Folder Descriptions:**
 
+*   **`organizasso-backend/`**: Contains all backend code (Node.js/Express).
+    *   `config/`: Database connection setup.
+    *   `controllers/`: Functions that handle incoming requests and interact with models/database.
+    *   `middleware/`: Functions that run before controllers (e.g., authentication checks).
+    *   `routes/`: Defines API endpoints and links them to controllers/middleware.
+    *   `server.js`: Initializes the Express app, connects DB, mounts middleware and routes.
+    *   `.env`: **Crucial** file for storing secrets (DB connection string, JWT secret) and configuration. **Do not commit to Git.**
+*   **`organizasso-frontend/`**: Contains all frontend code (React/Vite).
+    *   `public/`: Static files served directly.
+    *   `src/`: Main source code.
+        *   `assets/`: Images, SVGs etc. used by components.
+        *   `components/`: Reusable UI parts. Specific components like `login-form.jsx` and `register-form.jsx` are currently here, not in `Auth/`. `ui/` holds `shadcn/ui` components.
+        *   `contexts/`: React Context for global state (e.g., `AuthContext.jsx`).
+        *   `hooks/`: Custom hooks (e.g., `useAuth.js`).
+        *   `lib/`: Utility functions, often includes `utils.js` from `shadcn/ui`.
+        *   `pages/`: Components representing distinct application pages/views.
+        *   `services/`: Functions dedicated to making API calls to the backend.
+        *   `styles/`: Additional CSS files.
+        *   `utils/`: General helper functions.
+        *   `App.jsx`: Root React component, sets up routing and context providers.
+        *   `main.jsx`: Application entry point, renders `<App />` into the DOM.
+*   **`.gitignore`**: Files specified here will be ignored by Git (e.g., `node_modules`, `.env`). Ensure both backend and frontend have appropriate `.gitignore` files.
+*   **`package.json`**: Lists dependencies and scripts for backend/frontend respectively.
+*   **`README.md`**: This file - project overview.
+*   **`TESTING_GUIDE.md`**: Manual testing procedures.
 
-├── public/             # Static assets served directly (index.html, favicon.ico)
-│   └── index.html      # Main HTML file where React app mounts
-├── src/                # Main source code directory
-│   ├── assets/         # Static assets used within the app (images, fonts, svgs)
-│   ├── components/     # Reusable UI components shared across pages/features
-│   │   ├── Auth/       # Components specific to Authentication (LoginForm.js, RegisterForm.js)
-│   │   ├── Common/     # Highly reusable basic components (Button, Input, Modal, Spinner)
-│   │   ├── Forum/      # Components related to forums/threads (ThreadList, ThreadItem, MessageList, MessageItem, ReplyForm)
-│   │   ├── Layout/     # Layout components (Header, Footer, PageWrapper)
-│   │   ├── Profile/    # Components related to user profiles (UserInfo, UserMessages)
-│   │   ├── Admin/      # Components specific to the Admin Panel (UsernameList, Username)
-│   │   └── Search/     # Components related to search (SearchForm, SearchResults)
-│   ├── contexts/       # React Context API providers and consumers
-│   │   └── AuthContext.js # Manages global authentication state (isLoggedIn, currentUser [incl. roles/status], isAdmin, login/logout functions)
-│   ├── hooks/          # Custom React hooks
-│   │   └── useAuth.js  # Hook to easily access AuthContext
-│   │   └── useApi.js   # Optional: Custom hook for handling API calls (loading, error states)
-│   ├── pages/          # Top-level components representing application pages/routes
-│   │   ├── AdminPanelPage.js
-│   │   ├── ClosedForumPage.js
-│   │   ├── DashBoardPage.js  # Might contain nested routing setup
-│   │   ├── LoginPage.js      # Imports and renders components/Auth/LoginForm.js
-│   │   ├── OpenForumPage.js
-│   │   ├── OtherProfilePage.js # Consider removing/merging logic into ProfilePage.js
-│   │   ├── ProfilePage.js      # Handles viewing own or others' profiles based on route param
-│   │   ├── RegisterPage.js   # Imports and renders components/Auth/RegisterForm.js
-│   │   ├── SearchPage.js
-│   │   └── ThreadViewPage.js
-│   ├── services/       # Functions for interacting with the backend API (using MongoDB)
-│   │   ├── authService.js # Functions for login, register, logout API calls
-│   │   ├── forumService.js # Functions for fetching threads, messages, posting replies API calls
-│   │   ├── userService.js # Functions for fetching user profiles API calls
-│   │   ├── adminService.js # Functions for managing users (approval, roles) API calls
-│   │   └── apiClient.js  # Optional: Axios instance or fetch wrapper for base URL, headers etc.
-│   ├── utils/          # Utility functions (date formatting, validation, constants)
-│   ├── App.js          # Main application component: Sets up Router, Context Providers, renders base layout/pages
-│   ├── index.js        # Application entry point: Renders App component into the DOM
-│   └── index.css       # Global CSS styles or entry point for CSS framework/modules
-├── .env                # Environment variables (e.g., REACT_APP_API_BASE_URL)
-├── .gitignore          # Specifies intentionally untracked files that Git should ignore
-├── package.json        # Project metadata, dependencies, scripts
-└── README.md           # This file (or a more detailed project overview)
-
-
-
-**File/Folder Descriptions (Updated):**
-
-* **`public/`**: Contains the base HTML file and other static assets that don't go through the build process.
-* **`src/`**: All the application's source code lives here.
-* **`src/assets/`**: Store images, fonts, icons, etc., imported into components.
-* **`src/components/`**: Contains reusable UI pieces.
-    * **`Auth/`**: Contains `LoginForm.js` and `RegisterForm.js`.
-    * **Other subfolders**: Group components by feature or type.
-* **`src/contexts/`**: Holds React Context files. `AuthContext.js` is crucial for managing user login state, user details (including roles/approval status), and providing auth functions.
-* **`src/hooks/`**: Place for custom React Hooks.
-* **`src/pages/`**: Contains components that correspond to application routes.
-    * **`LoginPage.js` / `RegisterPage.js`**: Container pages importing forms from `src/components/Auth/`.
-    * **`ProfilePage.js`**: Designed to handle displaying both the logged-in user's profile and other users' profiles based on route parameters (`/profile/:userId`).
-    * **`OtherProfilePage.js`**: Likely redundant, consider removing.
-* **`src/services/`**: Modules for API calls. Added `adminService.js` for admin-specific actions.
-* **`src/utils/`**: Small, pure functions for common tasks.
-* **`src/App.js`**: The root component. Sets up the main router, Context Providers, and top-level routes, potentially including protected routes based on login status and admin role.
-* **`src/index.js`**: The entry point that renders the `App` component.
-* **`src/index.css`**: Global styles.
-* **`.env`**: Stores environment-specific variables.
-* **`.gitignore`**: Lists files/folders ignored by Git.
-* **`package.json`**: Defines project dependencies and scripts.
-* **`README.md`**: This document.
+*(Note: Specific file names use `.jsx` for React components)*
