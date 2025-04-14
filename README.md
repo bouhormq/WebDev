@@ -2,6 +2,91 @@
 
 **Authors:** Salim BOUHORMA MOUFFAK | Alexander DIMANACHKI | Anthony PORISSE
 
+## Getting Started
+
+Follow these instructions to set up and run the Organiz'asso application locally for development and testing.
+
+### Prerequisites
+
+*   **Node.js:** Version 18.x or later recommended (check with `node -v`).
+*   **npm** or **yarn:** Package manager (usually comes with Node.js).
+*   **MongoDB:** A running local MongoDB instance or access to a MongoDB Atlas cluster.
+    *   Default local connection URI expected: `mongodb://localhost:27017/organizasso`
+
+### Installation & Setup
+
+1.  **Clone the Repository:**
+    ```bash
+    git clone <your-repository-url>
+    cd <repository-folder>
+    ```
+
+2.  **Setup Backend (`organizasso-backend`):
+    ```bash
+    cd organizasso-backend
+
+    # Install dependencies
+    npm install 
+    # or: yarn install
+
+    # Create .env file
+    # Copy .env.example to .env (if example exists) or create manually
+    # Edit .env and add the following:
+    MONGODB_URI=mongodb://localhost:27017/organizasso # Or your Atlas URI
+    JWT_SECRET=your_strong_jwt_secret_key # Choose a secure secret
+    PORT=3001 # Or another port if 3001 is taken
+    # Optional: Define initial admin credentials (used by seeding script if available)
+    # ADMIN_USERNAME=admin
+    # ADMIN_EMAIL=admin@example.com
+    # ADMIN_PASSWORD=changeme123 
+
+    # Optional: Seed initial data (like the first admin user)
+    # Check backend package.json for a seed script, e.g.:
+    # npm run seed 
+    # If no seed script, you may need to register the first user and manually
+    # set isApproved=true and isAdmin=true in the database.
+
+    cd .. 
+    ```
+
+3.  **Setup Frontend (`organizasso-frontend`):
+    ```bash
+    cd organizasso-frontend
+
+    # Install dependencies
+    npm install
+    # or: yarn install
+
+    # Frontend uses Vite environment variables.
+    # It defaults to connecting to backend at http://localhost:3001/api in development.
+    # For production builds, create a .env.production file:
+    # echo "VITE_API_BASE_URL=https://your-deployed-backend.com/api" > .env.production
+
+    cd ..
+    ```
+
+### Running the Application
+
+1.  **Start the Backend Server:**
+    ```bash
+    cd organizasso-backend
+    npm run dev 
+    # Or: npm start (if using a different start script for development)
+    ```
+    *The backend should now be running, typically on `http://localhost:3001`.* 
+
+2.  **Start the Frontend Development Server:**
+    *Open a **new** terminal window/tab.*
+    ```bash
+    cd organizasso-frontend
+    npm run dev
+    ```
+    *The frontend should now be running, typically on `http://localhost:5173`.* 
+
+3.  **Access the App:** Open your web browser and navigate to `http://localhost:5173`.
+
+---
+
 ## Specifications
 
 Our site, **Organiz'asso**, allows members of an association to exchange messages through forums.
