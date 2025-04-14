@@ -4,7 +4,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import UsernameList from '../components/Admin/UsernameList';
 import Spinner from '../components/Common/Spinner';
 import { toast } from "sonner";
-// Import AlertDialog components
 import {
   AlertDialog,
   AlertDialogAction,
@@ -14,9 +13,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
-// Import admin service functions
+} from "@/components/ui/alert-dialog"; // No trigger needed
 import {
     getPendingRegistrations, 
     getMembers, 
@@ -25,23 +22,23 @@ import {
     grantAdminStatus, 
     revokeAdminStatus 
 } from '../services/adminService';
-import useAuth from '../hooks/useAuth'; // Import useAuth to get current user ID
+import useAuth from '../hooks/useAuth'; 
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"; // For empty states
+import { UserCheck, UserCog } from 'lucide-react'; // Icons for tabs
 
 const AdminPanelPage = () => {
-  const { currentUser } = useAuth(); // Get current user for self-check
+  const { currentUser } = useAuth();
   const [pendingUsers, setPendingUsers] = useState([]);
   const [members, setMembers] = useState([]);
   const [isLoadingPending, setIsLoadingPending] = useState(true);
   const [isLoadingMembers, setIsLoadingMembers] = useState(true);
   const [errorPending, setErrorPending] = useState(null);
   const [errorMembers, setErrorMembers] = useState(null);
-  const [actionLoading, setActionLoading] = useState(null); // Track loading state for specific user actions
-
-  // State for confirmation dialog
+  const [actionLoading, setActionLoading] = useState(null); 
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [actionToConfirm, setActionToConfirm] = useState(null); // { action: string, userId: string, username: string }
+  const [actionToConfirm, setActionToConfirm] = useState(null);
 
-  // Fetch Pending Users
+  // fetchPending and fetchMembers remain the same (already use useCallback)
   const fetchPending = useCallback(async () => {
     setIsLoadingPending(true);
     setErrorPending(null);
@@ -63,7 +60,6 @@ const AdminPanelPage = () => {
     fetchPending();
   }, [fetchPending]);
 
-  // Fetch Members
   const fetchMembers = useCallback(async () => {
     setIsLoadingMembers(true);
     setErrorMembers(null);
@@ -85,13 +81,9 @@ const AdminPanelPage = () => {
      fetchMembers();
   }, [fetchMembers]);
 
-
-  // --- Action Handlers (calling API) ---
-  // Updated to accept username for dialog messages
+  // handleUserAction and confirmAndExecuteAction remain the same
   const handleUserAction = async (action, userId, username) => {
-    // Actions requiring confirmation
     if (action === 'reject' || action === 'demote') {
-        // Prevent self-demotion check here too, before opening dialog
         if (action === 'demote' && userId === currentUser?._id) {
              toast.error("Cannot change your own admin status.");
              return;
@@ -99,8 +91,7 @@ const AdminPanelPage = () => {
         setActionToConfirm({ action, userId, username });
         setDialogOpen(true);
     } else { 
-        // Actions that execute directly (Approve, Promote)
-        setActionLoading(userId + '_' + action); // Set loading state for this specific action
+        setActionLoading(userId + '_' + action);
         try {
             let responseMessage = '';
             switch (action) {
@@ -112,7 +103,7 @@ const AdminPanelPage = () => {
               case 'promote': 
                 if (userId === currentUser?._id) throw new Error("Cannot change your own admin status.");
                 responseMessage = (await grantAdminStatus(userId)).message;
-                await fetchMembers(); // Refresh members list
+                await fetchMembers(); 
                 break;
               default: 
                 throw new Error('Unhandled direct action: ' + action);
@@ -123,28 +114,24 @@ const AdminPanelPage = () => {
            console.error(`Action ${action} failed for user ${userId}:`, err);
            toast.error(message);
         } finally {
-           setActionLoading(null); // Clear loading state
+           setActionLoading(null);
         }
     }
   };
-
-  // Function called when confirmation dialog's confirm button is clicked
   const confirmAndExecuteAction = async () => {
     if (!actionToConfirm) return;
-
     const { action, userId } = actionToConfirm;
-    setActionLoading(userId + '_' + action); // Set loading for the confirmed action
-    setDialogOpen(false); // Close dialog immediately
-
+    setActionLoading(userId + '_' + action);
+    setDialogOpen(false); 
     try {
       let responseMessage = '';
       if (action === 'reject') {
         responseMessage = (await rejectRegistration(userId)).message;
-        await fetchPending(); // Only need to refresh pending list
+        await fetchPending(); 
       } else if (action === 'demote') {
-         if (userId === currentUser?._id) throw new Error("Cannot change your own admin status."); // Double check
+         if (userId === currentUser?._id) throw new Error("Cannot change your own admin status."); 
          responseMessage = (await revokeAdminStatus(userId)).message;
-         await fetchMembers(); // Refresh members list
+         await fetchMembers();
       }
        toast.success(responseMessage || `Action "${action}" successful.`);
     } catch (err) {
@@ -153,69 +140,79 @@ const AdminPanelPage = () => {
         toast.error(message);
     } finally {
        setActionLoading(null);
-       setActionToConfirm(null); // Clear the action to confirm
+       setActionToConfirm(null); 
     }
   };
 
+  // Helper component for empty/error states
+  const StatusDisplay = ({ isLoading, error, children, emptyMessage }) => {
+    if (isLoading) {
+      return <div className="flex justify-center items-center py-12"><Spinner size="lg"/></div>;
+    }
+    if (error) {
+      return <p className="text-destructive text-center py-12">Error: {error}</p>;
+    }
+    if (React.Children.count(children) === 0) { // Check if list is empty
+      return (
+         <Card className="mt-4 text-center py-12">
+           <CardContent>
+             <p className="text-muted-foreground">{emptyMessage}</p>
+           </CardContent>
+         </Card>
+      );
+    }
+    return children;
+  };
 
   return (
     <PageWrapper>
-      <h2 className="text-3xl font-bold tracking-tight mb-6">Admin Panel</h2>
+      <div className="mb-6">
+         <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Admin Panel</h1>
+         <p className="text-muted-foreground">Manage user registrations and roles.</p>
+       </div>
 
-      <Tabs defaultValue="pending" className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="pending">Pending Registrations ({pendingUsers.length})</TabsTrigger>
-          <TabsTrigger value="manageAdmins">Manage Members ({members.length})</TabsTrigger>
+      <Tabs defaultValue="pending" className="w-full space-y-4">
+        <TabsList className="grid w-full grid-cols-2 h-11">
+           <TabsTrigger value="pending" className="gap-2">
+              <UserCheck className="h-4 w-4"/> Pending ({pendingUsers.length})
+           </TabsTrigger>
+           <TabsTrigger value="manageAdmins" className="gap-2">
+              <UserCog className="h-4 w-4"/> Members ({members.length})
+           </TabsTrigger>
         </TabsList>
         
         <TabsContent value="pending">
-          {isLoadingPending ? (
-            <div className="flex justify-center mt-8"><Spinner /></div>
-          ) : errorPending ? (
-            <p className="text-destructive text-center mt-8">Error: {errorPending}</p>
-          ) : (
-            <> {/* Use Fragment to wrap multiple elements */} 
-              {pendingUsers.length === 0 ? (
-                 <p className="text-muted-foreground text-center mt-8">No pending registrations found.</p>
-              ) : (
-                <UsernameList 
-                  users={pendingUsers} 
-                  type="pending" 
-                  onUserAction={handleUserAction}
-                  actionLoading={actionLoading} // Pass loading state down
-                  currentUserId={currentUser?._id}
-                />
+           <StatusDisplay isLoading={isLoadingPending} error={errorPending} emptyMessage="No pending registrations found.">
+             {/* Only render UsernameList if there are users */}
+             {pendingUsers.length > 0 && (
+                 <UsernameList 
+                    users={pendingUsers} 
+                    type="pending" 
+                    onUserAction={handleUserAction}
+                    actionLoading={actionLoading}
+                    currentUserId={currentUser?._id}
+                 />
               )}
-            </>
-          )}
+           </StatusDisplay>
         </TabsContent>
 
         <TabsContent value="manageAdmins">
-           {isLoadingMembers ? (
-            <div className="flex justify-center mt-8"><Spinner /></div>
-          ) : errorMembers ? (
-            <p className="text-destructive text-center mt-8">Error: {errorMembers}</p>
-          ) : (
-            <> {/* Use Fragment */} 
-              {members.length === 0 ? (
-                 <p className="text-muted-foreground text-center mt-8">No members found.</p>
-              ) : (
-                <UsernameList 
-                  users={members} 
-                  type="manageAdmins" 
-                  onUserAction={handleUserAction}
-                  actionLoading={actionLoading} // Pass loading state down
-                  currentUserId={currentUser?._id}
-                />
-               )}
-             </>
-          )}
+           <StatusDisplay isLoading={isLoadingMembers} error={errorMembers} emptyMessage="No members found.">
+             {members.length > 0 && (
+                 <UsernameList 
+                    users={members} 
+                    type="manageAdmins" 
+                    onUserAction={handleUserAction}
+                    actionLoading={actionLoading}
+                    currentUserId={currentUser?._id}
+                 />
+             )}
+           </StatusDisplay>
         </TabsContent>
       </Tabs>
 
-      {/* Confirmation Dialog */}
+      {/* Confirmation Dialog (remains the same) */}
       <AlertDialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        {/* AlertDialogTrigger is omitted as we trigger manually via state */}
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
@@ -230,10 +227,8 @@ const AdminPanelPage = () => {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel onClick={() => setActionToConfirm(null)}>Cancel</AlertDialogCancel>
-            {/* Call confirmAndExecuteAction on click */}
             <AlertDialogAction 
               onClick={confirmAndExecuteAction}
-              // Optionally style the confirmation button differently for destructive actions
               className={actionToConfirm?.action === 'reject' || actionToConfirm?.action === 'demote' ? "bg-destructive text-destructive-foreground hover:bg-destructive/90" : ""}
             >
                 Confirm {actionToConfirm?.action}

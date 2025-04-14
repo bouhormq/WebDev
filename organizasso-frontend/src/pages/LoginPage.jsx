@@ -1,12 +1,14 @@
 // organizasso-frontend/src/pages/LoginPage.jsx
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import LoginForm from '../components/Auth/LoginForm';
+// Import from correct Auth directory
+import LoginForm from '../components/Auth/LoginForm'; 
 import useAuth from '../hooks/useAuth';
 // No need to import Header/Footer if page is simple or uses a different layout
 // import Header from '../components/Layout/Header'; 
 // import Footer from '../components/Layout/Footer'; 
 import { toast } from "sonner";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 
 const LoginPage = () => {
   const { login } = useAuth();
@@ -33,17 +35,26 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-muted/40">
-      {/* Wrap LoginForm and link in a div if needed for layout, or Card handles it */}
-      <div className="w-full max-w-sm p-4">
-        <LoginForm onSubmit={handleLogin} error={error} isLoading={isLoading} />
-        <div className="mt-4 text-center text-sm">
-          Don&apos;t have an account?{" "}
-          <Link to="/register" className="underline">
-            Register here
-          </Link>
-        </div>
-      </div>
+    // Centered layout
+    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-background to-muted/30 p-4">
+      {/* Use Card for structure and styling */}
+      <Card className="w-full max-w-sm shadow-lg">
+        <CardHeader className="text-center">
+          <CardTitle className="text-2xl font-bold">Login</CardTitle>
+          <CardDescription>Welcome back to Organiz'asso</CardDescription>
+        </CardHeader>
+        <CardContent>
+           <LoginForm onSubmit={handleLogin} error={error} isLoading={isLoading} />
+        </CardContent>
+        <CardFooter className="flex flex-col items-center text-sm">
+           <p className="text-muted-foreground">
+             Don&apos;t have an account?{" "}
+             <Link to="/register" className="font-medium text-primary hover:underline">
+               Register here
+             </Link>
+           </p>
+        </CardFooter>
+      </Card>
     </div>
   );
 };

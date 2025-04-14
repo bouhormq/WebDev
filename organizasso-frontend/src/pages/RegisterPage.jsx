@@ -3,6 +3,9 @@ import { Link } from 'react-router-dom';
 import RegisterForm from '../components/Auth/RegisterForm';
 import useAuth from '../hooks/useAuth';
 import { toast } from "sonner";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { CheckCircle } from 'lucide-react';
 
 const RegisterPage = () => {
   const { register } = useAuth();
@@ -33,24 +36,36 @@ const RegisterPage = () => {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-muted/40">
-      <div className="w-full max-w-sm p-4">
-         {/* Display success message if registration was submitted */}
-         {successMessage ? (
-            <div className="p-4 mb-4 text-sm text-green-800 rounded-lg bg-green-50 dark:bg-gray-800 dark:text-green-400" role="alert">
-              <span className="font-medium">Success!</span> {successMessage}
-              <p className="mt-2">You can now <Link to="/login" className="underline">login</Link> once an administrator approves your account.</p>
-            </div>
-          ) : (
-             <RegisterForm onSubmit={handleRegister} error={error} isLoading={isLoading} />
-          )}
-        <div className="mt-4 text-center text-sm">
-          Already have an account?{" "}
-          <Link to="/login" className="underline">
-            Login here
-          </Link>
-        </div>
-      </div>
+    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-background to-muted/30 p-4">
+      <Card className="w-full max-w-sm shadow-lg">
+         <CardHeader className="text-center">
+           <CardTitle className="text-2xl font-bold">Register</CardTitle>
+           <CardDescription>Create your Organiz'asso account</CardDescription>
+         </CardHeader>
+         <CardContent>
+            {successMessage ? (
+                <Alert variant="success" className="mb-4">
+                  <CheckCircle className="h-5 w-5" />
+                  <AlertTitle>Registration Submitted!</AlertTitle>
+                  <AlertDescription>
+                     {successMessage} You can now <Link to="/login" className="font-medium text-primary hover:underline">login</Link> once an administrator approves your account.
+                  </AlertDescription>
+                </Alert>
+            ) : (
+                <RegisterForm onSubmit={handleRegister} error={error} isLoading={isLoading} />
+            )}
+         </CardContent>
+         {!successMessage && (
+            <CardFooter className="flex flex-col items-center text-sm">
+               <p className="text-muted-foreground">
+                  Already have an account?{" "}
+                  <Link to="/login" className="font-medium text-primary hover:underline">
+                    Login here
+                  </Link>
+                </p>
+            </CardFooter>
+         )}
+       </Card>
     </div>
   );
 };

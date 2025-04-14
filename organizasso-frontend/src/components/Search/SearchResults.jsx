@@ -3,6 +3,7 @@ import MessageItem from '../Forum/MessageItem'; // Reuse MessageItem
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Link } from 'react-router-dom'; // Link to threads
 import { format, parseISO } from 'date-fns'; // Import date-fns
+import { Separator } from "@/components/ui/separator"; // Import Separator
 
 const SearchResults = ({ results, currentUserId, searchParams }) => { 
 
@@ -18,7 +19,7 @@ const SearchResults = ({ results, currentUserId, searchParams }) => {
     // Ensure parts are strings or valid React elements before rendering
     return parts.map((part, index) => {
         if (typeof part !== 'string') return null; // Skip non-string parts if any somehow occur
-        return regex.test(part) ? <mark key={index} className="bg-yellow-200 dark:bg-yellow-700 px-0.5">{part}</mark> : part
+        return regex.test(part) ? <mark key={index} className="bg-yellow-200 dark:bg-yellow-700 rounded px-0.5 py-0">{part}</mark> : part
       }
     ).filter(Boolean); // Filter out nulls
   };
@@ -50,44 +51,34 @@ const SearchResults = ({ results, currentUserId, searchParams }) => {
   }
 
   return (
-    <Card className="mt-6">
+    <Card className="mt-6 shadow-sm">
       <CardHeader>
         <CardTitle>Search Results</CardTitle>
-        {results.length > 0 && searchParams && (
+        {searchParams && (
           <CardDescription>
             {buildDescription()}
           </CardDescription>
         )}
       </CardHeader>
-      <CardContent>
+      <CardContent className="p-0">
         {results.length === 0 ? (
-          <p className="text-muted-foreground italic text-center">No messages found matching your criteria.</p>
+           <div className="p-6 text-center text-muted-foreground">
+              <p>No messages found matching your criteria.</p>
+            </div>
         ) : (
-          <div className="space-y-4">
-            {results.map((message) => (
-              // Use MongoDB _id for key
-              <div key={message._id}> 
-                <p className="text-xs text-muted-foreground mb-1">
-                   {/* Link to the thread */}
-                   In thread: <Link to={`/forum/thread/${message.threadId}`} className="hover:underline text-primary">View Thread</Link>
-                   {/* Display message date */}
-                   <span className="ml-2">({formatDate(message.createdAt)})</span>
-                </p>
-                 {/* Reuse MessageItem, passing highlighted content */}
-                <MessageItem 
+          <div>
+            {results.map((message, index) => (
+              <React.Fragment key={message._id}>
+                 <MessageItem 
                   message={{
                       ...message,
-                      // Apply highlighting - pass original content if highlighting fails
                       content: highlightKeywords(message.content, searchParams?.keywords) || message.content,
-                      // Manually add authorName if available (currently not from backend)
-                      // authorName: message.authorName || 'Unknown Author' // Placeholder
                   }}
-                  // Use currentUserId (which should be _id) for comparison
                   isOwnMessage={message.authorId === currentUserId} 
-                  // Disable delete functionality in search results for now
-                  onDelete={null} 
+                  onDelete={null}
                 />
-              </div>
+                 {index < results.length - 1 && <Separator />} 
+               </React.Fragment>
             ))}
           </div>
         )}

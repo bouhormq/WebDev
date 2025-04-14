@@ -6,6 +6,7 @@ import useAuth from '../hooks/useAuth';
 import { toast } from "sonner";
 import Spinner from '../components/Common/Spinner';
 import { searchMessages } from '../services/searchService';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const SearchPage = () => {
   const { currentUser } = useAuth();
@@ -32,11 +33,15 @@ const SearchPage = () => {
       console.log("SearchPage: Performing search with params:", backendParams);
       const searchResults = await searchMessages(backendParams);
 
-      // TODO: Fetch author usernames if backend doesn't provide them
-      // For now, results will lack authorName unless backend changes
+      // Ensure createdAt is a Date object for MessageItem/SearchResults formatting
+      const formattedResults = searchResults.map(msg => ({
+          ...msg,
+          _id: msg._id,
+          createdAt: msg.createdAt ? new Date(msg.createdAt) : null
+      }));
 
-      setResults(searchResults);
-      if (searchResults.length === 0) {
+      setResults(formattedResults);
+      if (formattedResults.length === 0) {
          toast.info("No messages found matching your criteria.");
       }
     } catch (err) {
@@ -53,25 +58,46 @@ const SearchPage = () => {
   return (
     <PageWrapper>
       <div className="space-y-6">
-        <h2 className="text-3xl font-bold tracking-tight">Search Messages</h2>
-        
+        <div className="mb-6">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Search Messages</h1>
+          <p className="text-muted-foreground">Find messages by keyword, author, or date range.</p>
+        </div>
+
         <SearchForm onSearch={handleSearch} isLoading={isLoading} />
 
-        {isLoading && <div className="flex justify-center pt-8"><Spinner /></div>}
-        
-        {error && <p className="text-destructive text-center pt-8">Error: {error}</p>}
-        
-        {results !== null && !isLoading && (
-          <SearchResults 
-            results={results} 
-            currentUserId={currentUser?._id} // Use _id from MongoDB
-            searchParams={lastSearchParams} 
-          />
-        )}
-        
-        {results === null && !isLoading && !error && ( 
-          <p className="text-muted-foreground text-center pt-8">Enter search criteria above to find messages.</p>
-        )}
+        <div className="mt-6 min-h-[200px]">
+          {isLoading ? (
+             <div className="flex justify-center items-center h-full"><Spinner size="lg" /></div>
+          ) : error ? (
+             <div className="flex justify-center items-center h-full">
+               <Card className="w-full max-w-md text-center p-6">
+                 <CardHeader>
+                    <CardTitle className="text-xl font-semibold text-destructive">Search Error</CardTitle>
+                 </CardHeader>
+                 <CardContent>
+                    <p className="text-muted-foreground">{error}</p>
+                 </CardContent>
+               </Card>
+             </div>
+          ) : results !== null ? (
+             <SearchResults 
+               results={results} 
+               currentUserId={currentUser?._id}
+               searchParams={lastSearchParams} 
+             />
+          ) : ( 
+             <div className="flex justify-center items-center h-full">
+               <Card className="w-full max-w-md text-center p-6 border-dashed">
+                 <CardHeader>
+                    <CardTitle className="text-lg font-semibold">Start Searching</CardTitle>
+                 </CardHeader>
+                 <CardContent>
+                    <p className="text-muted-foreground">Enter your search criteria above to find messages.</p>
+                 </CardContent>
+               </Card>
+             </div>
+          )}
+        </div>
       </div>
     </PageWrapper>
   );

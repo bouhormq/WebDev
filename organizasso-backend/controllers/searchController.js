@@ -27,89 +27,126 @@ const ensureMessageTextIndex = async (messagesCollection) => {
 export const searchMessages = async (req, res, next) => {
     const { query, author, startDate, endDate } = req.query;
 
-    // --- Build MongoDB Query Filter --- 
-    const filter = {};
+    // --- Build Aggregation Pipeline --- 
+    const pipeline = [];
+    const matchStage = {}; // Initial match stage for non-text criteria
 
-    // 1. Text Search (using $text index)
+    // 1. Text Search (if query provided)
     if (query && query.trim() !== '') {
-        // Ensure you have a text index created on the 'content' field in your messages collection
+        // Ensure you have a text index created on the 'content' field
         // In mongosh: db.messages.createIndex({ content: "text" })
-        filter.$text = { $search: query.trim() };
+        // $text must be the first stage if used
+        pipeline.push({ $match: { $text: { $search: query.trim() } } });
+        // Add score projection for sorting later
+        pipeline.push({ $addFields: { score: { $meta: "textScore" } } });
     }
 
-    // 2. Author Search (by username, requires lookup or storing username on message)
-    //    Let's assume for now we search by authorId if provided directly,
-    //    Searching by username efficiently requires changing message schema or aggregation.
-    //    For simplicity now, we won't implement username search directly here.
-    //    TODO: Implement author search via username if needed (requires aggregation)
-    // if (author && author.trim() !== '') {
-    //     // This requires a lookup or denormalization
-    // }
+    // 2. Author Search (by username)
+    let authorId = null;
+    if (author && author.trim() !== '') {
+        const usersCollection = getCollection('users');
+        // Find user ID case-insensitively
+        const authorUser = await usersCollection.findOne(
+             { username: { $regex: `^${author.trim()}$`, $options: 'i' } }, // Case-insensitive exact match
+             { projection: { _id: 1 } }
+        );
+        if (authorUser) {
+            authorId = authorUser._id;
+            matchStage.authorId = authorId; // Add authorId filter
+        } else {
+            // If author specified but not found, return empty results immediately
+            return res.json([]);
+        }
+    }
 
     // 3. Date Range Search
     if (startDate || endDate) {
-        filter.createdAt = {};
+        matchStage.createdAt = {};
         if (startDate) {
             try {
-                filter.createdAt.$gte = new Date(startDate);
-                 // Validate Date
-                 if (isNaN(filter.createdAt.$gte.getTime())) {
-                    return res.status(400).json({ message: 'Invalid start date format.' });
-                 }
+                const start = new Date(startDate);
+                 if (isNaN(start.getTime())) throw new Error('Invalid start date');
+                matchStage.createdAt.$gte = start;
             } catch (e) {
                  return res.status(400).json({ message: 'Invalid start date format.' });
             }
         }
         if (endDate) {
              try {
-                // Add 1 day to endDate to make it inclusive of the entire end day
-                const endOfDay = new Date(endDate);
-                endOfDay.setDate(endOfDay.getDate() + 1);
-                filter.createdAt.$lt = endOfDay;
-                // Validate Date
-                if (isNaN(filter.createdAt.$lt.getTime())) {
-                   return res.status(400).json({ message: 'Invalid end date format.' });
-                }
+                const end = new Date(endDate);
+                if (isNaN(end.getTime())) throw new Error('Invalid end date');
+                // Add 1 day to endDate to make it inclusive
+                end.setDate(end.getDate() + 1);
+                matchStage.createdAt.$lt = end;
             } catch (e) {
                 return res.status(400).json({ message: 'Invalid end date format.' });
             }
         }
     }
 
+    // Add the $match stage if it contains criteria
+    if (Object.keys(matchStage).length > 0) {
+        // If $text was used, this $match stage comes after
+        // Otherwise, it's the first stage
+        if (pipeline.length > 0 && pipeline[0].$match.$text) {
+             pipeline.push({ $match: matchStage });
+        } else {
+             pipeline.unshift({ $match: matchStage }); // Add at the beginning
+        }
+    }
+
+    // 4. Lookup Author Information ($lookup)
+    pipeline.push({
+        $lookup: {
+            from: "users",             // Join with users collection
+            localField: "authorId",    // Field from messages
+            foreignField: "_id",       // Field from users
+            as: "authorInfo"         // Output array field name
+        }
+    });
+
+    // 5. Unwind the authorInfo array (since $lookup returns an array)
+    pipeline.push({ 
+         $unwind: { path: "$authorInfo", preserveNullAndEmptyArrays: true } // Keep message even if author deleted
+     });
+
+    // 6. Project Final Fields (include authorName)
+    pipeline.push({
+        $project: {
+            _id: 1,
+            threadId: 1,
+            content: 1,
+            createdAt: 1,
+            authorId: 1,
+            authorName: "$authorInfo.username", // Extract username
+            score: { $ifNull: ["$score", null] } // Include score if text search was done
+        }
+    });
+
+    // 7. Sort Results
+    // Check if text search was performed (presence of $text stage or score field)
+    const isTextSearch = pipeline.some(stage => stage.$match && stage.$match.$text);
+    if (isTextSearch) {
+         pipeline.push({ $sort: { score: -1, createdAt: -1 } }); // Sort by relevance score first
+     } else {
+         pipeline.push({ $sort: { createdAt: -1 } }); // Default sort by date
+     }
+
+    // 8. Limit Results
+    pipeline.push({ $limit: 100 }); 
+
     // --- Execute Search --- 
     try {
         const messagesCollection = getCollection('messages');
-
-        // Add projection to potentially fetch author username efficiently later
-        const options = {
-            // If using text search, MongoDB automatically adds a relevance score
-            // You can sort by this score if needed: sort: { score: { $meta: "textScore" } }
-            // For now, sort by creation date descending
-            sort: { createdAt: -1 }, 
-            limit: 100 // Limit results to prevent overload
-            // Consider adding projection if needed: projection: { ... }
-        };
-
-        // If text search is active, add score projection for sorting
-        if (filter.$text) {
-            options.projection = { score: { $meta: "textScore" } };
-            options.sort = { score: { $meta: "textScore" }, createdAt: -1 }; // Sort by relevance first
-        }
-
-        const results = await messagesCollection.find(filter, options).toArray();
-
-        // TODO: If searching by username was implemented, results would already include it.
-        // If not, and you need the username, you might need to do a lookup here 
-        // for each result's authorId (potentially inefficient for many results).
-        // For simplicity, we will return results without author username for now.
+        const results = await messagesCollection.aggregate(pipeline).toArray();
 
         res.json(results);
 
     } catch (error) {
         // Handle specific errors like invalid text index
-        if (error.codeName === 'IndexNotFound' && filter.$text) {
+        if (error.codeName === 'IndexNotFound' && query && query.trim() !== '') {
              console.error("Text index missing on messages collection ('content' field)");
-             return res.status(500).json({ message: 'Search functionality requires a text index. Please ask administrator to create it.' });
+             return res.status(500).json({ message: 'Search requires a text index. Please ask administrator to create it.' });
         }
         console.error("Error searching messages:", error);
         next(error);

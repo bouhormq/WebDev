@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import PageWrapper from '../components/Layout/PageWrapper';
 import ThreadList from '../components/Forum/ThreadList'; 
 import { Button } from "@/components/ui/button";
@@ -27,11 +27,12 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea"; // Import Textarea
-import { createThread } from '../services/forumService'; // Use the service for CREATE
-import { getOpenForumThreads } from '../services/forumService'; // Use the service for READ
+import { createThread, getOpenForumThreads } from '../services/forumService'; // Use the service for CREATE and READ
 import { toast } from "sonner";
 import Spinner from '../components/Common/Spinner'; 
 import { useNavigate } from 'react-router-dom'; // Import useNavigate
+import { PlusCircle } from 'lucide-react'; // Icon for button
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 // Zod schema for validation
 const formSchema = z.object({
@@ -57,7 +58,7 @@ const OpenForumPage = () => {
   const { isSubmitting } = form.formState; // Get submitting state
 
   // --- Fetch Threads ---
-  const fetchThreads = async () => {
+  const fetchThreads = useCallback(async () => { // Wrap in useCallback
       setIsLoading(true);
       setError(null);
       try {
@@ -79,11 +80,11 @@ const OpenForumPage = () => {
       } finally {
         setIsLoading(false);
       }
-    };
+    }, []); // Empty dependency array
 
   useEffect(() => {
     fetchThreads();
-  }, []);
+  }, [fetchThreads]); // Depend on fetchThreads
 
   // --- Submit Handler ---
   const onSubmit = async (values) => {
@@ -106,37 +107,43 @@ const OpenForumPage = () => {
 
   return (
     <PageWrapper>
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-3xl font-bold tracking-tight">Open Forum</h2>
-        {/* Dialog Trigger Button */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+        {/* Page Title */}
+        <div>
+           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Open Forum</h1>
+           <p className="text-muted-foreground">Discuss topics relevant to all members.</p>
+        </div>
+        {/* New Thread Button & Dialog */}
          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
            <DialogTrigger asChild>
-             <Button>Create New Thread</Button>
+             <Button size="sm">
+                <PlusCircle className="mr-2 h-4 w-4" /> Create New Thread
+             </Button>
            </DialogTrigger>
-           <DialogContent className="sm:max-w-[425px]">
+           <DialogContent className="sm:max-w-md">
             <DialogHeader>
               <DialogTitle>Start a New Discussion</DialogTitle>
               <DialogDescription>
-                Create a new thread in the Open Forum. Enter a title and your initial message below.
+                Create a new thread in the Open Forum.
               </DialogDescription>
             </DialogHeader>
-            
-             {/* New Thread Form */}
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-2">
+                {/* Title Field */}
                 <FormField
                   control={form.control}
                   name="title"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Thread Title</FormLabel>
+                      <FormLabel>Title</FormLabel>
                       <FormControl>
-                        <Input placeholder="Enter a descriptive title..." {...field} />
+                        <Input placeholder="Enter thread title..." {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
+                 {/* Content Field */}
                 <FormField
                   control={form.control}
                   name="content"
@@ -145,9 +152,8 @@ const OpenForumPage = () => {
                       <FormLabel>Initial Message</FormLabel>
                       <FormControl>
                          <Textarea
-                          placeholder="Start the discussion here..."
-                          className="resize-none" // Optional: prevent manual resizing
-                          rows={5} // Optional: suggest initial size
+                          placeholder="Start the discussion..."
+                          className="resize-y min-h-[100px]" // Allow vertical resize
                           {...field}
                         />
                       </FormControl>
@@ -155,7 +161,7 @@ const OpenForumPage = () => {
                     </FormItem>
                   )}
                 />
-                 <DialogFooter>
+                 <DialogFooter className="pt-4"> {/* Add padding top */}
                    <DialogClose asChild>
                       <Button type="button" variant="outline" disabled={isSubmitting}>
                           Cancel
@@ -168,20 +174,49 @@ const OpenForumPage = () => {
                 </DialogFooter>
               </form>
             </Form>
-
           </DialogContent>
         </Dialog>
       </div>
 
-      {isLoading && <div className="flex justify-center pt-8"><Spinner /></div>}
-      {error && <p className="text-destructive text-center pt-8">Error: {error}</p>}
-      {!isLoading && !error && (
-         threads.length > 0 ? (
+      {/* Display Area: Loading, Error, Empty, List */}
+      <div className="mt-4 min-h-[300px]"> {/* Add min-height */}
+        {isLoading ? (
+           <div className="flex justify-center items-center h-full"><Spinner size="lg"/></div>
+        ) : error ? (
+           <div className="flex justify-center items-center h-full">
+             <Card className="w-full max-w-md text-center p-6">
+               <CardHeader>
+                  <CardTitle className="text-xl font-semibold text-destructive">Error Loading Forum</CardTitle>
+               </CardHeader>
+               <CardContent>
+                  <p className="text-muted-foreground">{error}</p>
+               </CardContent>
+             </Card>
+           </div>
+        ) : threads.length > 0 ? (
            <ThreadList threads={threads} forumType="open" />
         ) : (
-          <p className="text-center text-muted-foreground pt-8">No threads found in the open forum yet. Be the first to create one!</p>
-        )
-      )}
+           <div className="flex justify-center items-center h-full">
+             <Card className="w-full max-w-md text-center p-6">
+                <CardHeader>
+                   <CardTitle className="text-lg font-semibold">No Threads Yet</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                   <p className="text-muted-foreground">Be the first to start a discussion in the open forum.</p>
+                   {/* Optionally repeat the button inside the card */}
+                   <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                      <DialogTrigger asChild>
+                         <Button size="sm" variant="secondary">
+                            <PlusCircle className="mr-2 h-4 w-4" /> Create Thread
+                         </Button>
+                      </DialogTrigger>
+                      {/* DialogContent defined above */}
+                   </Dialog>
+                </CardContent>
+             </Card>
+           </div>
+        )}
+      </div>
     </PageWrapper>
   );
 };

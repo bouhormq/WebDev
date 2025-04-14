@@ -1,72 +1,81 @@
-import React, { useState } from 'react';
+import React from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
-import Spinner from "../Common/Spinner";
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import Spinner from '../Common/Spinner';
+import { AlertCircle } from 'lucide-react';
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
-const LoginForm = ({ onSubmit, error, isLoading }) => { 
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
+// Zod schema for login validation
+const loginSchema = z.object({
+  username: z.string().min(1, { message: "Username is required." }),
+  password: z.string().min(1, { message: "Password is required." }),
+});
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (onSubmit && !isLoading) {
-      onSubmit({ username, password });
-    }
-  };
+const LoginForm = ({ onSubmit, error, isLoading }) => {
+  const form = useForm({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      username: '',
+      password: '',
+    },
+  });
+
+  // Use form's handleSubmit which validates before calling our onSubmit
+  const handleFormSubmit = form.handleSubmit(onSubmit);
 
   return (
-    <Card className="w-full max-w-sm">
-      <CardHeader>
-        <CardTitle className="text-2xl">Login</CardTitle>
-        <CardDescription>
-          Enter your username below to login to your account.
-        </CardDescription>
-      </CardHeader>
-      <form onSubmit={handleSubmit}>
-        <CardContent className="grid gap-4">
-          <div className="grid gap-2">
-            <Label htmlFor="username">Username</Label>
-            <Input 
-              id="username" 
-              type="text" 
-              placeholder="Your username" 
-              required 
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              disabled={isLoading}
-            />
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="password">Password</Label>
-            <Input 
-              id="password" 
-              type="password"
-              required 
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              disabled={isLoading}
-            />
-          </div>
-          {error && (
-            <p className="text-sm font-medium text-destructive">{error}</p>
+    <Form {...form}>
+      <form onSubmit={handleFormSubmit} className="space-y-4">
+        {error && (
+          <Alert variant="destructive" className="mb-4">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
+        <FormField
+          control={form.control}
+          name="username"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Username</FormLabel>
+              <FormControl>
+                <Input placeholder="Enter your username" {...field} disabled={isLoading} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
           )}
-        </CardContent>
-        <CardFooter>
-          <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading ? <Spinner /> : 'Sign in'}
-          </Button>
-        </CardFooter>
+        />
+        <FormField
+          control={form.control}
+          name="password"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Password</FormLabel>
+              {/* TODO: Add forgot password link maybe? */}
+              <FormControl>
+                <Input type="password" placeholder="Enter your password" {...field} disabled={isLoading} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <Button type="submit" className="w-full" disabled={isLoading}>
+          {isLoading && <Spinner size="sm" className="mr-2"/>}
+          Login
+        </Button>
       </form>
-    </Card>
+    </Form>
   );
 };
 

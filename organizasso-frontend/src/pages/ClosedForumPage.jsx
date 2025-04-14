@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import PageWrapper from '../components/Layout/PageWrapper';
 import ThreadList from '../components/Forum/ThreadList';
 import { Button } from "@/components/ui/button";
@@ -29,6 +29,8 @@ import { createThread, getClosedForumThreads } from '../services/forumService';
 import { toast } from "sonner";
 import Spinner from '../components/Common/Spinner';
 import { useNavigate } from 'react-router-dom';
+import { PlusCircle, ShieldAlert } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const formSchema = z.object({
   title: z.string().min(3, { message: "Title must be at least 3 characters." }).max(150, { message: "Title cannot exceed 150 characters." }),
@@ -51,7 +53,7 @@ const ClosedForumPage = () => {
   });
   const { isSubmitting } = form.formState;
 
-  const fetchThreads = async () => {
+  const fetchThreads = useCallback(async () => {
     setIsLoading(true);
     setError(null);
     try {
@@ -71,11 +73,11 @@ const ClosedForumPage = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchThreads();
-  }, []);
+  }, [fetchThreads]);
 
   const onSubmit = async (values) => {
     try {
@@ -94,30 +96,36 @@ const ClosedForumPage = () => {
 
   return (
     <PageWrapper>
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-3xl font-bold tracking-tight">Closed Forum <span className="text-destructive">(Admin Only)</span></h2>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight flex items-center">
+            Closed Forum <ShieldAlert className="ml-2 h-6 w-6 text-destructive" />
+          </h1>
+          <p className="text-muted-foreground">Confidential discussions for administrators only.</p>
+        </div>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
-            <Button>Create New Admin Thread</Button>
+            <Button size="sm">
+              <PlusCircle className="mr-2 h-4 w-4" /> Create New Admin Thread
+            </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-[425px]">
+          <DialogContent className="sm:max-w-md">
             <DialogHeader>
               <DialogTitle>Start a New Admin Discussion</DialogTitle>
               <DialogDescription>
-                 Create a new thread in the Closed Forum (Admin Only).
+                Create a new thread in the Closed Forum (Admin Only).
               </DialogDescription>
             </DialogHeader>
-            
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-2">
                 <FormField
                   control={form.control}
                   name="title"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Thread Title</FormLabel>
+                      <FormLabel>Title</FormLabel>
                       <FormControl>
-                        <Input placeholder="Enter an admin topic title..." {...field} />
+                        <Input placeholder="Enter admin topic title..." {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -130,10 +138,9 @@ const ClosedForumPage = () => {
                     <FormItem>
                       <FormLabel>Initial Message</FormLabel>
                       <FormControl>
-                         <Textarea
+                        <Textarea
                           placeholder="Start the admin discussion here..."
-                          className="resize-none"
-                          rows={5}
+                          className="resize-y min-h-[100px]"
                           {...field}
                         />
                       </FormControl>
@@ -141,33 +148,59 @@ const ClosedForumPage = () => {
                     </FormItem>
                   )}
                 />
-                 <DialogFooter>
-                   <DialogClose asChild>
-                      <Button type="button" variant="outline" disabled={isSubmitting}>
-                          Cancel
-                      </Button>
-                   </DialogClose>
-                   <Button type="submit" disabled={isSubmitting}>
-                      {isSubmitting ? <Spinner size="sm" className="mr-2"/> : null}
-                      Create Admin Thread
+                <DialogFooter className="pt-4">
+                  <DialogClose asChild>
+                    <Button type="button" variant="outline" disabled={isSubmitting}>
+                      Cancel
                     </Button>
+                  </DialogClose>
+                  <Button type="submit" disabled={isSubmitting}>
+                    {isSubmitting ? <Spinner size="sm" className="mr-2" /> : null}
+                    Create Admin Thread
+                  </Button>
                 </DialogFooter>
               </form>
             </Form>
-
           </DialogContent>
         </Dialog>
       </div>
 
-      {isLoading && <div className="flex justify-center pt-8"><Spinner /></div>}
-      {error && <p className="text-destructive text-center pt-8">Error: {error}</p>}
-      {!isLoading && !error && (
-        threads.length > 0 ? (
+      <div className="mt-4 min-h-[300px]">
+        {isLoading ? (
+          <div className="flex justify-center items-center h-full"><Spinner size="lg" /></div>
+        ) : error ? (
+          <div className="flex justify-center items-center h-full">
+             <Card className="w-full max-w-md text-center p-6">
+               <CardHeader>
+                  <CardTitle className="text-xl font-semibold text-destructive">Error Loading Forum</CardTitle>
+               </CardHeader>
+               <CardContent>
+                  <p className="text-muted-foreground">{error}</p>
+               </CardContent>
+             </Card>
+          </div>
+        ) : threads.length > 0 ? (
           <ThreadList threads={threads} forumType="closed" />
         ) : (
-           <p className="text-center text-muted-foreground pt-8">No threads found in the closed forum yet.</p>
-        )
-      )}
+           <div className="flex justify-center items-center h-full">
+             <Card className="w-full max-w-md text-center p-6">
+                <CardHeader>
+                   <CardTitle className="text-lg font-semibold">No Threads Yet</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                   <p className="text-muted-foreground">No confidential discussions have been started.</p>
+                   <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                      <DialogTrigger asChild>
+                         <Button size="sm" variant="secondary">
+                            <PlusCircle className="mr-2 h-4 w-4" /> Create Admin Thread
+                         </Button>
+                      </DialogTrigger>
+                   </Dialog>
+                </CardContent>
+             </Card>
+           </div>
+        )}
+      </div>
     </PageWrapper>
   );
 };

@@ -10,6 +10,7 @@ import {
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
 import { cn } from "@/lib/utils";
+import { LogOut, User, Settings, Search, MessageSquare, ShieldCheck } from 'lucide-react';
 
 const Header = () => {
   const { isLoggedIn, isAdmin, logout, currentUser } = useAuth();
@@ -17,82 +18,79 @@ const Header = () => {
   const navLinkClasses = ({ isActive }) =>
     cn(
       navigationMenuTriggerStyle(),
-      isActive ? "bg-accent text-accent-foreground" : "",
-      "text-sm font-medium"
+      "h-9",
+      isActive
+        ? "bg-accent text-accent-foreground"
+        : "hover:bg-accent/50 hover:text-accent-foreground",
+      "text-sm font-medium transition-colors"
     );
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-14 max-w-screen-2xl items-center mx-auto">
+      <div className="container flex h-14 max-w-5xl items-center mx-auto px-4 sm:px-6 lg:px-8">
         <Link to="/" className="mr-6 flex items-center space-x-2">
-          {/* <Icons.logo className="h-6 w-6" /> Can add logo later */}
-          <span className="font-bold sm:inline-block">
+          <span className="font-bold sm:inline-block text-lg">
             Organiz'asso
           </span>
         </Link>
-        <NavigationMenu className="hidden md:flex flex-grow">
-          <NavigationMenuList>
-            {isLoggedIn && currentUser?.isApproved && (
-              <>
-                <NavigationMenuItem>
-                  <NavLink to="/dashboard" className={navLinkClasses}>
-                    Dashboard
-                  </NavLink>
-                </NavigationMenuItem>
-                <NavigationMenuItem>
-                  <NavLink to="/forum/open" className={navLinkClasses}>
-                    Open Forum
-                  </NavLink>
-                </NavigationMenuItem>
-                {isAdmin && (
+
+        {isLoggedIn && currentUser?.isApproved && (
+            <NavigationMenu className="hidden md:flex flex-grow">
+              <NavigationMenuList>
                   <NavigationMenuItem>
-                    <NavLink to="/forum/closed" className={navLinkClasses}>
-                      Closed Forum
+                    <NavLink to="/forum/open" className={navLinkClasses}>
+                      <MessageSquare className="mr-2 h-4 w-4" /> Open Forum
                     </NavLink>
                   </NavigationMenuItem>
-                )}
-                 <NavigationMenuItem>
-                  <NavLink to="/search" className={navLinkClasses}>
-                    Search
-                  </NavLink>
-                </NavigationMenuItem>
-                {isAdmin && (
-                  <NavigationMenuItem>
-                    <NavLink to="/admin" className={navLinkClasses}>
-                      Admin Panel
+                  {isAdmin && (
+                    <NavigationMenuItem>
+                      <NavLink to="/forum/closed" className={navLinkClasses}>
+                         <ShieldCheck className="mr-2 h-4 w-4" /> Closed Forum
+                      </NavLink>
+                    </NavigationMenuItem>
+                  )}
+                   <NavigationMenuItem>
+                    <NavLink to="/search" className={navLinkClasses}>
+                       <Search className="mr-2 h-4 w-4" /> Search
                     </NavLink>
                   </NavigationMenuItem>
-                )}
-              </>
-            )}
-          </NavigationMenuList>
-        </NavigationMenu>
+                  {isAdmin && (
+                    <NavigationMenuItem>
+                      <NavLink to="/admin" className={navLinkClasses}>
+                         <Settings className="mr-2 h-4 w-4" /> Admin Panel
+                      </NavLink>
+                    </NavigationMenuItem>
+                  )}
+              </NavigationMenuList>
+            </NavigationMenu>
+        )}
 
         <div className="flex flex-1 items-center justify-end space-x-2">
           {isLoggedIn ? (
             <>
               {currentUser && (
                  <NavLink 
-                   to={`/profile/${currentUser.id}`} 
-                   className={cn(navLinkClasses({ isActive: false }), "hidden sm:inline-flex")} // Basic styling for profile link
+                   to={`/profile/${currentUser._id}`} 
+                   className={cn(navLinkClasses({ isActive: false }), "hidden sm:inline-flex items-center")}
                  >
-                    My Profile
+                    <User className="mr-2 h-4 w-4" /> My Profile
                   </NavLink>
               )}
-              <Button onClick={logout} variant="outline" size="sm">Logout</Button>
+              <Button onClick={logout} variant="outline" size="sm">
+                 <LogOut className="mr-2 h-4 w-4" /> Logout
+              </Button>
             </>
           ) : (
             <>
               <Button asChild variant="ghost" size="sm">
                  <Link to="/login">Login</Link>
               </Button>
-               <Button asChild size="sm">
+               <Button asChild size="sm" variant="default">
                  <Link to="/register">Register</Link>
               </Button>
             </>
           )}
         </div>
-        {/* Add Mobile Menu button here later */}
       </div>
     </header>
   );
