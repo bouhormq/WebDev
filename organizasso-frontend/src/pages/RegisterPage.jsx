@@ -35,20 +35,45 @@ const RegisterPage = () => {
     }
   };
 
+  // --- Inline Styles ---
+  const pageStyle = {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: '100vh',
+    // bg-gradient lost
+    backgroundColor: 'var(--background)', // Fallback bg
+    padding: '1rem', // p-4
+  };
+  const cardStyle = {
+      width: '100%',
+      maxWidth: '24rem', // max-w-sm
+      // shadow-lg is handled by Card component
+  };
+  const headerStyle = { textAlign: 'center' };
+  const titleStyle = { fontSize: '1.5rem', fontWeight: 'bold' }; // text-2xl font-bold
+  const successAlertStyle = { marginBottom: '1rem' }; // mb-4
+  const successIconStyle = { height: '1.25rem', width: '1.25rem' }; // h-5 w-5
+  const successLinkStyle = { fontWeight: 500, color: 'var(--primary)' }; // font-medium text-primary (hover:underline lost)
+  const footerStyle = { display: 'flex', flexDirection: 'column', alignItems: 'center', fontSize: '0.875rem' }; // flex flex-col items-center text-sm
+  const footerPStyle = { color: 'var(--muted-foreground)' }; // text-muted-foreground
+  const footerLinkStyle = { fontWeight: 500, color: 'var(--primary)' }; // font-medium text-primary (hover:underline lost)
+  // --- End Inline Styles ---
+
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-background to-muted/30 p-4">
-      <Card className="w-full max-w-sm shadow-lg">
-         <CardHeader className="text-center">
-           <CardTitle className="text-2xl font-bold">Register</CardTitle>
+    <div style={pageStyle}>
+      <Card style={cardStyle}>
+         <CardHeader style={headerStyle}>
+           <CardTitle style={titleStyle}>Register</CardTitle>
            <CardDescription>Create your Organiz'asso account</CardDescription>
          </CardHeader>
          <CardContent>
             {successMessage ? (
-                <Alert variant="success" className="mb-4">
-                  <CheckCircle className="h-5 w-5" />
+                <Alert variant="success" style={successAlertStyle}>
+                  <CheckCircle style={successIconStyle} />
                   <AlertTitle>Registration Submitted!</AlertTitle>
                   <AlertDescription>
-                     {successMessage} You can now <Link to="/login" className="font-medium text-primary hover:underline">login</Link> once an administrator approves your account.
+                     {successMessage} You can now <Link to="/login" style={successLinkStyle}>login</Link> once an administrator approves your account.
                   </AlertDescription>
                 </Alert>
             ) : (
@@ -56,10 +81,10 @@ const RegisterPage = () => {
             )}
          </CardContent>
          {!successMessage && (
-            <CardFooter className="flex flex-col items-center text-sm">
-               <p className="text-muted-foreground">
+            <CardFooter style={footerStyle}>
+               <p style={footerPStyle}>
                   Already have an account?{" "}
-                  <Link to="/login" className="font-medium text-primary hover:underline">
+                  <Link to="/login" style={footerLinkStyle}>
                     Login here
                   </Link>
                 </p>

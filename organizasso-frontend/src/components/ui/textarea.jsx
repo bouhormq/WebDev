@@ -1,18 +1,26 @@
 import * as React from "react"
 
-import { cn } from "@/lib/utils"
-
-function Textarea({
-  className,
-  ...props
-}) {
+function Textarea({ className, style, ...props }) {
+  const textareaStyle = {
+    display: "flex",
+    minHeight: "4rem",
+    width: "100%",
+    borderRadius: "0.5rem",
+    border: "1px solid var(--input)",
+    backgroundColor: "transparent",
+    padding: "0.5rem 0.75rem",
+    fontSize: "0.875rem",
+    lineHeight: "1.25rem",
+    transition: "color 0.2s ease-in-out, box-shadow 0.2s ease-in-out",
+    outline: "none",
+    fieldSizing: "content",
+    ...style,
+  };
   return (
     <textarea
       data-slot="textarea"
-      className={cn(
-        "border-input placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:bg-input/30 flex field-sizing-content min-h-16 w-full rounded-md border bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
-        className
-      )}
+      style={textareaStyle}
+      className={className}
       {...props} />
   );
 }

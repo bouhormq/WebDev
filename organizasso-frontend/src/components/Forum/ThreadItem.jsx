@@ -18,38 +18,59 @@ const ThreadItem = ({ thread, onClick }) => {
   // Get first letter for fallback avatar
   const authorInitial = thread.authorName ? thread.authorName.charAt(0).toUpperCase() : '?';
 
+  // --- Inline Styles ---
+  const outerDivStyle = {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '1rem', // gap-4
+    padding: '1rem', // p-4
+    cursor: 'pointer',
+    transition: 'background-color 0.2s ease-in-out', // transition-colors (approximated target)
+    // hover:bg-accent/50 lost
+  };
+  const avatarStyle = { height: '2.25rem', width: '2.25rem', display: 'none' }; // h-9 w-9 hidden (sm:flex lost)
+  const infoDivStyle = { flexGrow: 1, margin: '0.125rem 0', overflow: 'hidden' }; // flex-grow space-y-1 overflow-hidden
+  const titlePStyle = { fontSize: '0.875rem', fontWeight: 500, lineHeight: 1.25, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }; // text-sm font-medium leading-tight truncate
+  const authorInfoPStyle = { fontSize: '0.75rem', color: 'var(--muted-foreground)' }; // text-xs text-muted-foreground
+  const authorSpanStyle = { fontWeight: 500 }; // font-medium
+  const statsDivStyle = { flexShrink: 0, display: 'flex', alignItems: 'center', fontSize: '0.75rem', color: 'var(--muted-foreground)' }; // flex-shrink-0 flex items-center text-xs text-muted-foreground (space-x lost)
+  const statItemStyle = { display: 'flex', alignItems: 'center' }; // flex items-center
+  const iconStyle = { height: '0.875rem', width: '0.875rem', marginRight: '0.25rem' }; // h-3.5 w-3.5 mr-1
+  const lastPostTimeSpanStyle = { display: 'none' }; // hidden (sm:inline lost)
+  // --- End Inline Styles ---
+
   return (
     <div 
-      className="flex items-center gap-4 p-4 hover:bg-accent/50 cursor-pointer transition-colors" 
+      style={outerDivStyle}
       onClick={onClick}
       role="button" // Improve accessibility
       tabIndex={0} // Make focusable
       onKeyDown={(e) => e.key === 'Enter' && onClick()} // Allow activation with Enter key
     >
        {/* Avatar */}
-       <Avatar className="h-9 w-9 hidden sm:flex"> 
+       <Avatar style={avatarStyle}> 
          {/* Add AvatarImage src later if available */}
          <AvatarFallback>{authorInitial}</AvatarFallback>
        </Avatar>
 
       {/* Thread Info */}
-      <div className="flex-grow space-y-1 overflow-hidden"> {/* Prevent long text overflow */} 
-        <p className="text-sm font-medium leading-tight truncate">{thread.title || 'Untitled Thread'}</p>
-        <p className="text-xs text-muted-foreground">
-          Started by <span className="font-medium">{thread.authorName || 'Unknown'}</span>
+      <div style={infoDivStyle}> {/* Prevent long text overflow */} 
+        <p style={titlePStyle}>{thread.title || 'Untitled Thread'}</p>
+        <p style={authorInfoPStyle}>
+          Started by <span style={authorSpanStyle}>{thread.authorName || 'Unknown'}</span>
         </p>
       </div>
 
       {/* Stats */}
-      <div className="flex-shrink-0 flex items-center space-x-4 text-xs text-muted-foreground">
-         <div className="flex items-center" title="Replies">
-             <MessageSquareText className="h-3.5 w-3.5 mr-1" />
-             <span>{thread.messageCount ?? thread.replyCount ?? 0}</span>
-         </div>
-         <div className="flex items-center" title={`Last post: ${lastPostTimeText}`}>
-             <Clock className="h-3.5 w-3.5 mr-1" />
-             <span className="hidden sm:inline">{lastPostTimeText}</span>
-         </div>
+      <div style={{ ...statsDivStyle, gap: '1rem' }}> {/* Added gap to approximate space-x */} 
+        <div style={statItemStyle} title="Replies">
+          <MessageSquareText style={iconStyle} />
+          <span>{thread.messageCount ?? thread.replyCount ?? 0}</span>
+        </div>
+        <div style={statItemStyle} title={`Last post: ${lastPostTimeText}`}>
+          <Clock style={iconStyle} />
+          <span style={lastPostTimeSpanStyle}>{lastPostTimeText}</span>
+        </div>
       </div>
     </div>
   );

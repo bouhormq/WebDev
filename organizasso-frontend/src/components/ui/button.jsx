@@ -1,55 +1,137 @@
 import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
-import { cva } from "class-variance-authority";
 
-import { cn } from "@/lib/utils"
+// Helper function to generate styles based on variants
+// NOTE: This is a simplified approximation. Hover, focus, disabled, dark mode,
+//       and complex selectors ([&_svg], has-[>svg], aria-invalid) are LOST.
+const getButtonStyles = ({ variant, size }) => {
+  // Base styles (approximated from cva)
+  let styles = {
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: "0.5rem", // from gap-2 (default)
+    whiteSpace: "nowrap",
+    borderRadius: "0.5rem", // from rounded-lg (default)
+    fontSize: "0.875rem", // from text-sm
+    fontWeight: "500", // from font-medium
+    transition: "all 0.2s ease-in-out", // Approximated from transition-all
+    outline: "none",
+    flexShrink: 0, // from shrink-0
+    // pointerEvents: 'none', // Cannot apply conditional styles like disabled:pointer-events-none
+    // opacity: 0.5, // Cannot apply conditional styles like disabled:opacity-50
+  };
 
-const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
-  {
-    variants: {
-      variant: {
-        default:
-          "bg-primary text-primary-foreground shadow-xs hover:bg-primary/90",
-        destructive:
-          "bg-destructive text-white shadow-xs hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60",
-        outline:
-          "border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50",
-        secondary:
-          "bg-secondary text-secondary-foreground shadow-xs hover:bg-secondary/80",
-        ghost:
-          "hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50",
-        link: "text-primary underline-offset-4 hover:underline",
-      },
-      size: {
-        default: "h-9 px-4 py-2 has-[>svg]:px-3",
-        sm: "h-8 rounded-md gap-1.5 px-3 has-[>svg]:px-2.5",
-        lg: "h-10 rounded-md px-6 has-[>svg]:px-4",
-        icon: "size-9",
-      },
-    },
-    defaultVariants: {
-      variant: "default",
-      size: "default",
-    },
+  // Variant styles
+  switch (variant) {
+    case "destructive":
+      styles = {
+        ...styles,
+        backgroundColor: "var(--destructive)",
+        color: "var(--destructive-foreground)", // Assuming white is foreground
+      };
+      break;
+    case "destructiveOutline":
+      styles = {
+        ...styles,
+        border: "1px solid var(--destructive)",
+        color: "var(--destructive)",
+        backgroundColor: "transparent",
+      };
+      break;
+    case "outline":
+      styles = {
+        ...styles,
+        border: "1px solid var(--border)",
+        backgroundColor: "var(--background)",
+      };
+      break;
+    case "success":
+      styles = { ...styles, backgroundColor: "var(--success)", color: "white" }; // Assuming var(--success) exists
+      break;
+    case "successOutline":
+      styles = { ...styles, border: "1px solid var(--success)", color: "var(--success)", backgroundColor: "transparent" };
+      break;
+    case "secondary":
+      styles = { ...styles, backgroundColor: "var(--secondary)", color: "var(--secondary-foreground)" };
+      break;
+    case "ghost":
+       styles = { ...styles, backgroundColor: "transparent", color: "var(--foreground)" }; // Color needs context
+      break;
+    case "link":
+      styles = {
+        ...styles,
+        color: "var(--primary)",
+        textDecoration: "underline", // Approximated
+        textUnderlineOffset: "4px",
+        backgroundColor: "transparent",
+      };
+      break;
+    case "default":
+    default:
+      styles = { ...styles, backgroundColor: "var(--primary)", color: "var(--primary-foreground)" };
+      break;
   }
-)
+
+  // Size styles
+  switch (size) {
+    case "sm":
+      styles = {
+        ...styles,
+        height: "2.25rem", // h-9
+        borderRadius: "0.375rem", // rounded-md
+        padding: "0 0.75rem", // px-3
+        gap: "0.375rem", // gap-1.5
+      };
+      break;
+    case "lg":
+      styles = {
+        ...styles,
+        height: "2.75rem", // h-11
+        borderRadius: "0.5rem", // rounded-lg
+        padding: "0 1.5rem", // px-6
+      };
+      break;
+    case "icon":
+      styles = {
+        ...styles,
+        height: "2.5rem", // size-10
+        width: "2.5rem",  // size-10
+        padding: 0, // Icon buttons typically have no padding
+      };
+      break;
+    case "default":
+    default:
+      styles = {
+        ...styles,
+        height: "2.5rem", // h-10
+        padding: "0.5rem 1rem", // py-2 px-4 (approximated)
+      };
+      break;
+  }
+
+  return styles;
+};
 
 function Button({
   className,
-  variant,
-  size,
+  variant = "default", // Provide defaults
+  size = "default", // Provide defaults
   asChild = false,
+  style, // Accept incoming style prop
   ...props
 }) {
   const Comp = asChild ? Slot : "button"
+  const combinedStyle = { ...getButtonStyles({ variant, size }), ...style }
 
   return (
     <Comp
       data-slot="button"
-      className={cn(buttonVariants({ variant, size, className }))}
+      style={combinedStyle} // Apply calculated inline styles
+      className={className} // Keep external className
       {...props} />
   );
 }
 
-export { Button, buttonVariants }
+// Exporting getButtonStyles might be useful if variant logic is needed elsewhere
+export { Button, getButtonStyles }

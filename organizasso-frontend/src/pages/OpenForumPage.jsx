@@ -104,23 +104,38 @@ const OpenForumPage = () => {
     } // finally is handled by formState.isSubmitting
   };
 
+  // --- Inline Styles (Same as ClosedForumPage, adjusted H1) ---
+  const headerDivStyle = { display: 'flex', flexDirection: 'column', marginBottom: '1.5rem', gap: '1rem' }; // flex flex-col mb-6 gap-4 (responsive lost)
+  const h1Style = { fontSize: '1.875rem', fontWeight: 'bold', letterSpacing: '-0.02em' }; // text-3xl font-bold tracking-tight (sm size lost)
+  const pMutedStyle = { color: 'var(--muted-foreground)' };
+  const plusIconStyle = { marginRight: '0.5rem', height: '1rem', width: '1rem' }; // mr-2 h-4 w-4
+  const dialogContentStyle = { maxWidth: '28rem' }; // sm:max-w-md
+  const dialogFormStyle = { paddingTop: '0.5rem', paddingBottom: '0.5rem' }; // py-2 (space-y lost)
+  const dialogTextareaStyle = { resize: 'vertical', minHeight: '100px' }; // resize-y min-h-[100px]
+  const dialogFooterStyle = { paddingTop: '1rem' }; // pt-4
+  const spinnerStyle = { marginRight: '0.5rem' }; // mr-2
+  const listContainerStyle = { marginTop: '1rem', minHeight: '300px' }; // mt-4 min-h-[300px]
+  const centeredFlexStyle = { display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' };
+  const feedbackCardStyle = { width: '100%', maxWidth: '32rem', textAlign: 'center', padding: '1.5rem' }; // w-full max-w-md text-center p-6
+  const errorTitleStyle = { fontSize: '1.25rem', fontWeight: 600, color: 'var(--destructive)' }; // text-xl font-semibold text-destructive
+  const emptyTitleStyle = { fontSize: '1.125rem', fontWeight: 600 }; // text-lg font-semibold
+  const emptyContentStyle = {}; // space-y-4 lost
+  // --- End Inline Styles ---
 
   return (
     <PageWrapper>
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-        {/* Page Title */}
+      <div style={headerDivStyle}>
         <div>
-           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Open Forum</h1>
-           <p className="text-muted-foreground">Discuss topics relevant to all members.</p>
+          <h1 style={h1Style}>Open Forum</h1>
+          <p style={pMutedStyle}>Discuss topics relevant to all members.</p>
         </div>
-        {/* New Thread Button & Dialog */}
-         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-           <DialogTrigger asChild>
-             <Button size="sm">
-                <PlusCircle className="mr-2 h-4 w-4" /> Create New Thread
-             </Button>
-           </DialogTrigger>
-           <DialogContent className="sm:max-w-md">
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogTrigger asChild>
+            <Button size="sm">
+              <PlusCircle style={plusIconStyle} /> Create New Thread
+            </Button>
+          </DialogTrigger>
+          <DialogContent style={dialogContentStyle}>
             <DialogHeader>
               <DialogTitle>Start a New Discussion</DialogTitle>
               <DialogDescription>
@@ -128,13 +143,12 @@ const OpenForumPage = () => {
               </DialogDescription>
             </DialogHeader>
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-2">
-                {/* Title Field */}
+              <form onSubmit={form.handleSubmit(onSubmit)} style={dialogFormStyle}>
                 <FormField
                   control={form.control}
                   name="title"
                   render={({ field }) => (
-                    <FormItem>
+                    <FormItem style={{ marginBottom: '1rem' }}>
                       <FormLabel>Title</FormLabel>
                       <FormControl>
                         <Input placeholder="Enter thread title..." {...field} />
@@ -143,17 +157,16 @@ const OpenForumPage = () => {
                     </FormItem>
                   )}
                 />
-                 {/* Content Field */}
                 <FormField
                   control={form.control}
                   name="content"
                   render={({ field }) => (
-                    <FormItem>
+                    <FormItem style={{ marginBottom: '1rem' }}>
                       <FormLabel>Initial Message</FormLabel>
                       <FormControl>
-                         <Textarea
+                        <Textarea
                           placeholder="Start the discussion..."
-                          className="resize-y min-h-[100px]" // Allow vertical resize
+                          style={dialogTextareaStyle}
                           {...field}
                         />
                       </FormControl>
@@ -161,16 +174,16 @@ const OpenForumPage = () => {
                     </FormItem>
                   )}
                 />
-                 <DialogFooter className="pt-4"> {/* Add padding top */}
-                   <DialogClose asChild>
-                      <Button type="button" variant="outline" disabled={isSubmitting}>
-                          Cancel
-                      </Button>
-                   </DialogClose>
-                   <Button type="submit" disabled={isSubmitting}>
-                      {isSubmitting ? <Spinner size="sm" className="mr-2"/> : null}
-                      Create Thread
+                <DialogFooter style={dialogFooterStyle}>
+                  <DialogClose asChild>
+                    <Button type="button" variant="outline" disabled={isSubmitting}>
+                      Cancel
                     </Button>
+                  </DialogClose>
+                  <Button type="submit" disabled={isSubmitting}>
+                    {isSubmitting ? <Spinner size="sm" style={spinnerStyle} /> : null}
+                    Create Thread
+                  </Button>
                 </DialogFooter>
               </form>
             </Form>
@@ -178,43 +191,40 @@ const OpenForumPage = () => {
         </Dialog>
       </div>
 
-      {/* Display Area: Loading, Error, Empty, List */}
-      <div className="mt-4 min-h-[300px]"> {/* Add min-height */}
+      <div style={listContainerStyle}>
         {isLoading ? (
-           <div className="flex justify-center items-center h-full"><Spinner size="lg"/></div>
+          <div style={centeredFlexStyle}><Spinner size="lg" /></div>
         ) : error ? (
-           <div className="flex justify-center items-center h-full">
-             <Card className="w-full max-w-md text-center p-6">
-               <CardHeader>
-                  <CardTitle className="text-xl font-semibold text-destructive">Error Loading Forum</CardTitle>
-               </CardHeader>
-               <CardContent>
-                  <p className="text-muted-foreground">{error}</p>
-               </CardContent>
-             </Card>
-           </div>
+          <div style={centeredFlexStyle}>
+            <Card style={feedbackCardStyle}>
+              <CardHeader>
+                <CardTitle style={errorTitleStyle}>Error Loading Forum</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p style={pMutedStyle}>{error}</p>
+              </CardContent>
+            </Card>
+          </div>
         ) : threads.length > 0 ? (
-           <ThreadList threads={threads} forumType="open" />
+          <ThreadList threads={threads} forumType="open" />
         ) : (
-           <div className="flex justify-center items-center h-full">
-             <Card className="w-full max-w-md text-center p-6">
-                <CardHeader>
-                   <CardTitle className="text-lg font-semibold">No Threads Yet</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                   <p className="text-muted-foreground">Be the first to start a discussion in the open forum.</p>
-                   {/* Optionally repeat the button inside the card */}
-                   <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                      <DialogTrigger asChild>
-                         <Button size="sm" variant="secondary">
-                            <PlusCircle className="mr-2 h-4 w-4" /> Create Thread
-                         </Button>
-                      </DialogTrigger>
-                      {/* DialogContent defined above */}
-                   </Dialog>
-                </CardContent>
-             </Card>
-           </div>
+          <div style={centeredFlexStyle}>
+            <Card style={feedbackCardStyle}>
+              <CardHeader>
+                <CardTitle style={emptyTitleStyle}>No Threads Yet</CardTitle>
+              </CardHeader>
+              <CardContent style={emptyContentStyle}>
+                <p style={{ ...pMutedStyle, marginBottom: '1rem' }}>Be the first to start a discussion in the open forum.</p>
+                <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button size="sm" variant="secondary">
+                      <PlusCircle style={plusIconStyle} /> Create Thread
+                    </Button>
+                  </DialogTrigger>
+                </Dialog>
+              </CardContent>
+            </Card>
+          </div>
         )}
       </div>
     </PageWrapper>

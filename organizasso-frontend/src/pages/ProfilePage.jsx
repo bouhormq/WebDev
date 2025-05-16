@@ -25,21 +25,21 @@ const ProfilePage = () => {
     try {
       console.log(`ProfilePage (${userId}): Fetching profile data from API...`);
       const [profile, messages] = await Promise.all([
-          getUserProfile(userId),
-          getUserMessages(userId)
+        getUserProfile(userId),
+        getUserMessages(userId),
       ]);
 
       const formattedProfile = {
-          ...profile,
-          createdAt: profile.createdAt ? new Date(profile.createdAt) : null,
-          joinDate: profile.joinDate ? new Date(profile.joinDate) : (profile.createdAt ? new Date(profile.createdAt) : null)
+        ...profile,
+        createdAt: profile.createdAt ? new Date(profile.createdAt) : null,
+        joinDate: profile.joinDate ? new Date(profile.joinDate) : (profile.createdAt ? new Date(profile.createdAt) : null),
       };
-       const formattedMessages = messages.map(msg => ({
-          ...msg,
-          _id: msg._id,
-          createdAt: msg.createdAt ? new Date(msg.createdAt) : null,
-          authorName: msg.authorName || profile?.username || 'Unknown'
-       }));
+      const formattedMessages = messages.map(msg => ({
+        ...msg,
+        _id: msg._id,
+        createdAt: msg.createdAt ? new Date(msg.createdAt) : null,
+        authorName: msg.authorName || profile?.username || 'Unknown',
+      }));
 
       setUserInfo(formattedProfile);
       setUserMessages(formattedMessages);
@@ -62,10 +62,10 @@ const ProfilePage = () => {
 
   const handleDeleteMessage = useCallback(async (messageId) => {
     if (!isOwnProfile) {
-        toast.error("Cannot delete messages from another user's profile.");
-        return;
+      toast.error("Cannot delete messages from another user's profile.");
+      return;
     }
-     if (!window.confirm("Are you sure you want to delete this message?")) {
+    if (!window.confirm("Are you sure you want to delete this message?")) {
       return;
     }
 
@@ -74,48 +74,60 @@ const ProfilePage = () => {
     toast.info("Deleting message...");
 
     try {
-        console.log(`ProfilePage (${userId}): Deleting message ${messageId} via API...`);
-        await deleteUserMessage(messageId);
-        toast.success("Message deleted successfully!");
+      console.log(`ProfilePage (${userId}): Deleting message ${messageId} via API...`);
+      await deleteUserMessage(messageId);
+      toast.success("Message deleted successfully!");
     } catch (err) {
-        const message = err.message || "Failed to delete message.";
-        console.error(message, err);
-        toast.error(message);
-        setUserMessages(originalMessages);
+      const message = err.message || "Failed to delete message.";
+      console.error(message, err);
+      toast.error(message);
+      setUserMessages(originalMessages);
     }
-  }, [isOwnProfile, userMessages]);
+  }, [isOwnProfile, userMessages, userId]);
+
+  // --- Inline Styles ---
+  const centeredFlexMinHeightStyle = { display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '300px' };
+  const errorCardStyle = { width: '100%', maxWidth: '32rem', textAlign: 'center', padding: '1.5rem' };
+  const errorTitleStyle = { fontSize: '1.25rem', fontWeight: 600, color: 'var(--destructive)' };
+  const errorPStyle = { color: 'var(--muted-foreground)' };
+  const notFoundDivStyle = { textAlign: 'center', paddingTop: '3rem' };
+  const notFoundH2Style = { fontSize: '1.25rem', fontWeight: 600, marginBottom: '0.5rem' };
+  const notFoundPStyle = { color: 'var(--muted-foreground)' };
+  // --- End Inline Styles ---
 
   return (
     <PageWrapper>
       {isLoading ? (
-        <div className="flex justify-center items-center min-h-[300px]"><Spinner size="lg"/></div>
+        <div style={centeredFlexMinHeightStyle}><Spinner size="lg" /></div>
       ) : error ? (
-         <div className="flex justify-center items-center min-h-[300px]">
-           <Card className="w-full max-w-md text-center p-6">
-             <CardHeader>
-                <CardTitle className="text-xl font-semibold text-destructive">Error Loading Profile</CardTitle>
-             </CardHeader>
-             <CardContent>
-                <p className="text-muted-foreground">{error}</p>
-             </CardContent>
-           </Card>
-         </div>
+        <div style={centeredFlexMinHeightStyle}>
+          <Card style={errorCardStyle}>
+            <CardHeader>
+              <CardTitle style={errorTitleStyle}>Error Loading Profile</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p style={errorPStyle}>{error}</p>
+            </CardContent>
+          </Card>
+        </div>
       ) : userInfo ? (
-        <div className="space-y-6">
-          <UserInfo user={userInfo} isCurrentUserProfile={isOwnProfile} />
+        <div>
+          <div style={{ marginBottom: '1.5rem' }}>
+            <UserInfo user={userInfo} isCurrentUserProfile={isOwnProfile} />
+          </div>
           <Card>
-            <UserMessages 
-              messages={userMessages} 
-              isOwnProfile={isOwnProfile} 
-              onDelete={handleDeleteMessage} 
+            <UserMessages
+              messages={userMessages}
+              isOwnProfile={isOwnProfile}
+              onDelete={handleDeleteMessage}
             />
           </Card>
         </div>
       ) : (
-         <div className="text-center pt-12">
-           <h2 className="text-xl font-semibold mb-2">Profile Not Found</h2>
-           <p className="text-muted-foreground">The requested user profile could not be found.</p>
-         </div>
+        <div style={notFoundDivStyle}>
+          <h2 style={notFoundH2Style}>Profile Not Found</h2>
+          <p style={notFoundPStyle}>The requested user profile could not be found.</p>
+        </div>
       )}
     </PageWrapper>
   );

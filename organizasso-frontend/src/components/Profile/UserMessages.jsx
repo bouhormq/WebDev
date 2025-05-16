@@ -5,26 +5,37 @@ import { Link } from 'react-router-dom'; // To link messages to their threads
 import { Separator } from "@/components/ui/separator"; // Import Separator
 
 const UserMessages = ({ messages, isOwnProfile, onDelete }) => { // eslint-disable-line no-unused-vars
+
+  // --- Inline Styles ---
+  const contentStyle = { padding: 0 }; // p-0
+  const emptyStateDivStyle = { padding: '1.5rem', textAlign: 'center' }; // p-6 text-center
+  const emptyStatePStyle = { color: 'var(--muted-foreground)', fontStyle: 'italic' }; // text-muted-foreground italic
+  const metadataDivStyle = { padding: '1rem 1.5rem 0.5rem' }; // px-6 pt-4 pb-2
+  const metadataPStyle = { fontSize: '0.75rem', color: 'var(--muted-foreground)', marginBottom: '0.25rem' }; // text-xs text-muted-foreground mb-1
+  const linkStyle = { color: 'var(--primary)' }; // text-primary (hover:underline lost)
+  const messageItemDivStyle = { padding: '0 1.5rem 1rem' }; // px-6 pb-4
+  // --- End Inline Styles ---
+
   return (
     <Card>
        <CardHeader>
          <CardTitle>Messages Posted ({messages?.length || 0})</CardTitle>
        </CardHeader>
-       <CardContent className="p-0"> {/* Remove padding for edge-to-edge MessageItem */}
+       <CardContent style={contentStyle}> {/* Remove padding for edge-to-edge MessageItem */}
           {(!messages || messages.length === 0) ? (
-             <div className="p-6 text-center"> {/* Add padding back for empty state */}
-               <p className="text-muted-foreground italic">This user hasn't posted any messages yet.</p>
+             <div style={emptyStateDivStyle}> {/* Add padding back for empty state */}
+               <p style={emptyStatePStyle}>This user hasn't posted any messages yet.</p>
              </div>
           ) : (
-             <div className="space-y-0"> {/* Remove space-y, handled by Separator */}
+             <>
               {messages.map((message, index) => (
                 <React.Fragment key={message._id}> {/* Use _id and React.Fragment */}
-                  <div className="px-6 pt-4 pb-2"> {/* Add padding around metadata */}
-                    <p className="text-xs text-muted-foreground mb-1">
-                       Posted in thread: <Link to={`/forum/thread/${message.threadId}`} className="hover:underline text-primary">View Thread</Link>
+                  <div style={metadataDivStyle}> {/* Add padding around metadata */}
+                    <p style={metadataPStyle}>
+                       Posted in thread: <Link to={`/forum/thread/${message.threadId}`} style={linkStyle}>View Thread</Link>
                     </p>
                   </div>
-                  <div className="px-6 pb-4"> {/* Add padding for MessageItem content */}
+                  <div style={messageItemDivStyle}> {/* Add padding for MessageItem content */}
                     <MessageItem 
                        message={message} 
                        isOwnMessage={isOwnProfile}
@@ -34,7 +45,7 @@ const UserMessages = ({ messages, isOwnProfile, onDelete }) => { // eslint-disab
                   {index < messages.length - 1 && <Separator />} {/* Add Separator between items */}
                 </React.Fragment>
               ))}
-            </div>
+            </>
           )}
        </CardContent>
     </Card>

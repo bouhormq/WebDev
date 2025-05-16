@@ -10,7 +10,7 @@ import {
   DialogTitle,
   DialogTrigger,
   DialogFooter,
-  DialogClose
+  DialogClose,
 } from "@/components/ui/dialog";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -60,9 +60,9 @@ const ClosedForumPage = () => {
       console.log('ClosedForumPage: Fetching threads from API...');
       const fetchedThreads = await getClosedForumThreads();
       const formattedThreads = fetchedThreads.map(thread => ({
-          ...thread,
-          createdAt: thread.createdAt ? new Date(thread.createdAt) : null,
-          lastPostTime: thread.lastReplyAt ? new Date(thread.lastReplyAt) : (thread.createdAt ? new Date(thread.createdAt) : null)
+        ...thread,
+        createdAt: thread.createdAt ? new Date(thread.createdAt) : null,
+        lastPostTime: thread.lastReplyAt ? new Date(thread.lastReplyAt) : (thread.createdAt ? new Date(thread.createdAt) : null),
       }));
       setThreads(formattedThreads);
     } catch (err) {
@@ -94,22 +94,41 @@ const ClosedForumPage = () => {
     }
   };
 
+  // --- Inline Styles ---
+  const headerDivStyle = { display: 'flex', flexDirection: 'column', marginBottom: '1.5rem', gap: '1rem' }; // flex flex-col mb-6 gap-4 (responsive lost)
+  const h1Style = { fontSize: '1.875rem', fontWeight: 'bold', letterSpacing: '-0.02em', display: 'flex', alignItems: 'center' }; // text-3xl font-bold tracking-tight flex items-center (sm size lost)
+  const shieldIconStyle = { marginLeft: '0.5rem', height: '1.5rem', width: '1.5rem', color: 'var(--destructive)' }; // ml-2 h-6 w-6 text-destructive
+  const pMutedStyle = { color: 'var(--muted-foreground)' };
+  const plusIconStyle = { marginRight: '0.5rem', height: '1rem', width: '1rem' }; // mr-2 h-4 w-4
+  const dialogContentStyle = { maxWidth: '28rem' }; // sm:max-w-md
+  const dialogFormStyle = { paddingTop: '0.5rem', paddingBottom: '0.5rem' }; // py-2 (space-y lost)
+  const dialogTextareaStyle = { resize: 'vertical', minHeight: '100px' }; // resize-y min-h-[100px]
+  const dialogFooterStyle = { paddingTop: '1rem' }; // pt-4
+  const spinnerStyle = { marginRight: '0.5rem' }; // mr-2
+  const listContainerStyle = { marginTop: '1rem', minHeight: '300px' }; // mt-4 min-h-[300px]
+  const centeredFlexStyle = { display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' };
+  const feedbackCardStyle = { width: '100%', maxWidth: '32rem', textAlign: 'center', padding: '1.5rem' }; // w-full max-w-md text-center p-6
+  const errorTitleStyle = { fontSize: '1.25rem', fontWeight: 600, color: 'var(--destructive)' }; // text-xl font-semibold text-destructive
+  const emptyTitleStyle = { fontSize: '1.125rem', fontWeight: 600 }; // text-lg font-semibold
+  const emptyContentStyle = {}; // space-y-4 lost, would need margin on children
+  // --- End Inline Styles ---
+
   return (
     <PageWrapper>
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+      <div style={headerDivStyle}>
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight flex items-center">
-            Closed Forum <ShieldAlert className="ml-2 h-6 w-6 text-destructive" />
+          <h1 style={h1Style}>
+            Closed Forum <ShieldAlert style={shieldIconStyle} />
           </h1>
-          <p className="text-muted-foreground">Confidential discussions for administrators only.</p>
+          <p style={pMutedStyle}>Confidential discussions for administrators only.</p>
         </div>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
             <Button size="sm">
-              <PlusCircle className="mr-2 h-4 w-4" /> Create New Admin Thread
+              <PlusCircle style={plusIconStyle} /> Create New Admin Thread
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-md">
+          <DialogContent style={dialogContentStyle}>
             <DialogHeader>
               <DialogTitle>Start a New Admin Discussion</DialogTitle>
               <DialogDescription>
@@ -117,12 +136,12 @@ const ClosedForumPage = () => {
               </DialogDescription>
             </DialogHeader>
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-2">
+              <form onSubmit={form.handleSubmit(onSubmit)} style={dialogFormStyle}>
                 <FormField
                   control={form.control}
                   name="title"
                   render={({ field }) => (
-                    <FormItem>
+                    <FormItem style={{ marginBottom: '1rem' }}>
                       <FormLabel>Title</FormLabel>
                       <FormControl>
                         <Input placeholder="Enter admin topic title..." {...field} />
@@ -135,12 +154,12 @@ const ClosedForumPage = () => {
                   control={form.control}
                   name="content"
                   render={({ field }) => (
-                    <FormItem>
+                    <FormItem style={{ marginBottom: '1rem' }}>
                       <FormLabel>Initial Message</FormLabel>
                       <FormControl>
                         <Textarea
                           placeholder="Start the admin discussion here..."
-                          className="resize-y min-h-[100px]"
+                          style={dialogTextareaStyle}
                           {...field}
                         />
                       </FormControl>
@@ -148,14 +167,14 @@ const ClosedForumPage = () => {
                     </FormItem>
                   )}
                 />
-                <DialogFooter className="pt-4">
+                <DialogFooter style={dialogFooterStyle}>
                   <DialogClose asChild>
                     <Button type="button" variant="outline" disabled={isSubmitting}>
                       Cancel
                     </Button>
                   </DialogClose>
                   <Button type="submit" disabled={isSubmitting}>
-                    {isSubmitting ? <Spinner size="sm" className="mr-2" /> : null}
+                    {isSubmitting ? <Spinner size="sm" style={spinnerStyle} /> : null}
                     Create Admin Thread
                   </Button>
                 </DialogFooter>
@@ -165,40 +184,40 @@ const ClosedForumPage = () => {
         </Dialog>
       </div>
 
-      <div className="mt-4 min-h-[300px]">
+      <div style={listContainerStyle}>
         {isLoading ? (
-          <div className="flex justify-center items-center h-full"><Spinner size="lg" /></div>
+          <div style={centeredFlexStyle}><Spinner size="lg" /></div>
         ) : error ? (
-          <div className="flex justify-center items-center h-full">
-             <Card className="w-full max-w-md text-center p-6">
-               <CardHeader>
-                  <CardTitle className="text-xl font-semibold text-destructive">Error Loading Forum</CardTitle>
-               </CardHeader>
-               <CardContent>
-                  <p className="text-muted-foreground">{error}</p>
-               </CardContent>
-             </Card>
+          <div style={centeredFlexStyle}>
+            <Card style={feedbackCardStyle}>
+              <CardHeader>
+                <CardTitle style={errorTitleStyle}>Error Loading Forum</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p style={pMutedStyle}>{error}</p>
+              </CardContent>
+            </Card>
           </div>
         ) : threads.length > 0 ? (
           <ThreadList threads={threads} forumType="closed" />
         ) : (
-           <div className="flex justify-center items-center h-full">
-             <Card className="w-full max-w-md text-center p-6">
-                <CardHeader>
-                   <CardTitle className="text-lg font-semibold">No Threads Yet</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                   <p className="text-muted-foreground">No confidential discussions have been started.</p>
-                   <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                      <DialogTrigger asChild>
-                         <Button size="sm" variant="secondary">
-                            <PlusCircle className="mr-2 h-4 w-4" /> Create Admin Thread
-                         </Button>
-                      </DialogTrigger>
-                   </Dialog>
-                </CardContent>
-             </Card>
-           </div>
+          <div style={centeredFlexStyle}>
+            <Card style={feedbackCardStyle}>
+              <CardHeader>
+                <CardTitle style={emptyTitleStyle}>No Threads Yet</CardTitle>
+              </CardHeader>
+              <CardContent style={emptyContentStyle}>
+                <p style={{ ...pMutedStyle, marginBottom: '1rem' }}>No confidential discussions have been started.</p>
+                <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button size="sm" variant="secondary">
+                      <PlusCircle style={plusIconStyle} /> Create Admin Thread
+                    </Button>
+                  </DialogTrigger>
+                </Dialog>
+              </CardContent>
+            </Card>
+          </div>
         )}
       </div>
     </PageWrapper>

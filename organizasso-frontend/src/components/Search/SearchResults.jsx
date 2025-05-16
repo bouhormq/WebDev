@@ -5,7 +5,19 @@ import { Link } from 'react-router-dom'; // Link to threads
 import { format, parseISO } from 'date-fns'; // Import date-fns
 import { Separator } from "@/components/ui/separator"; // Import Separator
 
-const SearchResults = ({ results, currentUserId, searchParams }) => { 
+const SearchResults = ({ results, currentUserId, searchParams }) => {
+
+  // --- Inline Styles ---
+  const markStyle = {
+    backgroundColor: '#FEF08A', // bg-yellow-200
+    borderRadius: '0.125rem', // rounded
+    padding: '0 0.125rem', // px-0.5 py-0
+    // dark:bg-yellow-700 lost
+  };
+  const cardStyle = { marginTop: '1.5rem' }; // mt-6 (shadow-sm lost)
+  const cardContentStyle = { padding: 0 }; // p-0
+  const emptyDivStyle = { padding: '1.5rem', textAlign: 'center', color: 'var(--muted-foreground)' }; // p-6 text-center text-muted-foreground
+  // --- End Inline Styles ---
 
   // Function to highlight keywords (simple implementation)
   const highlightKeywords = (text, keywords) => {
@@ -18,40 +30,40 @@ const SearchResults = ({ results, currentUserId, searchParams }) => {
 
     // Ensure parts are strings or valid React elements before rendering
     return parts.map((part, index) => {
-        if (typeof part !== 'string') return null; // Skip non-string parts if any somehow occur
-        return regex.test(part) ? <mark key={index} className="bg-yellow-200 dark:bg-yellow-700 rounded px-0.5 py-0">{part}</mark> : part
-      }
-    ).filter(Boolean); // Filter out nulls
+      if (typeof part !== 'string') return null; // Skip non-string parts if any somehow occur
+      // Apply inline style to mark tag
+      return regex.test(part) ? <mark key={index} style={markStyle}>{part}</mark> : part;
+    }).filter(Boolean); // Filter out nulls
   };
 
   const formatDate = (dateString) => {
-     if (!dateString) return '';
-     try {
-        return format(parseISO(dateString), 'PPP'); // Format as Oct 20th, 2023
-     } catch (error) {
-        console.warn(`Failed to parse date string: ${dateString}`, error);
-        return dateString; // Return original if parsing fails
-     }
-  }
+    if (!dateString) return '';
+    try {
+      return format(parseISO(dateString), 'PPP'); // Format as Oct 20th, 2023
+    } catch (error) {
+      console.warn(`Failed to parse date string: ${dateString}`, error);
+      return dateString; // Return original if parsing fails
+    }
+  };
 
   // Build description string
   const buildDescription = () => {
-      let desc = `Found ${results.length} message${results.length !== 1 ? 's' : ''}`;
-      if (searchParams?.keywords) desc += ` matching keywords: "${searchParams.keywords}"`;
-      if (searchParams?.author) desc += `${searchParams.keywords ? ';' : ''} by author: "${searchParams.author}"`;
-      if (searchParams?.startDate || searchParams?.endDate) {
-          const start = searchParams.startDate ? formatDate(searchParams.startDate) : '';
-          const end = searchParams.endDate ? formatDate(searchParams.endDate) : '';
-          desc += `${searchParams.keywords || searchParams.author ? ';' : ''} within date range: `;
-          if (start && end) desc += `${start} - ${end}`;
-          else if (start) desc += `from ${start}`;
-          else if (end) desc += `until ${end}`;
-      }
-      return desc + '.';
-  }
+    let desc = `Found ${results.length} message${results.length !== 1 ? 's' : ''}`;
+    if (searchParams?.keywords) desc += ` matching keywords: "${searchParams.keywords}"`;
+    if (searchParams?.author) desc += `${searchParams.keywords ? ';' : ''} by author: "${searchParams.author}"`;
+    if (searchParams?.startDate || searchParams?.endDate) {
+      const start = searchParams.startDate ? formatDate(searchParams.startDate) : '';
+      const end = searchParams.endDate ? formatDate(searchParams.endDate) : '';
+      desc += `${searchParams.keywords || searchParams.author ? ';' : ''} within date range: `;
+      if (start && end) desc += `${start} - ${end}`;
+      else if (start) desc += `from ${start}`;
+      else if (end) desc += `until ${end}`;
+    }
+    return desc + '.';
+  };
 
   return (
-    <Card className="mt-6 shadow-sm">
+    <Card style={cardStyle}>
       <CardHeader>
         <CardTitle>Search Results</CardTitle>
         {searchParams && (
@@ -60,25 +72,25 @@ const SearchResults = ({ results, currentUserId, searchParams }) => {
           </CardDescription>
         )}
       </CardHeader>
-      <CardContent className="p-0">
+      <CardContent style={cardContentStyle}>
         {results.length === 0 ? (
-           <div className="p-6 text-center text-muted-foreground">
-              <p>No messages found matching your criteria.</p>
-            </div>
+          <div style={emptyDivStyle}>
+            <p>No messages found matching your criteria.</p>
+          </div>
         ) : (
           <div>
             {results.map((message, index) => (
               <React.Fragment key={message._id}>
-                 <MessageItem 
+                <MessageItem
                   message={{
-                      ...message,
-                      content: highlightKeywords(message.content, searchParams?.keywords) || message.content,
+                    ...message,
+                    content: highlightKeywords(message.content, searchParams?.keywords) || message.content,
                   }}
-                  isOwnMessage={message.authorId === currentUserId} 
+                  isOwnMessage={message.authorId === currentUserId}
                   onDelete={null}
                 />
-                 {index < results.length - 1 && <Separator />} 
-               </React.Fragment>
+                {index < results.length - 1 && <Separator />}
+              </React.Fragment>
             ))}
           </div>
         )}

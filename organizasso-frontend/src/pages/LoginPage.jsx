@@ -34,22 +34,42 @@ const LoginPage = () => {
     }
   };
 
+  // --- Inline Styles ---
+  const pageStyle = {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: '100vh',
+    // bg-gradient lost
+    backgroundColor: 'var(--background)', // Fallback background
+    padding: '1rem', // p-4
+  };
+  const cardStyle = {
+      width: '100%',
+      maxWidth: '24rem', // max-w-sm
+      // shadow-lg is handled by the Card component itself now
+  };
+  const headerStyle = { textAlign: 'center' };
+  const titleStyle = { fontSize: '1.5rem', fontWeight: 'bold' }; // text-2xl font-bold
+  const footerStyle = { display: 'flex', flexDirection: 'column', alignItems: 'center', fontSize: '0.875rem' }; // flex flex-col items-center text-sm
+  const footerPStyle = { color: 'var(--muted-foreground)' }; // text-muted-foreground
+  const footerLinkStyle = { fontWeight: 500, color: 'var(--primary)' }; // font-medium text-primary (hover lost)
+  // --- End Inline Styles ---
+
   return (
-    // Centered layout
-    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-background to-muted/30 p-4">
-      {/* Use Card for structure and styling */}
-      <Card className="w-full max-w-sm shadow-lg">
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold">Login</CardTitle>
+    <div style={pageStyle}>
+      <Card style={cardStyle}>
+        <CardHeader style={headerStyle}>
+          <CardTitle style={titleStyle}>Login</CardTitle>
           <CardDescription>Welcome back to Organiz'asso</CardDescription>
         </CardHeader>
         <CardContent>
            <LoginForm onSubmit={handleLogin} error={error} isLoading={isLoading} />
         </CardContent>
-        <CardFooter className="flex flex-col items-center text-sm">
-           <p className="text-muted-foreground">
+        <CardFooter style={footerStyle}>
+           <p style={footerPStyle}>
              Don&apos;t have an account?{" "}
-             <Link to="/register" className="font-medium text-primary hover:underline">
+             <Link to="/register" style={footerLinkStyle}>
                Register here
              </Link>
            </p>

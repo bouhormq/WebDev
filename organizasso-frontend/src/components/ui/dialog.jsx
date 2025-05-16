@@ -2,8 +2,6 @@ import * as React from "react"
 import * as DialogPrimitive from "@radix-ui/react-dialog"
 import { XIcon } from "lucide-react"
 
-import { cn } from "@/lib/utils"
-
 function Dialog({
   ...props
 }) {
@@ -30,15 +28,21 @@ function DialogClose({
 
 function DialogOverlay({
   className,
+  style,
   ...props
 }) {
+  const overlayStyle = {
+    position: "fixed",
+    inset: 0,
+    zIndex: 50,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    ...style,
+  };
   return (
     <DialogPrimitive.Overlay
       data-slot="dialog-overlay"
-      className={cn(
-        "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 fixed inset-0 z-50 bg-black/50",
-        className
-      )}
+      style={overlayStyle}
+      className={className}
       {...props} />
   );
 }
@@ -46,23 +50,53 @@ function DialogOverlay({
 function DialogContent({
   className,
   children,
+  style,
   ...props
 }) {
+  const contentStyle = {
+    backgroundColor: "var(--background)",
+    position: "fixed",
+    top: "50%",
+    left: "50%",
+    transform: "translate(-50%, -50%)",
+    zIndex: 50,
+    display: "grid",
+    width: "calc(100% - 2rem)",
+    maxWidth: "32rem",
+    gap: "1rem",
+    borderRadius: "0.5rem",
+    border: "1px solid var(--border)",
+    padding: "1.5rem",
+    boxShadow: "var(--shadow-lg)",
+    ...style,
+  };
+
+  const closeButtonStyle = {
+    position: "absolute",
+    top: "1rem",
+    right: "1rem",
+    borderRadius: "0.25rem",
+    opacity: 0.7,
+    transition: "opacity 0.2s ease-in-out",
+    background: "none",
+    border: "none",
+    padding: 0,
+    cursor: "pointer",
+  };
+  const closeIconStyle = { width: "1rem", height: "1rem" };
+
   return (
     <DialogPortal data-slot="dialog-portal">
       <DialogOverlay />
       <DialogPrimitive.Content
         data-slot="dialog-content"
-        className={cn(
-          "bg-background data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg border p-6 shadow-lg duration-200 sm:max-w-lg",
-          className
-        )}
+        style={contentStyle}
+        className={className}
         {...props}>
         {children}
-        <DialogPrimitive.Close
-          className="ring-offset-background focus:ring-ring data-[state=open]:bg-accent data-[state=open]:text-muted-foreground absolute top-4 right-4 rounded-xs opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4">
-          <XIcon />
-          <span className="sr-only">Close</span>
+        <DialogPrimitive.Close style={closeButtonStyle}>
+          <XIcon style={closeIconStyle} />
+          <span style={{ position: "absolute", width: 1, height: 1, padding: 0, margin: -1, overflow: "hidden", clip: "rect(0, 0, 0, 0)", whiteSpace: "nowrap", borderWidth: 0 }}>Close</span>
         </DialogPrimitive.Close>
       </DialogPrimitive.Content>
     </DialogPortal>
@@ -71,48 +105,80 @@ function DialogContent({
 
 function DialogHeader({
   className,
+  style,
   ...props
 }) {
+  const headerStyle = {
+    display: "flex",
+    flexDirection: "column",
+    gap: "0.5rem",
+    textAlign: "center",
+    ...style,
+  };
   return (
     <div
       data-slot="dialog-header"
-      className={cn("flex flex-col gap-2 text-center sm:text-left", className)}
+      style={headerStyle}
+      className={className}
       {...props} />
   );
 }
 
 function DialogFooter({
   className,
+  style,
   ...props
 }) {
+  const footerStyle = {
+    display: "flex",
+    flexDirection: "column-reverse",
+    gap: "0.5rem",
+    ...style,
+  };
   return (
     <div
       data-slot="dialog-footer"
-      className={cn("flex flex-col-reverse gap-2 sm:flex-row sm:justify-end", className)}
+      style={footerStyle}
+      className={className}
       {...props} />
   );
 }
 
 function DialogTitle({
   className,
+  style,
   ...props
 }) {
+  const titleStyle = {
+    fontSize: "1.125rem",
+    lineHeight: "1",
+    fontWeight: "600",
+    ...style,
+  };
   return (
     <DialogPrimitive.Title
       data-slot="dialog-title"
-      className={cn("text-lg leading-none font-semibold", className)}
+      style={titleStyle}
+      className={className}
       {...props} />
   );
 }
 
 function DialogDescription({
   className,
+  style,
   ...props
 }) {
+  const descriptionStyle = {
+    color: "var(--muted-foreground)",
+    fontSize: "0.875rem",
+    ...style,
+  };
   return (
     <DialogPrimitive.Description
       data-slot="dialog-description"
-      className={cn("text-muted-foreground text-sm", className)}
+      style={descriptionStyle}
+      className={className}
       {...props} />
   );
 }

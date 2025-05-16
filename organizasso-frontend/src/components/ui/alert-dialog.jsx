@@ -1,9 +1,6 @@
 import * as React from "react"
 import * as AlertDialogPrimitive from "@radix-ui/react-alert-dialog"
 
-import { cn } from "@/lib/utils"
-import { buttonVariants } from "@/components/ui/button"
-
 function AlertDialog({
   ...props
 }) {
@@ -24,32 +21,54 @@ function AlertDialogPortal({
 
 function AlertDialogOverlay({
   className,
+  style,
   ...props
 }) {
+  const overlayStyle = {
+    position: "fixed",
+    inset: 0,
+    zIndex: 50,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    ...style,
+  };
   return (
     <AlertDialogPrimitive.Overlay
       data-slot="alert-dialog-overlay"
-      className={cn(
-        "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 fixed inset-0 z-50 bg-black/50",
-        className
-      )}
+      style={overlayStyle}
+      className={className}
       {...props} />
   );
 }
 
 function AlertDialogContent({
   className,
+  style,
   ...props
 }) {
+  const contentStyle = {
+    backgroundColor: "var(--background)",
+    position: "fixed",
+    top: "50%",
+    left: "50%",
+    transform: "translate(-50%, -50%)",
+    zIndex: 50,
+    display: "grid",
+    width: "calc(100% - 2rem)",
+    maxWidth: "32rem",
+    gap: "1rem",
+    borderRadius: "0.5rem",
+    border: "1px solid var(--border)",
+    padding: "1.5rem",
+    boxShadow: "var(--shadow-lg)",
+    ...style,
+  };
   return (
     <AlertDialogPortal>
       <AlertDialogOverlay />
       <AlertDialogPrimitive.Content
         data-slot="alert-dialog-content"
-        className={cn(
-          "bg-background data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg border p-6 shadow-lg duration-200 sm:max-w-lg",
-          className
-        )}
+        style={contentStyle}
+        className={className}
         {...props} />
     </AlertDialogPortal>
   );
@@ -57,67 +76,116 @@ function AlertDialogContent({
 
 function AlertDialogHeader({
   className,
+  style,
   ...props
 }) {
+  const headerStyle = {
+    display: "flex",
+    flexDirection: "column",
+    gap: "0.5rem",
+    textAlign: "center",
+    ...style,
+  };
   return (
     <div
       data-slot="alert-dialog-header"
-      className={cn("flex flex-col gap-2 text-center sm:text-left", className)}
+      style={headerStyle}
+      className={className}
       {...props} />
   );
 }
 
 function AlertDialogFooter({
   className,
+  style,
   ...props
 }) {
+  const footerStyle = {
+    display: "flex",
+    flexDirection: "column-reverse",
+    gap: "0.5rem",
+    ...style,
+  };
   return (
     <div
       data-slot="alert-dialog-footer"
-      className={cn("flex flex-col-reverse gap-2 sm:flex-row sm:justify-end", className)}
+      style={footerStyle}
+      className={className}
       {...props} />
   );
 }
 
 function AlertDialogTitle({
   className,
+  style,
   ...props
 }) {
+  const titleStyle = {
+    fontSize: "1.125rem",
+    fontWeight: "600",
+    ...style,
+  };
   return (
     <AlertDialogPrimitive.Title
       data-slot="alert-dialog-title"
-      className={cn("text-lg font-semibold", className)}
+      style={titleStyle}
+      className={className}
       {...props} />
   );
 }
 
 function AlertDialogDescription({
   className,
+  style,
   ...props
 }) {
+  const descriptionStyle = {
+    color: "var(--muted-foreground)",
+    fontSize: "0.875rem",
+    ...style,
+  };
   return (
     <AlertDialogPrimitive.Description
       data-slot="alert-dialog-description"
-      className={cn("text-muted-foreground text-sm", className)}
+      style={descriptionStyle}
+      className={className}
       {...props} />
   );
 }
 
 function AlertDialogAction({
   className,
+  style,
   ...props
 }) {
-  return (<AlertDialogPrimitive.Action className={cn(buttonVariants(), className)} {...props} />);
+  const actionStyle = {
+    cursor: 'pointer',
+    ...style
+  };
+  return (
+    <AlertDialogPrimitive.Action
+      style={actionStyle}
+      className={className}
+      {...props}
+    />
+  );
 }
 
 function AlertDialogCancel({
   className,
+  style,
   ...props
 }) {
+  const cancelStyle = {
+    cursor: 'pointer',
+    ...style
+  };
   return (
     <AlertDialogPrimitive.Cancel
-      className={cn(buttonVariants({ variant: "outline" }), className)}
-      {...props} />
+      style={cancelStyle}
+      className={className}
+      {...props}
+    />
   );
 }
 

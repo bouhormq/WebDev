@@ -9,7 +9,6 @@ const Toaster = ({
   return (
     <Sonner
       theme={theme}
-      className="toaster group"
       style={
         {
           "--normal-bg": "var(--popover)",

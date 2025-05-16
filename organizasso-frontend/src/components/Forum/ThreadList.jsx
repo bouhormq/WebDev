@@ -11,9 +11,12 @@ const ThreadList = ({ threads, forumType }) => { // eslint-disable-line no-unuse
     navigate(`/forum/thread/${threadId}`);
   };
 
+  // Inline style for CardContent
+  const contentStyle = { padding: 0 }; // p-0
+
   return (
     <Card>
-      <CardContent className="p-0">
+      <CardContent style={contentStyle}>
         <div>
           {threads.map((thread, index) => (
             <React.Fragment key={thread._id}>

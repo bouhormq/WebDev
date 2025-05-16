@@ -144,19 +144,34 @@ const AdminPanelPage = () => {
     }
   };
 
+  // --- Inline Styles ---
+  const headerDivStyle = { marginBottom: '1.5rem' }; // mb-6
+  const h1Style = { fontSize: '1.875rem', fontWeight: 'bold', letterSpacing: '-0.02em' }; // text-3xl font-bold tracking-tight (sm size lost)
+  const pMutedStyle = { color: 'var(--muted-foreground)' };
+  const tabsStyle = { width: '100%' }; // w-full (space-y lost)
+  const tabsListStyle = { display: 'grid', width: '100%', gridTemplateColumns: 'repeat(2, 1fr)', height: '2.75rem' }; // grid w-full grid-cols-2 h-11
+  const tabsTriggerStyle = { display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }; // Base style for trigger (gap-2)
+  const iconStyle = { height: '1rem', width: '1rem' }; // h-4 w-4
+  const statusLoadingStyle = { display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '3rem 0' }; // py-12
+  const statusErrorStyle = { color: 'var(--destructive)', textAlign: 'center', padding: '3rem 0' }; // py-12
+  const statusEmptyCardStyle = { marginTop: '1rem', textAlign: 'center', padding: '3rem 0' }; // mt-4 py-12
+  const actionDialogButtonStyle = {}; // Conditional styles lost
+  const destructiveActionStyle = { backgroundColor: 'var(--destructive)', color: 'var(--destructive-foreground)' }; // Conditional destructive styles
+  // --- End Inline Styles ---
+
   // Helper component for empty/error states
   const StatusDisplay = ({ isLoading, error, children, emptyMessage }) => {
     if (isLoading) {
-      return <div className="flex justify-center items-center py-12"><Spinner size="lg"/></div>;
+      return <div style={statusLoadingStyle}><Spinner size="lg"/></div>;
     }
     if (error) {
-      return <p className="text-destructive text-center py-12">Error: {error}</p>;
+      return <p style={statusErrorStyle}>Error: {error}</p>;
     }
     if (React.Children.count(children) === 0) { // Check if list is empty
       return (
-         <Card className="mt-4 text-center py-12">
+         <Card style={statusEmptyCardStyle}>
            <CardContent>
-             <p className="text-muted-foreground">{emptyMessage}</p>
+             <p style={pMutedStyle}>{emptyMessage}</p>
            </CardContent>
          </Card>
       );
@@ -166,22 +181,22 @@ const AdminPanelPage = () => {
 
   return (
     <PageWrapper>
-      <div className="mb-6">
-         <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Admin Panel</h1>
-         <p className="text-muted-foreground">Manage user registrations and roles.</p>
+      <div style={headerDivStyle}>
+         <h1 style={h1Style}>Admin Panel</h1>
+         <p style={pMutedStyle}>Manage user registrations and roles.</p>
        </div>
 
-      <Tabs defaultValue="pending" className="w-full space-y-4">
-        <TabsList className="grid w-full grid-cols-2 h-11">
-           <TabsTrigger value="pending" className="gap-2">
-              <UserCheck className="h-4 w-4"/> Pending ({pendingUsers.length})
+      <Tabs defaultValue="pending" style={tabsStyle}>
+        <TabsList style={tabsListStyle}>
+           <TabsTrigger value="pending" style={tabsTriggerStyle}>
+              <UserCheck style={iconStyle}/> Pending ({pendingUsers.length})
            </TabsTrigger>
-           <TabsTrigger value="manageAdmins" className="gap-2">
-              <UserCog className="h-4 w-4"/> Members ({members.length})
+           <TabsTrigger value="manageAdmins" style={tabsTriggerStyle}>
+              <UserCog style={iconStyle}/> Members ({members.length})
            </TabsTrigger>
         </TabsList>
         
-        <TabsContent value="pending">
+        <TabsContent value="pending" style={{ marginTop: '1rem' }}>
            <StatusDisplay isLoading={isLoadingPending} error={errorPending} emptyMessage="No pending registrations found.">
              {/* Only render UsernameList if there are users */}
              {pendingUsers.length > 0 && (
@@ -196,7 +211,7 @@ const AdminPanelPage = () => {
            </StatusDisplay>
         </TabsContent>
 
-        <TabsContent value="manageAdmins">
+        <TabsContent value="manageAdmins" style={{ marginTop: '1rem' }}>
            <StatusDisplay isLoading={isLoadingMembers} error={errorMembers} emptyMessage="No members found.">
              {members.length > 0 && (
                  <UsernameList 
@@ -229,7 +244,7 @@ const AdminPanelPage = () => {
             <AlertDialogCancel onClick={() => setActionToConfirm(null)}>Cancel</AlertDialogCancel>
             <AlertDialogAction 
               onClick={confirmAndExecuteAction}
-              className={actionToConfirm?.action === 'reject' || actionToConfirm?.action === 'demote' ? "bg-destructive text-destructive-foreground hover:bg-destructive/90" : ""}
+              style={actionToConfirm?.action === 'reject' || actionToConfirm?.action === 'demote' ? destructiveActionStyle : actionDialogButtonStyle}
             >
                 Confirm {actionToConfirm?.action}
             </AlertDialogAction>

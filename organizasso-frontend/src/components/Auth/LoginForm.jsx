@@ -34,12 +34,21 @@ const LoginForm = ({ onSubmit, error, isLoading }) => {
   // Use form's handleSubmit which validates before calling our onSubmit
   const handleFormSubmit = form.handleSubmit(onSubmit);
 
+  const formStyle = { padding: '1.5rem' }; // p-6
+  const alertStyle = { marginBottom: '1rem' }; // mb-4
+  const alertIconStyle = { height: '1rem', width: '1rem' }; // h-4 w-4
+  const formItemStyle = { marginBottom: '1.5rem' }; // mb-6
+  // Input pt-1 removed - spacing may be off
+  const submitButtonStyle = { width: '100%', marginTop: '0.75rem' }; // Reduced from 1.5rem (mt-6 to mt-3)
+  const spinnerStyle = { marginRight: '0.5rem' }; // mr-2
+  const inputStyle = { width: '100%' }; // Added width: 100%
+
   return (
     <Form {...form}>
-      <form onSubmit={handleFormSubmit} className="space-y-4">
+      <form onSubmit={handleFormSubmit} style={formStyle}>
         {error && (
-          <Alert variant="destructive" className="mb-4">
-            <AlertCircle className="h-4 w-4" />
+          <Alert variant="destructive" style={alertStyle}>
+            <AlertCircle style={alertIconStyle} />
             <AlertDescription>{error}</AlertDescription>
           </Alert>
         )}
@@ -47,10 +56,10 @@ const LoginForm = ({ onSubmit, error, isLoading }) => {
           control={form.control}
           name="username"
           render={({ field }) => (
-            <FormItem>
+            <FormItem style={formItemStyle}>
               <FormLabel>Username</FormLabel>
               <FormControl>
-                <Input placeholder="Enter your username" {...field} disabled={isLoading} />
+                <Input placeholder="Enter your username" {...field} disabled={isLoading} style={inputStyle} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -60,18 +69,18 @@ const LoginForm = ({ onSubmit, error, isLoading }) => {
           control={form.control}
           name="password"
           render={({ field }) => (
-            <FormItem>
+            <FormItem style={formItemStyle}>
               <FormLabel>Password</FormLabel>
               {/* TODO: Add forgot password link maybe? */}
               <FormControl>
-                <Input type="password" placeholder="Enter your password" {...field} disabled={isLoading} />
+                <Input type="password" placeholder="Enter your password" {...field} disabled={isLoading} style={inputStyle} />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
-        <Button type="submit" className="w-full" disabled={isLoading}>
-          {isLoading && <Spinner size="sm" className="mr-2"/>}
+        <Button type="submit" style={submitButtonStyle} disabled={isLoading}>
+          {isLoading && <Spinner size="sm" style={spinnerStyle}/>}
           Login
         </Button>
       </form>

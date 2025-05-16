@@ -1,19 +1,23 @@
 import * as React from "react"
 import * as LabelPrimitive from "@radix-ui/react-label"
 
-import { cn } from "@/lib/utils"
-
-function Label({
-  className,
-  ...props
-}) {
+function Label({ className, style, ...props }) {
+  const labelStyle = {
+    display: "flex",
+    alignItems: "center",
+    gap: "0.5rem",
+    fontSize: "0.875rem",
+    lineHeight: "1",
+    fontWeight: "500",
+    userSelect: "none",
+    marginBottom: '0.75rem',
+    ...style,
+  };
   return (
     <LabelPrimitive.Root
       data-slot="label"
-      className={cn(
-        "flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50",
-        className
-      )}
+      style={labelStyle}
+      className={className}
       {...props} />
   );
 }

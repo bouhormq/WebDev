@@ -55,47 +55,60 @@ const SearchPage = () => {
     }
   };
 
+  // --- Inline Styles ---
+  // space-y-6 lost
+  const headerDivStyle = { marginBottom: '1.5rem' }; // mb-6
+  const h1Style = { fontSize: '1.875rem', fontWeight: 'bold', letterSpacing: '-0.02em' }; // text-3xl font-bold tracking-tight (sm size lost)
+  const pMutedStyle = { color: 'var(--muted-foreground)' }; // text-muted-foreground
+  const resultsContainerStyle = { marginTop: '1.5rem', minHeight: '200px' }; // mt-6 min-h-[200px]
+  const centeredFlexStyle = { display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' };
+  const feedbackCardStyle = { width: '100%', maxWidth: '32rem', textAlign: 'center', padding: '1.5rem' }; // w-full max-w-md text-center p-6
+  const errorTitleStyle = { fontSize: '1.25rem', fontWeight: 600, color: 'var(--destructive)' }; // text-xl font-semibold text-destructive
+  const initialCardStyle = { ...feedbackCardStyle, borderStyle: 'dashed' }; // border-dashed
+  const initialTitleStyle = { fontSize: '1.125rem', fontWeight: 600 }; // text-lg font-semibold
+  // --- End Inline Styles ---
+
   return (
     <PageWrapper>
-      <div className="space-y-6">
-        <div className="mb-6">
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Search Messages</h1>
-          <p className="text-muted-foreground">Find messages by keyword, author, or date range.</p>
+      <div>
+        <div style={headerDivStyle}>
+          <h1 style={h1Style}>Search Messages</h1>
+          <p style={pMutedStyle}>Find messages by keyword, author, or date range.</p>
         </div>
 
         <SearchForm onSearch={handleSearch} isLoading={isLoading} />
 
-        <div className="mt-6 min-h-[200px]">
+        <div style={resultsContainerStyle}>
           {isLoading ? (
-             <div className="flex justify-center items-center h-full"><Spinner size="lg" /></div>
+            <div style={centeredFlexStyle}><Spinner size="lg" /></div>
           ) : error ? (
-             <div className="flex justify-center items-center h-full">
-               <Card className="w-full max-w-md text-center p-6">
-                 <CardHeader>
-                    <CardTitle className="text-xl font-semibold text-destructive">Search Error</CardTitle>
-                 </CardHeader>
-                 <CardContent>
-                    <p className="text-muted-foreground">{error}</p>
-                 </CardContent>
-               </Card>
-             </div>
+            <div style={centeredFlexStyle}>
+              <Card style={feedbackCardStyle}>
+                <CardHeader>
+                  <CardTitle style={errorTitleStyle}>Search Error</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p style={pMutedStyle}>{error}</p>
+                </CardContent>
+              </Card>
+            </div>
           ) : results !== null ? (
-             <SearchResults 
-               results={results} 
-               currentUserId={currentUser?._id}
-               searchParams={lastSearchParams} 
-             />
+            <SearchResults 
+              results={results} 
+              currentUserId={currentUser?._id}
+              searchParams={lastSearchParams} 
+            />
           ) : ( 
-             <div className="flex justify-center items-center h-full">
-               <Card className="w-full max-w-md text-center p-6 border-dashed">
-                 <CardHeader>
-                    <CardTitle className="text-lg font-semibold">Start Searching</CardTitle>
-                 </CardHeader>
-                 <CardContent>
-                    <p className="text-muted-foreground">Enter your search criteria above to find messages.</p>
-                 </CardContent>
-               </Card>
-             </div>
+            <div style={centeredFlexStyle}>
+              <Card style={initialCardStyle}>
+                <CardHeader>
+                  <CardTitle style={initialTitleStyle}>Start Searching</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p style={pMutedStyle}>Enter your search criteria above to find messages.</p>
+                </CardContent>
+              </Card>
+            </div>
           )}
         </div>
       </div>

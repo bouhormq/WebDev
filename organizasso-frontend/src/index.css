@@ -1,5 +1,6 @@
-@import "tailwindcss/preflight";
-@import "tailwindcss/utilities";
+/* Removed Tailwind Imports */
+/* @import "tailwindcss/preflight"; */
+/* @import "tailwindcss/utilities"; */
 
 /* Remove non-standard rules that were causing errors */
 /* @import "tw-animate-css"; */
@@ -112,6 +113,8 @@
   --sidebar-ring: oklch(0.556 0 0);
 }
 
+/* Removed @layer base containing @apply directives */
+/*
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -119,4 +122,12 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+*/
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  /* Add other base body styles if needed */
 }

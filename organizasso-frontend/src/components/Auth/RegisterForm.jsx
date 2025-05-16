@@ -44,12 +44,20 @@ const RegisterForm = ({ onSubmit, error, isLoading }) => {
   // Use form's handleSubmit
   const handleFormSubmit = form.handleSubmit(onSubmit);
 
+  // Inline styles
+  const alertStyle = { marginBottom: '1rem' }; // mb-4
+  const alertIconStyle = { height: '1rem', width: '1rem' }; // h-4 w-4
+  const formItemStyle = { marginBottom: '1rem' }; // approximation for space-y-4
+  const submitButtonStyle = { width: '100%' }; // w-full
+  const spinnerStyle = { marginRight: '0.5rem' }; // mr-2
+
   return (
     <Form {...form}>
-      <form onSubmit={handleFormSubmit} className="space-y-4">
+      {/* Removed space-y-4 from form, using margin on items */}
+      <form onSubmit={handleFormSubmit}>
          {error && (
-          <Alert variant="destructive" className="mb-4">
-            <AlertCircle className="h-4 w-4" />
+          <Alert variant="destructive" style={alertStyle}>
+            <AlertCircle style={alertIconStyle} />
             <AlertDescription>{error}</AlertDescription>
           </Alert>
         )}
@@ -57,7 +65,7 @@ const RegisterForm = ({ onSubmit, error, isLoading }) => {
           control={form.control}
           name="username"
           render={({ field }) => (
-            <FormItem>
+            <FormItem style={formItemStyle}>
               <FormLabel>Username</FormLabel>
               <FormControl>
                 <Input placeholder="Choose a username" {...field} disabled={isLoading} />
@@ -70,7 +78,7 @@ const RegisterForm = ({ onSubmit, error, isLoading }) => {
           control={form.control}
           name="email"
           render={({ field }) => (
-            <FormItem>
+            <FormItem style={formItemStyle}>
               <FormLabel>Email</FormLabel>
               <FormControl>
                 <Input type="email" placeholder="your@email.com" {...field} disabled={isLoading} />
@@ -83,7 +91,7 @@ const RegisterForm = ({ onSubmit, error, isLoading }) => {
           control={form.control}
           name="password"
           render={({ field }) => (
-            <FormItem>
+            <FormItem style={formItemStyle}>
               <FormLabel>Password</FormLabel>
               <FormControl>
                 <Input type="password" placeholder="Choose a password (min 6 chars)" {...field} disabled={isLoading} />
@@ -96,7 +104,7 @@ const RegisterForm = ({ onSubmit, error, isLoading }) => {
           control={form.control}
           name="confirmPassword"
           render={({ field }) => (
-            <FormItem>
+            <FormItem style={formItemStyle}>
               <FormLabel>Confirm Password</FormLabel>
               <FormControl>
                 <Input type="password" placeholder="Retype your password" {...field} disabled={isLoading} />
@@ -105,8 +113,8 @@ const RegisterForm = ({ onSubmit, error, isLoading }) => {
             </FormItem>
           )}
         />
-        <Button type="submit" className="w-full" disabled={isLoading}>
-          {isLoading && <Spinner size="sm" className="mr-2"/>}
+        <Button type="submit" style={submitButtonStyle} disabled={isLoading}>
+          {isLoading && <Spinner size="sm" style={spinnerStyle}/>}
           Create Account
         </Button>
       </form>

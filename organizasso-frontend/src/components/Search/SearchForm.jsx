@@ -21,7 +21,6 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar";
 import { CalendarIcon } from 'lucide-react';
 import { format } from 'date-fns';
-import { cn } from "@/lib/utils";
 
 // Define Zod schema for the search form
 const searchFormSchema = z.object({
@@ -64,20 +63,38 @@ const SearchForm = ({ onSearch, isLoading }) => {
     onSearch(formattedValues);
   };
 
+  // --- Inline Styles ---
+  const titleStyle = { fontSize: '1.125rem' }; // text-lg
+  // NOTE: Grid layout (grid, sm:grid-cols-2, lg:grid-cols-4, lg:col-span-1) is LOST.
+  const contentStyle = { display: 'flex', flexDirection: 'column', gap: '1rem' }; // Fallback layout
+  const formItemColStyle = { display: 'flex', flexDirection: 'column' }; // flex flex-col
+  const dateButtonStyle = {
+      width: '100%',
+      justifyContent: 'flex-start',
+      textAlign: 'left',
+      fontWeight: 'normal',
+      // Conditional text color lost
+  };
+  const calendarIconStyle = { marginRight: '0.5rem', height: '1rem', width: '1rem' }; // mr-2 h-4 w-4
+  const popoverContentStyle = { width: 'auto', padding: 0 }; // w-auto p-0
+  const submitButtonStyle = { marginLeft: 'auto' }; // ml-auto
+  const spinnerStyle = { marginRight: '0.5rem' }; // mr-2
+  // --- End Inline Styles ---
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-lg">Search Criteria</CardTitle>
+        <CardTitle style={titleStyle}>Search Criteria</CardTitle>
       </CardHeader>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(handleSubmit)}>
-          <CardContent className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <CardContent style={contentStyle}>
             {/* Keywords */}
             <FormField
               control={form.control}
               name="keywords"
               render={({ field }) => (
-                <FormItem className="lg:col-span-1">
+                <FormItem> {/* Grid span lost */}
                   <FormLabel>Keywords</FormLabel>
                   <FormControl>
                     <Input placeholder="Search content..." {...field} disabled={isLoading}/>
@@ -92,7 +109,7 @@ const SearchForm = ({ onSearch, isLoading }) => {
               control={form.control}
               name="author"
               render={({ field }) => (
-                <FormItem className="lg:col-span-1">
+                <FormItem> {/* Grid span lost */}
                   <FormLabel>Author Username</FormLabel>
                   <FormControl>
                     <Input placeholder="Filter by author..." {...field} disabled={isLoading} />
@@ -107,31 +124,27 @@ const SearchForm = ({ onSearch, isLoading }) => {
               control={form.control}
               name="startDate"
               render={({ field }) => (
-                 <FormItem className="flex flex-col lg:col-span-1">
+                 <FormItem style={formItemColStyle}> {/* Grid span lost */}
                    <FormLabel>Start Date</FormLabel>
                     <Popover>
                       <PopoverTrigger asChild>
                         <FormControl>
                           <Button
                             variant={"outline"}
-                            className={cn(
-                              "w-full justify-start text-left font-normal",
-                              !field.value && "text-muted-foreground"
-                            )}
+                            style={dateButtonStyle} // Apply style
                             disabled={isLoading}
                           >
-                            <CalendarIcon className="mr-2 h-4 w-4" />
+                            <CalendarIcon style={calendarIconStyle} />
                             {field.value ? format(field.value, "PPP") : <span>Pick a start date</span>}
                           </Button>
                         </FormControl>
                       </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
+                      <PopoverContent style={popoverContentStyle} align="start">
                         <Calendar
                           mode="single"
                           selected={field.value}
                           onSelect={field.onChange}
                            disabled={(date) =>
-                             // Disable dates after the selected end date
                              form.getValues("endDate") ? date > form.getValues("endDate") : false
                            }
                           initialFocus
@@ -146,31 +159,27 @@ const SearchForm = ({ onSearch, isLoading }) => {
               control={form.control}
               name="endDate"
               render={({ field }) => (
-                <FormItem className="flex flex-col lg:col-span-1">
+                <FormItem style={formItemColStyle}> {/* Grid span lost */}
                   <FormLabel>End Date</FormLabel>
                   <Popover>
                     <PopoverTrigger asChild>
                       <FormControl>
                         <Button
                           variant={"outline"}
-                          className={cn(
-                            "w-full justify-start text-left font-normal",
-                            !field.value && "text-muted-foreground"
-                          )}
+                          style={dateButtonStyle} // Apply style
                           disabled={isLoading}
                         >
-                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          <CalendarIcon style={calendarIconStyle} />
                           {field.value ? format(field.value, "PPP") : <span>Pick an end date</span>}
                         </Button>
                       </FormControl>
                     </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
+                    <PopoverContent style={popoverContentStyle} align="start">
                       <Calendar
                         mode="single"
                         selected={field.value}
                         onSelect={field.onChange}
                         disabled={(date) =>
-                          // Disable dates before the selected start date
                           form.getValues("startDate") ? date < form.getValues("startDate") : false
                         }
                         initialFocus
@@ -183,8 +192,8 @@ const SearchForm = ({ onSearch, isLoading }) => {
             />
           </CardContent>
           <CardFooter>
-            <Button type="submit" disabled={isLoading} className="ml-auto">
-              {isLoading ? <Spinner size="sm" className="mr-2"/> : null}
+            <Button type="submit" disabled={isLoading} style={submitButtonStyle}>
+              {isLoading ? <Spinner size="sm" style={spinnerStyle}/> : null}
               Search
             </Button>
           </CardFooter>

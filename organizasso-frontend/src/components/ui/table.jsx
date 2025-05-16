@@ -2,17 +2,28 @@
 
 import * as React from "react"
 
-import { cn } from "@/lib/utils"
-
 function Table({
   className,
+  style,
   ...props
 }) {
+  const containerStyle = {
+    position: "relative",
+    width: "100%",
+    overflowX: "auto",
+  };
+  const tableStyle = {
+    width: "100%",
+    captionSide: "bottom",
+    fontSize: "0.875rem",
+    ...style,
+  };
   return (
-    <div data-slot="table-container" className="relative w-full overflow-x-auto">
+    <div data-slot="table-container" style={containerStyle}>
       <table
         data-slot="table"
-        className={cn("w-full caption-bottom text-sm", className)}
+        style={tableStyle}
+        className={className}
         {...props} />
     </div>
   );
@@ -20,93 +31,136 @@ function Table({
 
 function TableHeader({
   className,
+  style,
   ...props
 }) {
+  const headerStyle = {
+    ...style,
+  };
   return (
     <thead
       data-slot="table-header"
-      className={cn("[&_tr]:border-b", className)}
+      style={headerStyle}
+      className={className}
       {...props} />
   );
 }
 
 function TableBody({
   className,
+  style,
   ...props
 }) {
+  const bodyStyle = {
+    ...style,
+  };
   return (
     <tbody
       data-slot="table-body"
-      className={cn("[&_tr:last-child]:border-0", className)}
+      style={bodyStyle}
+      className={className}
       {...props} />
   );
 }
 
 function TableFooter({
   className,
+  style,
   ...props
 }) {
+  const footerStyle = {
+    backgroundColor: "var(--muted-alpha)",
+    borderTop: "1px solid var(--border)",
+    fontWeight: "500",
+    ...style,
+  };
   return (
     <tfoot
       data-slot="table-footer"
-      className={cn("bg-muted/50 border-t font-medium [&>tr]:last:border-b-0", className)}
+      style={footerStyle}
+      className={className}
       {...props} />
   );
 }
 
 function TableRow({
   className,
+  style,
   ...props
 }) {
+  const rowStyle = {
+    transition: "colors 0.2s ease-in-out",
+    ...style,
+  };
   return (
     <tr
       data-slot="table-row"
-      className={cn(
-        "hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors",
-        className
-      )}
+      style={rowStyle}
+      className={className}
       {...props} />
   );
 }
 
 function TableHead({
   className,
+  style,
   ...props
 }) {
+  const headStyle = {
+    color: "var(--foreground)",
+    height: "3rem",
+    padding: "0 1rem",
+    textAlign: "left",
+    verticalAlign: "middle",
+    fontWeight: "500",
+    whiteSpace: "nowrap",
+    ...style,
+  };
   return (
     <th
       data-slot="table-head"
-      className={cn(
-        "text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]",
-        className
-      )}
+      style={headStyle}
+      className={className}
       {...props} />
   );
 }
 
 function TableCell({
   className,
+  style,
   ...props
 }) {
+  const cellStyle = {
+    padding: "1rem",
+    verticalAlign: "middle",
+    whiteSpace: "nowrap",
+    ...style,
+  };
   return (
     <td
       data-slot="table-cell"
-      className={cn(
-        "p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]",
-        className
-      )}
+      style={cellStyle}
+      className={className}
       {...props} />
   );
 }
 
 function TableCaption({
   className,
+  style,
   ...props
 }) {
+  const captionStyle = {
+    color: "var(--muted-foreground)",
+    marginTop: "1rem",
+    fontSize: "0.875rem",
+    ...style,
+  };
   return (
     <caption
       data-slot="table-caption"
-      className={cn("text-muted-foreground mt-4 text-sm", className)}
+      style={captionStyle}
+      className={className}
       {...props} />
   );
 }
