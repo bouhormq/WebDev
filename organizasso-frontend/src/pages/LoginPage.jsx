@@ -1,5 +1,5 @@
 // organizasso-frontend/src/pages/LoginPage.jsx
-import React, { useState } from 'react';
+import React, { useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 // Import from correct Auth directory
 import LoginForm from '../components/Auth/LoginForm'; 
@@ -11,26 +11,24 @@ import { toast } from "sonner";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 
 const LoginPage = () => {
-  const { login } = useAuth();
+  const { login, error, isLoading } = useAuth();
   const navigate = useNavigate();
-  const [error, setError] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    document.title = 'Login | Organizasso';
+  }, []);
 
   const handleLogin = async (credentials) => {
-    setError(null); // Clear previous errors
-    setIsLoading(true);
     try {
-      // Use the login function from AuthContext, which now uses the simulated service
       const userData = await login(credentials.username, credentials.password);
       toast.success(`Welcome back, ${userData.username}!`);
-      navigate('/dashboard'); // Redirect on successful login
+      navigate('/forum/open');
     } catch (err) {
       const errorMessage = err.message || "Login failed. Please check your credentials.";
       console.error("Login failed:", errorMessage);
-      setError(errorMessage);
-      toast.error(errorMessage);
-    } finally {
-      setIsLoading(false);
+      if (!error) {
+          toast.error(errorMessage);
+      }
     }
   };
 
@@ -61,7 +59,7 @@ const LoginPage = () => {
       <Card style={cardStyle}>
         <CardHeader style={headerStyle}>
           <CardTitle style={titleStyle}>Login</CardTitle>
-          <CardDescription>Welcome back to Organiz'asso</CardDescription>
+          <CardDescription>Welcome back to Organizasso</CardDescription>
         </CardHeader>
         <CardContent>
            <LoginForm onSubmit={handleLogin} error={error} isLoading={isLoading} />

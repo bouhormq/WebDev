@@ -72,4 +72,60 @@ export const createThread = async (req, res, next) => {
     }
 };
 
+// Controller function to get a single thread by its ID, including its initial message content
+export const getThreadById = async (req, res, next) => {
+    const { threadId } = req.params;
+
+    if (!ObjectId.isValid(threadId)) {
+        return res.status(400).json({ message: 'Invalid thread ID format.' });
+    }
+
+    try {
+        const threadsCollection = getCollection('threads');
+        const messagesCollection = getCollection('messages');
+        const usersCollection = getCollection('users'); // For author details
+
+        // Fetch the thread
+        const thread = await threadsCollection.findOne({ _id: new ObjectId(threadId) });
+
+        if (!thread) {
+            return res.status(404).json({ message: 'Thread not found.' });
+        }
+
+        // Fetch the initial message for this thread to get its content
+        // Assuming the first message posted to a thread is its main content
+        const initialMessage = await messagesCollection.findOne(
+            { threadId: new ObjectId(threadId) },
+            { sort: { createdAt: 1 } } // Get the earliest message
+        );
+
+        if (!initialMessage) {
+            // This case should ideally not happen if a thread exists
+            return res.status(404).json({ message: 'Initial message for thread not found.' });
+        }
+
+        // Fetch author details for the thread
+        let authorDetails = null;
+        if (thread.authorId && ObjectId.isValid(thread.authorId)) {
+            authorDetails = await usersCollection.findOne(
+                { _id: new ObjectId(thread.authorId) },
+                { projection: { username: 1, _id: 0 } } // Only fetch username
+            );
+        }
+
+        // Combine thread data with its initial content and author info
+        const threadWithDetails = {
+            ...thread,
+            content: initialMessage.content, // Add the content from the first message
+            authorName: authorDetails ? authorDetails.username : 'Unknown',
+        };
+
+        res.status(200).json(threadWithDetails);
+
+    } catch (error) {
+        console.error(`Error fetching thread by ID (${threadId}):`, error);
+        next(error);
+    }
+};
+
 // TODO: Add other thread controllers here (getThreads, getThreadById, etc.) 

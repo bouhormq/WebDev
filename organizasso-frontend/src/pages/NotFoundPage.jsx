@@ -1,9 +1,13 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import PageWrapper from '../components/Layout/PageWrapper';
 import { Button } from '@/components/ui/button';
 
 const NotFoundPage = () => {
+
+  useEffect(() => {
+    document.title = 'Page Not Found | Organizasso';
+  }, []);
 
   // --- Inline Styles ---
   const containerStyle = {
@@ -28,7 +32,7 @@ const NotFoundPage = () => {
         <h3 style={h3Style}>Page Not Found</h3>
         <p style={pStyle}>Sorry, the page you are looking for does not exist or has been moved.</p>
         <Button asChild size="sm">
-           <Link to="/">Go back to Dashboard</Link>
+           <Link to="/forum/open">Go to Open Forum</Link>
         </Button>
       </div>
     </PageWrapper>

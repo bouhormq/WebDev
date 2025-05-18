@@ -13,24 +13,43 @@ const getUserInfo = async (userId) => {
 export const getOpenForumThreads = async (req, res, next) => {
     try {
         const threadsCollection = getCollection('threads');
-        // Find threads marked as 'open'
-        // TODO: Add author username, last post time, reply count via aggregation or denormalization
-        const threads = await threadsCollection.find(
+        const messagesCollection = getCollection('messages'); // Get messages collection
+
+        const threadsData = await threadsCollection.find(
             { forumType: 'open' }
-        ).sort({ lastActivity: -1 }).toArray(); // Sort by most recent activity
+        ).sort({ lastActivity: -1 }).toArray();
 
-        // Basic enrichment (replace with aggregation later for performance)
-        for (let thread of threads) {
-             if (thread.authorId) {
-                 const author = await getUserInfo(thread.authorId);
-                 thread.authorName = author.username;
-             }
-             // Add placeholder replyCount/lastPostTime if not stored
-             thread.replyCount = thread.replyCount || 0;
-             thread.lastPostTime = thread.lastActivity || thread.createdAt;
-         }
+        const enrichedThreads = [];
+        for (let thread of threadsData) {
+            let authorName = 'Unknown';
+            if (thread.authorId) {
+                const author = await getUserInfo(thread.authorId);
+                authorName = author.username;
+            }
 
-        res.json(threads);
+            // Fetch the initial message to get the content
+            let initialContent = '';
+            if (thread._id) { // Ensure thread._id is valid
+                const firstMessage = await messagesCollection.findOne(
+                    { threadId: new ObjectId(thread._id) }, 
+                    { sort: { createdAt: 1 } } // Get the earliest message
+                );
+                if (firstMessage && firstMessage.content) {
+                    initialContent = firstMessage.content;
+                }
+            }
+
+            enrichedThreads.push({
+                ...thread,
+                authorName: authorName,
+                replyCount: thread.replyCount || 0, // This should align with how messageCount is tracked
+                messageCount: thread.replyCount || 0, // Frontend expects messageCount
+                lastPostTime: thread.lastActivity || thread.createdAt,
+                content: initialContent // Add the fetched content
+            });
+        }
+
+        res.json(enrichedThreads);
     } catch (error) {
         console.error("Error fetching open forum threads:", error);
         next(error);
@@ -41,21 +60,43 @@ export const getOpenForumThreads = async (req, res, next) => {
 export const getClosedForumThreads = async (req, res, next) => {
     try {
         const threadsCollection = getCollection('threads');
-        const threads = await threadsCollection.find(
+        const messagesCollection = getCollection('messages'); // Get messages collection
+
+        const threadsData = await threadsCollection.find(
             { forumType: 'closed' }
         ).sort({ lastActivity: -1 }).toArray();
 
-        // Basic enrichment
-        for (let thread of threads) {
-             if (thread.authorId) {
-                 const author = await getUserInfo(thread.authorId);
-                 thread.authorName = author.username;
-             }
-             thread.replyCount = thread.replyCount || 0;
-             thread.lastPostTime = thread.lastActivity || thread.createdAt;
-         }
+        const enrichedThreads = [];
+        for (let thread of threadsData) {
+            let authorName = 'Unknown';
+            if (thread.authorId) {
+                const author = await getUserInfo(thread.authorId);
+                authorName = author.username;
+            }
 
-        res.json(threads);
+            // Fetch the initial message to get the content
+            let initialContent = '';
+            if (thread._id) { // Ensure thread._id is valid
+                const firstMessage = await messagesCollection.findOne(
+                    { threadId: new ObjectId(thread._id) },
+                    { sort: { createdAt: 1 } } // Get the earliest message
+                );
+                if (firstMessage && firstMessage.content) {
+                    initialContent = firstMessage.content;
+                }
+            }
+
+            enrichedThreads.push({
+                ...thread,
+                authorName: authorName,
+                replyCount: thread.replyCount || 0, // Align with how messageCount is tracked
+                messageCount: thread.replyCount || 0, // Frontend expects messageCount
+                lastPostTime: thread.lastActivity || thread.createdAt,
+                content: initialContent // Add the fetched content
+            });
+        }
+
+        res.json(enrichedThreads);
     } catch (error) {
         console.error("Error fetching closed forum threads:", error);
         next(error);

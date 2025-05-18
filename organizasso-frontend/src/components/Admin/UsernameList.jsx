@@ -5,7 +5,7 @@ import { Separator } from "@/components/ui/separator";
 
 const UsernameList = ({ users, type, onUserAction, actionLoading, currentUserId }) => { 
   return (
-    <Card>
+    <Card style={{ width: '100%' }}>
       <CardContent style={{ padding: 0 }}>
         <div>
           {users.map((user, index) => (

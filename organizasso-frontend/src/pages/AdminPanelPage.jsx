@@ -23,7 +23,7 @@ import {
     revokeAdminStatus 
 } from '../services/adminService';
 import useAuth from '../hooks/useAuth'; 
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"; // For empty states
+import { Card, CardContent} from "@/components/ui/card"; // For empty states
 import { UserCheck, UserCog } from 'lucide-react'; // Icons for tabs
 
 const AdminPanelPage = () => {
@@ -37,6 +37,10 @@ const AdminPanelPage = () => {
   const [actionLoading, setActionLoading] = useState(null); 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [actionToConfirm, setActionToConfirm] = useState(null);
+
+  useEffect(() => {
+    document.title = 'Admin Panel | Organizasso';
+  }, []);
 
   // fetchPending and fetchMembers remain the same (already use useCallback)
   const fetchPending = useCallback(async () => {
@@ -154,8 +158,8 @@ const AdminPanelPage = () => {
   const iconStyle = { height: '1rem', width: '1rem' }; // h-4 w-4
   const statusLoadingStyle = { display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '3rem 0' }; // py-12
   const statusErrorStyle = { color: 'var(--destructive)', textAlign: 'center', padding: '3rem 0' }; // py-12
-  const statusEmptyCardStyle = { marginTop: '1rem', textAlign: 'center', padding: '3rem 0' }; // mt-4 py-12
-  const actionDialogButtonStyle = {}; // Conditional styles lost
+  const statusEmptyCardStyle = { marginTop: '1rem', textAlign: 'center', padding: '3rem 0', width: '100%' }; // Added width: 100%
+  const actionDialogButtonStyle = { backgroundColor: '#000000', color: '#FFFFFF', border: 'none', borderRadius: 'var(--radius)' }; // Updated to match black/white styling
   const destructiveActionStyle = { backgroundColor: 'var(--destructive)', color: 'var(--destructive-foreground)' }; // Conditional destructive styles
   // --- End Inline Styles ---
 
@@ -181,6 +185,14 @@ const AdminPanelPage = () => {
 
   return (
     <PageWrapper>
+      {/* Add style tag to inject custom CSS */}
+      <style dangerouslySetInnerHTML={{ __html: `
+        .black-white-tab[data-state="active"] {
+          background-color: #000000 !important;
+          color: #FFFFFF !important;
+        }
+      `}} />
+        
       <div style={headerDivStyle}>
          <h1 style={h1Style}>Admin Panel</h1>
          <p style={pMutedStyle}>Manage user registrations and roles.</p>
@@ -188,15 +200,23 @@ const AdminPanelPage = () => {
 
       <Tabs defaultValue="pending" style={tabsStyle}>
         <TabsList style={tabsListStyle}>
-           <TabsTrigger value="pending" style={tabsTriggerStyle}>
+           <TabsTrigger 
+             value="pending" 
+             style={tabsTriggerStyle}
+             className="black-white-tab"
+           >
               <UserCheck style={iconStyle}/> Pending ({pendingUsers.length})
            </TabsTrigger>
-           <TabsTrigger value="manageAdmins" style={tabsTriggerStyle}>
+           <TabsTrigger 
+             value="manageAdmins" 
+             style={tabsTriggerStyle}
+             className="black-white-tab"
+           >
               <UserCog style={iconStyle}/> Members ({members.length})
            </TabsTrigger>
         </TabsList>
         
-        <TabsContent value="pending" style={{ marginTop: '1rem' }}>
+        <TabsContent value="pending" style={{ marginTop: '1rem', width: '100%' }}>
            <StatusDisplay isLoading={isLoadingPending} error={errorPending} emptyMessage="No pending registrations found.">
              {/* Only render UsernameList if there are users */}
              {pendingUsers.length > 0 && (
@@ -211,7 +231,7 @@ const AdminPanelPage = () => {
            </StatusDisplay>
         </TabsContent>
 
-        <TabsContent value="manageAdmins" style={{ marginTop: '1rem' }}>
+        <TabsContent value="manageAdmins" style={{ marginTop: '1rem', width: '100%' }}>
            <StatusDisplay isLoading={isLoadingMembers} error={errorMembers} emptyMessage="No members found.">
              {members.length > 0 && (
                  <UsernameList 

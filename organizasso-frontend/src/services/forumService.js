@@ -24,6 +24,17 @@ export const getClosedForumThreads = async () => {
   }
 };
 
+// Fetch details for a single thread
+export const getThreadDetails = async (threadId) => {
+  try {
+    const response = await apiClient.get(`/threads/${threadId}`); // Ensure this matches your backend route
+    return response.data;
+  } catch (error) {
+    console.error(`API Error fetching details for thread ${threadId}:`, error.response?.data || error.message);
+    throw new Error(error.response?.data?.message || "Failed to fetch thread details");
+  }
+};
+
 // Fetch Messages for a Thread
 export const getThreadMessages = async (threadId) => {
   try {

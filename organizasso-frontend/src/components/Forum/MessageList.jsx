@@ -1,43 +1,43 @@
 import React from 'react';
 import MessageItem from './MessageItem';
-import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import ReplyForm from './ReplyForm';
 
-const MessageList = ({ messages, currentUserId, onDeleteRequest }) => {
+const MessageList = ({ messages, threadId, onReplySubmitted, currentUserId, onDeleteRequest, nestingLevel = 0 }) => {
+  const noMessagesStyle = { color: 'var(--muted-foreground)', padding: '1rem 0' };
 
-  // --- Inline Styles ---
-  const emptyCardStyle = { textAlign: 'center', paddingTop: '3rem', paddingBottom: '3rem' }; // text-center py-12
-  const emptyPStyle = { color: 'var(--muted-foreground)' }; // text-muted-foreground
-  const contentStyle = { padding: 0 }; // p-0
-  // --- End Inline Styles ---
+  const handleDirectReply = async (/* values were unused */) => {
+    // This assumes postReply is available via a service or context and handles the API call.
+    // Then calls onReplySubmitted to refresh the list.
+    if (onReplySubmitted) {
+      await onReplySubmitted(); 
+    }
+  };
 
   if (!messages || messages.length === 0) {
     return (
-      <Card style={emptyCardStyle}>
-        <CardContent>
-          <p style={emptyPStyle}>No messages in this thread yet.</p>
-        </CardContent>
-      </Card>
+      <div>
+        <p style={noMessagesStyle}>No replies yet. Be the first to respond!</p>
+        {threadId && <ReplyForm threadId={threadId} onSubmit={handleDirectReply} nestingLevel={nestingLevel} />}
+      </div>
     );
   }
 
   return (
-    <Card>
-      <CardContent style={contentStyle}>
-        <div>
-          {messages.map((message, index) => (
-            <React.Fragment key={message._id}>
-              <MessageItem
-                message={message}
-                isOwnMessage={message.authorId === currentUserId}
-                onDelete={message.authorId === currentUserId ? () => onDeleteRequest(message._id) : null}
-              />
-              {index < messages.length - 1 && <Separator />}
-            </React.Fragment>
-          ))}
-        </div>
-      </CardContent>
-    </Card>
+    <div>
+      {messages.map((message, index) => (
+        <React.Fragment key={message._id}>
+          <MessageItem
+            message={message}
+            isOwnMessage={message.authorId === currentUserId}
+            onDelete={message.authorId === currentUserId ? () => onDeleteRequest(message._id) : null}
+            nestingLevel={nestingLevel}
+          />
+          {index < messages.length - 1 && <Separator style={{ margin: '0.5rem 0'}} />}
+        </React.Fragment>
+      ))}
+      {threadId && <ReplyForm threadId={threadId} onSubmit={handleDirectReply} nestingLevel={nestingLevel} />}
+    </div>
   );
 };
 

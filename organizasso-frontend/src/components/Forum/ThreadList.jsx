@@ -1,35 +1,24 @@
 import React from 'react';
 import ThreadItem from './ThreadItem';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { useNavigate } from 'react-router-dom';
 
-const ThreadList = ({ threads, forumType }) => { // eslint-disable-line no-unused-vars
-  const navigate = useNavigate();
-
-  const handleThreadSelect = (threadId) => {
-    navigate(`/forum/thread/${threadId}`);
-  };
-
-  // Inline style for CardContent
-  const contentStyle = { padding: 0 }; // p-0
-
+const ThreadList = ({ threads, onThreadClick, openThreadIds }) => {
   return (
-    <Card>
-      <CardContent style={contentStyle}>
-        <div>
-          {threads.map((thread, index) => (
-            <React.Fragment key={thread._id}>
-              <ThreadItem 
-                thread={thread} 
-                onClick={() => handleThreadSelect(thread._id)} 
-              />
-              {index < threads.length - 1 && <Separator />}
-            </React.Fragment>
-          ))}
-        </div>
-      </CardContent>
-    </Card>
+    <div>
+      {threads.map((thread, index) => {
+        const isExpanded = openThreadIds && openThreadIds.has(thread._id);
+        return (
+          <React.Fragment key={thread._id}>
+            <ThreadItem 
+              thread={thread} 
+              onClick={() => onThreadClick(thread._id)}
+              isExpanded={isExpanded}
+            />
+            {index < threads.length - 1 && <Separator />}
+          </React.Fragment>
+        );
+      })}
+    </div>
   );
 };
 

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import RegisterForm from '../components/Auth/RegisterForm';
 import useAuth from '../hooks/useAuth';
@@ -12,6 +12,10 @@ const RegisterPage = () => {
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
+
+  useEffect(() => {
+    document.title = 'Register | Organizasso';
+  }, []);
 
   const handleRegister = async (credentials) => {
     setError(null);

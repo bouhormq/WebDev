@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PageWrapper from '../components/Layout/PageWrapper';
 import SearchForm from '../components/Search/SearchForm';
 import SearchResults from '../components/Search/SearchResults';
@@ -14,6 +14,10 @@ const SearchPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [lastSearchParams, setLastSearchParams] = useState(null);
+
+  useEffect(() => {
+    document.title = 'Search | Organizasso';
+  }, []);
 
   const handleSearch = async (searchParams) => {
     // Rename keywords to query for backend compatibility

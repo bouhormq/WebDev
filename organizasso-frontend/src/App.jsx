@@ -6,7 +6,7 @@ import { AuthProvider } from './contexts/AuthContext'
 // Import Pages
 import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'
-import DashBoardPage from './pages/DashBoardPage'
+// import DashBoardPage from './pages/DashBoardPage'; // Removed DashboardPage import
 import ProfilePage from './pages/ProfilePage'
 import OpenForumPage from './pages/OpenForumPage'
 import ClosedForumPage from './pages/ClosedForumPage'
@@ -32,7 +32,7 @@ function AppRoutes() {
       return <div>Your account is pending approval.</div>
     }
     if (adminOnly && !isAdmin) {
-      return <Navigate to="/dashboard" replace /> // Or an unauthorized page
+      return <Navigate to="/forum/open" replace /> // Changed from /dashboard
     }
     return children
   }
@@ -43,7 +43,7 @@ function AppRoutes() {
       return <div>Loading...</div> // Or a Spinner component
     }
     if (isLoggedIn) {
-      return <Navigate to="/dashboard" replace />
+      return <Navigate to="/forum/open" replace /> // Changed from /dashboard
     }
     return children
   }
@@ -60,7 +60,7 @@ function AppRoutes() {
       <Route path="/register" element={<PublicRoute><RegisterPage /></PublicRoute>} />
 
       {/* Protected Routes (require login + approval) */}
-      <Route path="/dashboard" element={<ProtectedRoute><DashBoardPage /></ProtectedRoute>} />
+      {/* <Route path="/dashboard" element={<ProtectedRoute><DashBoardPage /></ProtectedRoute>} /> */}
       <Route path="/profile/:userId" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
       <Route path="/forum/open" element={<ProtectedRoute><OpenForumPage /></ProtectedRoute>} />
       <Route path="/forum/thread/:threadId" element={<ProtectedRoute><ThreadViewPage /></ProtectedRoute>} />
@@ -77,7 +77,7 @@ function AppRoutes() {
       />
 
       {/* Redirect root path - logic now relies on hook called within AuthProvider */}
-      <Route path="/" element={<Navigate to={isLoggedIn ? "/dashboard" : "/login"} replace />} />
+      <Route path="/" element={<Navigate to={isLoggedIn ? "/forum/open" : "/login"} replace />} /> {/* Changed from /dashboard */}
 
       {/* Catch-all 404 Route */}
       <Route path="*" element={<NotFoundPage />} />

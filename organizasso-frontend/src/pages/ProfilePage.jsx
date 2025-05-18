@@ -19,6 +19,14 @@ const ProfilePage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  useEffect(() => {
+    if (userInfo && userInfo.username) {
+      document.title = `${userInfo.username}'s Profile | Organizasso`;
+    } else {
+      document.title = 'Profile | Organizasso';
+    }
+  }, [userInfo]);
+
   const fetchProfileData = useCallback(async () => {
     setIsLoading(true);
     setError(null);

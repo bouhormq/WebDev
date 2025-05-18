@@ -31,7 +31,7 @@ const Footer = () => {
     <footer style={footerStyle}>
       <div style={containerStyle}>
         <p style={pStyle}>
-          &copy; {new Date().getFullYear()} Organiz'asso. All rights reserved.
+          &copy; {new Date().getFullYear()} Organizasso. All rights reserved.
         </p>
         {/* Add social links or other footer items here if needed */}
       </div>
