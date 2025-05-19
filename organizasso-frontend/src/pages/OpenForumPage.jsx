@@ -95,8 +95,8 @@ const OpenForumPage = () => {
         zIndex: 0
       }}>
         <div>
-            <h1 style={h1Style}>Open Forum</h1>
-            <p style={pMutedStyle}>Discuss topics relevant to all members.</p>
+          <h1 style={h1Style}>Open Forum</h1>
+          <p style={pMutedStyle}>Discuss topics relevant to all members.</p>
         </div>
       </div>
 

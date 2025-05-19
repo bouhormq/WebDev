@@ -27,7 +27,7 @@ const LoginPage = () => {
       const errorMessage = err.message || "Login failed. Please check your credentials.";
       console.error("Login failed:", errorMessage);
       if (!error) {
-          toast.error(errorMessage);
+      toast.error(errorMessage);
       }
     }
   };

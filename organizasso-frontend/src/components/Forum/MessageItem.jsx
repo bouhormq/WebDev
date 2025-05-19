@@ -45,8 +45,21 @@ const MessageItem = ({ message, isOwnMessage, onDelete, nestingLevel = 0 }) => {
   const authorInfoDivStyle = { display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem' };
   const authorLinkStyle = { fontWeight: 600, color: 'var(--foreground)', textDecoration: 'none' };
   const timeSpanStyle = { fontSize: '0.75rem', color: 'var(--muted-foreground)' };
-  const deleteButtonStyle = { color: 'var(--muted-foreground)' };
-  const deleteIconStyle = { height: '0.9rem', width: '0.9rem' };
+  const deleteButtonStyle = {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+    border: '1px solid #d1d5db', // Tailwind gray-300
+    background: '#fff',
+    color: 'var(--muted-foreground)',
+    borderRadius: 'var(--radius)',
+    padding: '0.25rem 0.75rem',
+    fontSize: '0.95rem',
+    fontWeight: 500,
+    cursor: 'pointer',
+    transition: 'background 0.15s, border 0.15s',
+  };
+  const deleteIconStyle = { height: '1rem', width: '1rem', marginRight: '0.5rem' };
   const contentDivStyle = { fontSize: '0.875rem', color: 'var(--foreground)', whiteSpace: 'pre-wrap', wordBreak: 'break-words', lineHeight: '1.5' };
   // --- End Inline Styles ---
 
@@ -69,13 +82,14 @@ const MessageItem = ({ message, isOwnMessage, onDelete, nestingLevel = 0 }) => {
              </div>
               {isOwnMessage && onDelete && (
                 <Button 
-                  variant="ghost" 
-                  size="icon"
+                  variant="outline" 
+                  size="sm"
                   style={deleteButtonStyle}
                   onClick={handleDeleteClick}
                   title="Delete message"
                 >
                   <Trash2 style={deleteIconStyle} />
+                  Delete
                 </Button>
              )}
           </div>

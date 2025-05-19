@@ -22,10 +22,10 @@ export const getOpenForumThreads = async (req, res, next) => {
         const enrichedThreads = [];
         for (let thread of threadsData) {
             let authorName = 'Unknown';
-            if (thread.authorId) {
-                const author = await getUserInfo(thread.authorId);
+             if (thread.authorId) {
+                 const author = await getUserInfo(thread.authorId);
                 authorName = author.username;
-            }
+             }
 
             // Fetch the initial message to get the content
             let initialContent = '';
@@ -47,7 +47,7 @@ export const getOpenForumThreads = async (req, res, next) => {
                 lastPostTime: thread.lastActivity || thread.createdAt,
                 content: initialContent // Add the fetched content
             });
-        }
+         }
 
         res.json(enrichedThreads);
     } catch (error) {
@@ -69,10 +69,10 @@ export const getClosedForumThreads = async (req, res, next) => {
         const enrichedThreads = [];
         for (let thread of threadsData) {
             let authorName = 'Unknown';
-            if (thread.authorId) {
-                const author = await getUserInfo(thread.authorId);
+             if (thread.authorId) {
+                 const author = await getUserInfo(thread.authorId);
                 authorName = author.username;
-            }
+             }
 
             // Fetch the initial message to get the content
             let initialContent = '';
@@ -94,7 +94,7 @@ export const getClosedForumThreads = async (req, res, next) => {
                 lastPostTime: thread.lastActivity || thread.createdAt,
                 content: initialContent // Add the fetched content
             });
-        }
+         }
 
         res.json(enrichedThreads);
     } catch (error) {

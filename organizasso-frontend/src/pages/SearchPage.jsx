@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import Spinner from '../components/Common/Spinner';
 import { searchMessages } from '../services/searchService';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 
 const SearchPage = () => {
   const { currentUser } = useAuth();
@@ -66,9 +67,7 @@ const SearchPage = () => {
   const pMutedStyle = { color: 'var(--muted-foreground)' }; // text-muted-foreground
   const resultsContainerStyle = { marginTop: '1.5rem', minHeight: '200px' }; // mt-6 min-h-[200px]
   const centeredFlexStyle = { display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' };
-  const feedbackCardStyle = { width: '100%', maxWidth: '32rem', textAlign: 'center', padding: '1.5rem' }; // w-full max-w-md text-center p-6
   const errorTitleStyle = { fontSize: '1.25rem', fontWeight: 600, color: 'var(--destructive)' }; // text-xl font-semibold text-destructive
-  const initialCardStyle = { ...feedbackCardStyle, borderStyle: 'dashed' }; // border-dashed
   const initialTitleStyle = { fontSize: '1.125rem', fontWeight: 600 }; // text-lg font-semibold
   // --- End Inline Styles ---
 
@@ -82,19 +81,18 @@ const SearchPage = () => {
 
         <SearchForm onSearch={handleSearch} isLoading={isLoading} />
 
+        {/* Divider below search section */}
+        <Separator style={{ margin: '2rem 0' }} />
+
         <div style={resultsContainerStyle}>
           {isLoading ? (
             <div style={centeredFlexStyle}><Spinner size="lg" /></div>
           ) : error ? (
             <div style={centeredFlexStyle}>
-              <Card style={feedbackCardStyle}>
-                <CardHeader>
-                  <CardTitle style={errorTitleStyle}>Search Error</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p style={pMutedStyle}>{error}</p>
-                </CardContent>
-              </Card>
+              <div style={{ width: '100%', maxWidth: '32rem', textAlign: 'center', padding: '1.5rem', border: '1px solid var(--destructive)', borderRadius: 'var(--radius)', background: '#fff' }}>
+                <div style={errorTitleStyle}>Search Error</div>
+                <p style={pMutedStyle}>{error}</p>
+              </div>
             </div>
           ) : results !== null ? (
             <SearchResults 
@@ -104,14 +102,10 @@ const SearchPage = () => {
             />
           ) : ( 
             <div style={centeredFlexStyle}>
-              <Card style={initialCardStyle}>
-                <CardHeader>
-                  <CardTitle style={initialTitleStyle}>Start Searching</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p style={pMutedStyle}>Enter your search criteria above to find messages.</p>
-                </CardContent>
-              </Card>
+              <div style={{ width: '100%', maxWidth: '32rem', textAlign: 'center', padding: '1.5rem', border: '1px dashed var(--border)', borderRadius: 'var(--radius)', background: '#fff' }}>
+                <div style={initialTitleStyle}>Start Searching</div>
+                <p style={pMutedStyle}>Enter your search criteria above to find messages.</p>
+              </div>
             </div>
           )}
         </div>

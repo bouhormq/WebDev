@@ -4,21 +4,21 @@ import { Separator } from "@/components/ui/separator";
 
 const ThreadList = ({ threads, onThreadClick, openThreadIds }) => {
   return (
-    <div>
+        <div>
       {threads.map((thread, index) => {
         const isExpanded = openThreadIds && openThreadIds.has(thread._id);
         return (
-          <React.Fragment key={thread._id}>
-            <ThreadItem 
-              thread={thread} 
+            <React.Fragment key={thread._id}>
+              <ThreadItem 
+                thread={thread} 
               onClick={() => onThreadClick(thread._id)}
               isExpanded={isExpanded}
-            />
-            {index < threads.length - 1 && <Separator />}
-          </React.Fragment>
+              />
+              {index < threads.length - 1 && <Separator />}
+            </React.Fragment>
         );
       })}
-    </div>
+        </div>
   );
 };
 

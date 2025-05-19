@@ -109,27 +109,23 @@ const ProfilePage = () => {
         <div style={centeredFlexMinHeightStyle}><Spinner size="lg" /></div>
       ) : error ? (
         <div style={centeredFlexMinHeightStyle}>
-          <Card style={errorCardStyle}>
-            <CardHeader>
-              <CardTitle style={errorTitleStyle}>Error Loading Profile</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p style={errorPStyle}>{error}</p>
-            </CardContent>
-          </Card>
+          <div style={errorCardStyle}>
+            <div style={errorTitleStyle}>Error Loading Profile</div>
+            <p style={errorPStyle}>{error}</p>
+          </div>
         </div>
       ) : userInfo ? (
         <div>
           <div style={{ marginBottom: '1.5rem' }}>
             <UserInfo user={userInfo} isCurrentUserProfile={isOwnProfile} />
           </div>
-          <Card>
+          <div style={{ width: '100%' }}>
             <UserMessages
               messages={userMessages}
               isOwnProfile={isOwnProfile}
               onDelete={handleDeleteMessage}
             />
-          </Card>
+          </div>
         </div>
       ) : (
         <div style={notFoundDivStyle}>

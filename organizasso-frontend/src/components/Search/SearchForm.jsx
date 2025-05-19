@@ -2,7 +2,6 @@ import React from 'react';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import Spinner from '../Common/Spinner';
 // Import Form components
 import { useForm } from 'react-hook-form';
@@ -19,7 +18,7 @@ import {
 // Import Date Picker components
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { CalendarIcon } from 'lucide-react';
+import { CalendarIcon, Search as SearchIcon } from 'lucide-react';
 import { format } from 'date-fns';
 
 // Define Zod schema for the search form
@@ -64,40 +63,42 @@ const SearchForm = ({ onSearch, isLoading }) => {
   };
 
   // --- Inline Styles ---
-  const titleStyle = { fontSize: '1.125rem' }; // text-lg
-  // NOTE: Grid layout (grid, sm:grid-cols-2, lg:grid-cols-4, lg:col-span-1) is LOST.
-  const contentStyle = { display: 'flex', flexDirection: 'column', gap: '1rem' }; // Fallback layout
-  const formItemColStyle = { display: 'flex', flexDirection: 'column' }; // flex flex-col
+  const titleStyle = { fontSize: '1.125rem', fontWeight: 600, marginBottom: '1rem' };
+  const contentStyle = { display: 'flex', flexDirection: 'column', gap: '1rem' };
+  const formItemColStyle = { display: 'flex', flexDirection: 'column' };
   const dateButtonStyle = {
       width: '100%',
       justifyContent: 'flex-start',
       textAlign: 'left',
       fontWeight: 'normal',
-      // Conditional text color lost
   };
-  const calendarIconStyle = { marginRight: '0.5rem', height: '1rem', width: '1rem' }; // mr-2 h-4 w-4
-  const popoverContentStyle = { width: 'auto', padding: 0 }; // w-auto p-0
-  const submitButtonStyle = { marginLeft: 'auto' }; // ml-auto
-  const spinnerStyle = { marginRight: '0.5rem' }; // mr-2
+  const calendarIconStyle = { marginRight: '0.5rem', height: '1rem', width: '1rem' };
+  const popoverContentStyle = { width: 'auto', padding: 0 };
+  const iconStyle = { height: '1rem', width: '1rem', marginRight: '0.5rem' };
+  const submitButtonStyle = {
+    backgroundColor: '#000000',
+    color: '#FFFFFF',
+    border: 'none',
+    borderRadius: 'var(--radius)',
+  };
+  const spinnerStyle = { marginRight: '0.5rem' };
   // --- End Inline Styles ---
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle style={titleStyle}>Search Criteria</CardTitle>
-      </CardHeader>
+    <div style={{width: '100%'}}>
+      <div style={titleStyle}>Search Criteria</div>
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(handleSubmit)}>
-          <CardContent style={contentStyle}>
+        <form onSubmit={form.handleSubmit(handleSubmit)} style={{ width: '100%', boxSizing: 'border-box' }}>
+          <div style={{ ...contentStyle, width: '100%' }}>
             {/* Keywords */}
             <FormField
               control={form.control}
               name="keywords"
               render={({ field }) => (
-                <FormItem> {/* Grid span lost */}
+                <FormItem style={{ width: '100%' }}>
                   <FormLabel>Keywords</FormLabel>
                   <FormControl>
-                    <Input placeholder="Search content..." {...field} disabled={isLoading}/>
+                    <Input style={{ width: '100%', boxSizing: 'border-box' }} placeholder="Search content..." {...field} disabled={isLoading}/>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -109,10 +110,10 @@ const SearchForm = ({ onSearch, isLoading }) => {
               control={form.control}
               name="author"
               render={({ field }) => (
-                <FormItem> {/* Grid span lost */}
+                <FormItem style={{ width: '100%' }}>
                   <FormLabel>Author Username</FormLabel>
                   <FormControl>
-                    <Input placeholder="Filter by author..." {...field} disabled={isLoading} />
+                    <Input style={{ width: '100%', boxSizing: 'border-box' }} placeholder="Filter by author..." {...field} disabled={isLoading} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -124,14 +125,14 @@ const SearchForm = ({ onSearch, isLoading }) => {
               control={form.control}
               name="startDate"
               render={({ field }) => (
-                 <FormItem style={formItemColStyle}> {/* Grid span lost */}
+                 <FormItem style={{ ...formItemColStyle, width: '100%' }}>
                    <FormLabel>Start Date</FormLabel>
                     <Popover>
                       <PopoverTrigger asChild>
                         <FormControl>
                           <Button
                             variant={"outline"}
-                            style={dateButtonStyle} // Apply style
+                            style={{ ...dateButtonStyle, width: '100%' }}
                             disabled={isLoading}
                           >
                             <CalendarIcon style={calendarIconStyle} />
@@ -159,14 +160,14 @@ const SearchForm = ({ onSearch, isLoading }) => {
               control={form.control}
               name="endDate"
               render={({ field }) => (
-                <FormItem style={formItemColStyle}> {/* Grid span lost */}
+                <FormItem style={{ ...formItemColStyle, width: '100%' }}>
                   <FormLabel>End Date</FormLabel>
                   <Popover>
                     <PopoverTrigger asChild>
                       <FormControl>
                         <Button
                           variant={"outline"}
-                          style={dateButtonStyle} // Apply style
+                          style={{ ...dateButtonStyle, width: '100%' }}
                           disabled={isLoading}
                         >
                           <CalendarIcon style={calendarIconStyle} />
@@ -190,16 +191,16 @@ const SearchForm = ({ onSearch, isLoading }) => {
                 </FormItem>
               )}
             />
-          </CardContent>
-          <CardFooter>
-            <Button type="submit" disabled={isLoading} style={submitButtonStyle}>
-              {isLoading ? <Spinner size="sm" style={spinnerStyle}/> : null}
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '1.5rem' }}>
+            <Button type="submit" disabled={isLoading} style={{ ...submitButtonStyle, ...submitButtonStyle }}>
+              {isLoading ? <Spinner size="sm" style={spinnerStyle}/> : <SearchIcon style={iconStyle} />}
               Search
             </Button>
-          </CardFooter>
+          </div>
         </form>
       </Form>
-    </Card>
+    </div>
   );
 };
 

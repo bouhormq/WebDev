@@ -122,43 +122,43 @@ const ClosedForumPage = () => {
       </div>
 
       <div>
-        <Form {...form}>
+            <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
             <div style={{ marginBottom: '1rem' }}>
               <div style={{ fontWeight: 500, marginBottom: '0.5rem' }}>Title</div>
-              <FormField
-                control={form.control}
-                name="title"
-                render={({ field }) => (
+                <FormField
+                  control={form.control}
+                  name="title"
+                  render={({ field }) => (
                   <FormItem>
-                    <FormControl>
+                      <FormControl>
                       <Input placeholder="Admin topic title (optional, but recommended)" {...field} style={{ width: '100%' }} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
             </div>
 
             <div style={{ marginBottom: '1rem' }}>
               <div style={{ fontWeight: 500, marginBottom: '0.5rem' }}>Content</div>
-              <FormField
-                control={form.control}
-                name="content"
-                render={({ field }) => (
+                <FormField
+                  control={form.control}
+                  name="content"
+                  render={({ field }) => (
                   <FormItem>
-                    <FormControl>
-                      <Textarea
-                        placeholder="Start the admin discussion here..."
+                      <FormControl>
+                        <Textarea
+                          placeholder="Start the admin discussion here..."
                         style={{ width: '100%', minHeight: '100px', resize: 'vertical' }}
-                        {...field}
+                          {...field}
                         rows={4}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
             </div>
 
             <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
@@ -170,10 +170,10 @@ const ClosedForumPage = () => {
               }}>
                 {isSubmitting ? <Spinner size="sm" style={{ marginRight: '0.5rem' }} /> : <Send style={{ marginRight: '0.5rem', height: '1rem', width: '1rem' }} />}
                 Post Thread
-              </Button>
+                    </Button>
             </div>
-          </form>
-        </Form>
+              </form>
+            </Form>
       </div>
 
       <hr 
@@ -196,7 +196,7 @@ const ClosedForumPage = () => {
           <div style={centeredFlexStyle}>
             <div style={{ width: '100%', maxWidth: '32rem', textAlign: 'center', padding: '1.5rem' }}>
               <h2 style={{ fontSize: '1.25rem', fontWeight: 600, color: 'var(--destructive)', marginBottom: '0.5rem' }}>Error Loading Forum</h2>
-              <p style={pMutedStyle}>{error}</p>
+                <p style={pMutedStyle}>{error}</p>
             </div>
           </div>
         ) : threads.length > 0 ? (
@@ -210,7 +210,7 @@ const ClosedForumPage = () => {
           <div style={centeredFlexStyle}>
             <div style={{ width: '100%', maxWidth: '32rem', textAlign: 'center', padding: '1.5rem' }}>
               <h2 style={{ fontSize: '1.125rem', fontWeight: 600, marginBottom: '0.5rem' }}>No Threads Yet</h2>
-              <p style={{ ...pMutedStyle, marginBottom: '1rem' }}>No confidential discussions have been started.</p>
+                <p style={{ ...pMutedStyle, marginBottom: '1rem' }}>No confidential discussions have been started.</p>
             </div>
           </div>
         )}

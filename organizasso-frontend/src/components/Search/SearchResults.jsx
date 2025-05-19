@@ -1,6 +1,5 @@
 import React from 'react';
 import MessageItem from '../Forum/MessageItem'; // Reuse MessageItem
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Link } from 'react-router-dom'; // Link to threads
 import { format, parseISO } from 'date-fns'; // Import date-fns
 import { Separator } from "@/components/ui/separator"; // Import Separator
@@ -14,9 +13,10 @@ const SearchResults = ({ results, currentUserId, searchParams }) => {
     padding: '0 0.125rem', // px-0.5 py-0
     // dark:bg-yellow-700 lost
   };
-  const cardStyle = { marginTop: '1.5rem' }; // mt-6 (shadow-sm lost)
-  const cardContentStyle = { padding: 0 }; // p-0
-  const emptyDivStyle = { padding: '1.5rem', textAlign: 'center', color: 'var(--muted-foreground)' }; // p-6 text-center text-muted-foreground
+  const containerStyle = { marginTop: '1.5rem', width: '100%' };
+  const titleStyle = { fontSize: '1.125rem', fontWeight: 600, marginBottom: '0.25rem' };
+  const descStyle = { color: 'var(--muted-foreground)', marginBottom: '1rem', fontSize: '0.95rem' };
+  const emptyDivStyle = { padding: '1.5rem', textAlign: 'center', color: 'var(--muted-foreground)' };
   // --- End Inline Styles ---
 
   // Function to highlight keywords (simple implementation)
@@ -63,39 +63,33 @@ const SearchResults = ({ results, currentUserId, searchParams }) => {
   };
 
   return (
-    <Card style={cardStyle}>
-      <CardHeader>
-        <CardTitle>Search Results</CardTitle>
-        {searchParams && (
-          <CardDescription>
-            {buildDescription()}
-          </CardDescription>
-        )}
-      </CardHeader>
-      <CardContent style={cardContentStyle}>
-        {results.length === 0 ? (
-          <div style={emptyDivStyle}>
-            <p>No messages found matching your criteria.</p>
-          </div>
-        ) : (
-          <div>
-            {results.map((message, index) => (
-              <React.Fragment key={message._id}>
-                <MessageItem
-                  message={{
-                    ...message,
-                    content: highlightKeywords(message.content, searchParams?.keywords) || message.content,
-                  }}
-                  isOwnMessage={message.authorId === currentUserId}
-                  onDelete={null}
-                />
-                {index < results.length - 1 && <Separator />}
-              </React.Fragment>
-            ))}
-          </div>
-        )}
-      </CardContent>
-    </Card>
+    <div style={containerStyle}>
+      <div style={titleStyle}>Search Results</div>
+      {searchParams && (
+        <div style={descStyle}>{buildDescription()}</div>
+      )}
+      {results.length === 0 ? (
+        <div style={emptyDivStyle}>
+          <p>No messages found matching your criteria.</p>
+        </div>
+      ) : (
+        <div>
+          {results.map((message, index) => (
+            <React.Fragment key={message._id}>
+              <MessageItem
+                message={{
+                  ...message,
+                  content: highlightKeywords(message.content, searchParams?.keywords) || message.content,
+                }}
+                isOwnMessage={message.authorId === currentUserId}
+                onDelete={null}
+              />
+              {index < results.length - 1 && <Separator />}
+            </React.Fragment>
+          ))}
+        </div>
+      )}
+    </div>
   );
 };
 
