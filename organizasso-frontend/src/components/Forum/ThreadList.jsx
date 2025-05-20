@@ -2,7 +2,7 @@ import React from 'react';
 import ThreadItem from './ThreadItem';
 import { Separator } from "@/components/ui/separator";
 
-const ThreadList = ({ threads, onThreadClick, openThreadIds }) => {
+const ThreadList = ({ threads, onThreadClick, openThreadIds, onReplyPosted, ensureThreadOpen }) => {
   return (
         <div>
       {threads.map((thread, index) => {
@@ -13,6 +13,8 @@ const ThreadList = ({ threads, onThreadClick, openThreadIds }) => {
                 thread={thread} 
               onClick={() => onThreadClick(thread._id)}
               isExpanded={isExpanded}
+              onReplyPosted={onReplyPosted}
+              ensureThreadOpen={ensureThreadOpen}
               />
               {index < threads.length - 1 && <Separator />}
             </React.Fragment>

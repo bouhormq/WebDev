@@ -3,10 +3,14 @@ import { ObjectId } from 'mongodb';
 
 // Helper to get user data for enriching results (can be expanded)
 const getUserInfo = async (userId) => {
-    if (!userId || !ObjectId.isValid(userId)) return { username: 'Unknown' };
+    if (!userId || !ObjectId.isValid(userId)) return { username: 'Unknown', displayName: 'Unknown', profilePicUrl: '' };
     const usersCollection = getCollection('users');
-    const user = await usersCollection.findOne({ _id: new ObjectId(userId) }, { projection: { username: 1 } });
-    return user || { username: 'Unknown' };
+    // Fetch username, displayName, and profilePicUrl
+    const user = await usersCollection.findOne(
+        { _id: new ObjectId(userId) }, 
+        { projection: { username: 1, displayName: 1, profilePicUrl: 1 } }
+    );
+    return user || { username: 'Unknown', displayName: 'Unknown', profilePicUrl: '' };
 };
 
 // Controller to get threads for the Open Forum
@@ -17,37 +21,70 @@ export const getOpenForumThreads = async (req, res, next) => {
 
         const threadsData = await threadsCollection.find(
             { forumType: 'open' }
-        ).sort({ lastActivity: -1 }).toArray();
+        ).sort({ createdAt: -1 }).toArray(); // Changed lastActivity to createdAt
 
         const enrichedThreads = [];
         for (let thread of threadsData) {
             let authorName = 'Unknown';
+            let profilePicUrl = '';
              if (thread.authorId) {
                  const author = await getUserInfo(thread.authorId);
-                authorName = author.username;
+                authorName = author.displayName || author.username;
+                profilePicUrl = author.profilePicUrl || '';
              }
 
-            // Fetch the initial message to get the content
-            let initialContent = '';
+            // Fetch the initial message to get all its details
+            let firstMessageData = null;
             if (thread._id) { // Ensure thread._id is valid
-                const firstMessage = await messagesCollection.findOne(
+                firstMessageData = await messagesCollection.findOne(
                     { threadId: new ObjectId(thread._id) }, 
-                    { sort: { createdAt: 1 } } // Get the earliest message
+                    { 
+                        sort: { createdAt: 1 }, 
+                        projection: { 
+                            _id: 1, 
+                            content: 1, 
+                            imageUrl: 1, 
+                            likes: 1, 
+                            dislikes: 1, 
+                            likeCount: 1, 
+                            dislikeCount: 1 
+                        } 
+                    }
                 );
-                if (firstMessage && firstMessage.content) {
-                    initialContent = firstMessage.content;
-                }
             }
+
+            // Get the actual count of messages for the thread
+            const actualMessageCount = await messagesCollection.countDocuments({ threadId: new ObjectId(thread._id) });
 
             enrichedThreads.push({
                 ...thread,
                 authorName: authorName,
-                replyCount: thread.replyCount || 0, // This should align with how messageCount is tracked
-                messageCount: thread.replyCount || 0, // Frontend expects messageCount
+                profilePicUrl: profilePicUrl,
+                replyCount: actualMessageCount, // Use actual count
+                messageCount: actualMessageCount, // Use actual count
                 lastPostTime: thread.lastActivity || thread.createdAt,
-                content: initialContent // Add the fetched content
+                // Embed the initial post details
+                initialPost: firstMessageData || { 
+                    _id: null, 
+                    content: '', 
+                    imageUrl: null, 
+                    likes: [], 
+                    dislikes: [], 
+                    likeCount: 0, 
+                    dislikeCount: 0 
+                }
+                // Remove old content and imageUrl properties if they are now within initialPost
             });
          }
+
+        // Sort threads: primary by initialPost.likeCount (desc), secondary by lastActivity (desc)
+        enrichedThreads.sort((a, b) => {
+            const likeCompare = (b.initialPost?.likeCount || 0) - (a.initialPost?.likeCount || 0);
+            if (likeCompare !== 0) {
+                return likeCompare;
+            }
+            return new Date(b.lastPostTime) - new Date(a.lastPostTime);
+        });
 
         res.json(enrichedThreads);
     } catch (error) {
@@ -64,37 +101,69 @@ export const getClosedForumThreads = async (req, res, next) => {
 
         const threadsData = await threadsCollection.find(
             { forumType: 'closed' }
-        ).sort({ lastActivity: -1 }).toArray();
+        ).sort({ createdAt: -1 }).toArray(); // Changed lastActivity to createdAt
 
         const enrichedThreads = [];
         for (let thread of threadsData) {
             let authorName = 'Unknown';
+            let profilePicUrl = '';
              if (thread.authorId) {
                  const author = await getUserInfo(thread.authorId);
-                authorName = author.username;
+                authorName = author.displayName || author.username;
+                profilePicUrl = author.profilePicUrl || '';
              }
 
-            // Fetch the initial message to get the content
-            let initialContent = '';
+            // Fetch the initial message to get all its details
+            let firstMessageData = null;
             if (thread._id) { // Ensure thread._id is valid
-                const firstMessage = await messagesCollection.findOne(
-                    { threadId: new ObjectId(thread._id) },
-                    { sort: { createdAt: 1 } } // Get the earliest message
+                firstMessageData = await messagesCollection.findOne(
+                    { threadId: new ObjectId(thread._id) }, 
+                    { 
+                        sort: { createdAt: 1 }, 
+                        projection: { 
+                            _id: 1, 
+                            content: 1, 
+                            imageUrl: 1, 
+                            likes: 1, 
+                            dislikes: 1, 
+                            likeCount: 1, 
+                            dislikeCount: 1 
+                        } 
+                    }
                 );
-                if (firstMessage && firstMessage.content) {
-                    initialContent = firstMessage.content;
-                }
             }
+            
+            // Get the actual count of messages for the thread
+            const actualMessageCount = await messagesCollection.countDocuments({ threadId: new ObjectId(thread._id) });
 
             enrichedThreads.push({
                 ...thread,
                 authorName: authorName,
-                replyCount: thread.replyCount || 0, // Align with how messageCount is tracked
-                messageCount: thread.replyCount || 0, // Frontend expects messageCount
+                profilePicUrl: profilePicUrl,
+                replyCount: actualMessageCount, // Use actual count
+                messageCount: actualMessageCount, // Use actual count
                 lastPostTime: thread.lastActivity || thread.createdAt,
-                content: initialContent // Add the fetched content
+                // Embed the initial post details
+                initialPost: firstMessageData || { 
+                    _id: null, 
+                    content: '', 
+                    imageUrl: null, 
+                    likes: [], 
+                    dislikes: [], 
+                    likeCount: 0, 
+                    dislikeCount: 0 
+                }
             });
          }
+
+         // Sort threads: primary by initialPost.likeCount (desc), secondary by lastActivity (desc)
+         enrichedThreads.sort((a, b) => {
+            const likeCompare = (b.initialPost?.likeCount || 0) - (a.initialPost?.likeCount || 0);
+            if (likeCompare !== 0) {
+                return likeCompare;
+            }
+            return new Date(b.lastPostTime) - new Date(a.lastPostTime);
+        });
 
         res.json(enrichedThreads);
     } catch (error) {
@@ -111,20 +180,84 @@ export const getThreadMessages = async (req, res, next) => {
             return res.status(400).json({ message: 'Invalid thread ID format' });
         }
         const messagesCollection = getCollection('messages');
-        // TODO: Add author username (aggregation or denormalization)
-        const messages = await messagesCollection.find(
+        const allMessages = await messagesCollection.find(
             { threadId: new ObjectId(threadId) }
         ).sort({ createdAt: 1 }).toArray(); // Sort by oldest first
 
-        // Basic enrichment
-        for (let message of messages) {
-             if (message.authorId) {
-                 const author = await getUserInfo(message.authorId);
-                 message.authorName = author.username;
-             }
-         }
+        // Enrich messages with author details
+        const enrichedMessagesWithAuthor = await Promise.all(allMessages.map(async (message) => {
+            const author = await getUserInfo(message.authorId);
+            return {
+                ...message,
+                authorName: author.displayName || author.username,
+                profilePicUrl: author.profilePicUrl || '',
+                replies: [] // Initialize replies array
+            };
+        }));
 
-        res.json(messages);
+        // Build the message tree
+        const messageMap = {};
+        enrichedMessagesWithAuthor.forEach(message => {
+            messageMap[message._id.toString()] = message;
+        });
+
+        const rootMessages = [];
+        enrichedMessagesWithAuthor.forEach(message => {
+            if (message.parentId) {
+                const parentIdStr = message.parentId.toString();
+                let parent = messageMap[parentIdStr];
+                if (parent) {
+                    parent.replies.push(message);
+                } else {
+                    // Parent not found, create a placeholder parent
+                    // and add it to messageMap and rootMessages to ensure it's processed.
+                    const placeholderParent = {
+                        _id: message.parentId, // Use the original parentId for the placeholder
+                        authorName: 'Unknown',
+                        content: '[This message is deleted]',
+                        createdAt: new Date(0), // Or some other default date
+                        likes: [],
+                        dislikes: [],
+                        likeCount: 0,
+                        dislikeCount: 0,
+                        profilePicUrl: '',
+                        replies: [message], // Add current message as a reply to placeholder
+                        isPlaceholder: true // Custom flag to identify this as a placeholder
+                    };
+                    messageMap[parentIdStr] = placeholderParent; // Add to map so other potential siblings find it
+                    rootMessages.push(placeholderParent); // Add to root messages to be included in the response
+                }
+            } else {
+                rootMessages.push(message);
+            }
+        });
+
+        // Sort replies for each message node
+        const sortRepliesRecursive = (node) => {
+            if (node.replies && node.replies.length > 0) {
+                node.replies.sort((a, b) => {
+                    const likeCompare = (b.likeCount || 0) - (a.likeCount || 0);
+                    if (likeCompare !== 0) {
+                        return likeCompare;
+                    }
+                    return new Date(b.createdAt) - new Date(a.createdAt);
+                });
+                node.replies.forEach(sortRepliesRecursive); // Recursively sort replies of replies
+            }
+        };
+
+        rootMessages.forEach(sortRepliesRecursive);
+
+        // Sort root messages themselves (top-level messages/replies for the current parentId)
+        rootMessages.sort((a, b) => {
+            const likeCompare = (b.likeCount || 0) - (a.likeCount || 0);
+            if (likeCompare !== 0) {
+                return likeCompare;
+            }
+            return new Date(b.createdAt) - new Date(a.createdAt);
+        });
+
+        res.json(rootMessages);
     } catch (error) {
         console.error("Error fetching thread messages:", error);
         next(error);
@@ -135,8 +268,6 @@ export const getThreadMessages = async (req, res, next) => {
 export const createThread = async (req, res, next) => {
     const { title, content } = req.body;
     const authorId = req.user.id; // From protect middleware
-    // Determine forum type based on the route used (requires parsing req.path or passing type)
-    // Simple approach: check if the path includes '/closed/'
     const forumType = req.path.includes('/closed/') ? 'closed' : 'open';
 
     // Basic Validation
@@ -181,7 +312,8 @@ export const createThread = async (req, res, next) => {
         res.status(201).json({
             ...newThread,
             _id: newThreadId, // Ensure ID is included
-            authorName: author.username, // Add author name
+            authorName: author.displayName || author.username, // Add author name
+            profilePicUrl: author.profilePicUrl || '',
             lastPostTime: now // For consistency with list view
         });
 
@@ -194,61 +326,136 @@ export const createThread = async (req, res, next) => {
 // Controller to post a reply to a thread
 export const postReply = async (req, res, next) => {
     const { threadId } = req.params;
-    const { content } = req.body;
+    const { content, parentId } = req.body; // parentId might be used for nested replies
     const authorId = req.user.id;
 
     if (!content) {
         return res.status(400).json({ message: 'Reply content cannot be empty' });
     }
     if (!ObjectId.isValid(threadId)) {
-        return res.status(400).json({ message: 'Invalid thread ID format' });
+        return res.status(400).json({ message: 'Invalid thread ID' });
     }
 
     try {
-        const threadsCollection = getCollection('threads');
         const messagesCollection = getCollection('messages');
+        const threadsCollection = getCollection('threads');
         const now = new Date();
 
-        // 1. Find the thread to ensure it exists and check access (if closed)
-        const thread = await threadsCollection.findOne({ _id: new ObjectId(threadId) });
-        if (!thread) {
-            return res.status(404).json({ message: 'Thread not found' });
-        }
-        // If it's a closed forum, ensure user is admin (already handled by route middleware, but good defense)
-        if (thread.forumType === 'closed' && !req.user.isAdmin) {
-            return res.status(403).json({ message: 'Cannot post reply in closed forum' });
-        }
-
-        // 2. Create the message document
+        // Create the new message
         const newMessage = {
             threadId: new ObjectId(threadId),
             authorId: new ObjectId(authorId),
             content,
             createdAt: now,
+            // parentId: parentId ? new ObjectId(parentId) : null, // If supporting nested replies
         };
         const messageResult = await messagesCollection.insertOne(newMessage);
 
-        // 3. Update the thread's lastActivity time and increment reply count
-        await threadsCollection.updateOne(
+        // Update thread's lastActivity and replyCount
+        const updateResult = await threadsCollection.updateOne(
             { _id: new ObjectId(threadId) },
             {
-                 $set: { lastActivity: now },
-                 $inc: { replyCount: 1 }
+                $set: { lastActivity: now },
+                $inc: { replyCount: 1 } // Increment reply count
             }
         );
 
-        // Fetch author username for response enrichment
+        if (updateResult.matchedCount === 0) {
+            // This means the threadId was valid, but no thread was found (e.g., deleted just before reply)
+            // Depending on desired behavior, you might delete the orphaned message or handle differently
+            console.warn(`Reply posted to a non-existent or non-updated thread: ${threadId}`);
+            // For now, we proceed to return the message, but this is a potential inconsistency point.
+        }
+
+        // Fetch author details for the response
         const author = await getUserInfo(authorId);
 
-        // Respond with the created message info
+        // Respond with the created message, enriched with author details
         res.status(201).json({
             ...newMessage,
-            _id: messageResult.insertedId, // Ensure ID is included
-            authorName: author.username // Add author name
+            _id: messageResult.insertedId,
+            authorName: author.displayName || author.username,
+            profilePicUrl: author.profilePicUrl || '',
         });
 
     } catch (error) {
         console.error("Error posting reply:", error);
+        next(error);
+    }
+};
+
+// Controller to handle liking/disliking a message
+export const handleMessageReaction = async (req, res, next) => {
+    const { messageId } = req.params;
+    const { actionType } = req.body; // 'like' or 'dislike'
+    const userId = req.user.id; // From protect middleware
+
+    if (!ObjectId.isValid(messageId)) {
+        return res.status(400).json({ message: 'Invalid message ID' });
+    }
+    if (!['like', 'dislike'].includes(actionType)) {
+        return res.status(400).json({ message: 'Invalid action type. Must be "like" or "dislike".' });
+    }
+
+    try {
+        const messagesCollection = getCollection('messages');
+        const messageObjectId = new ObjectId(messageId);
+        const userObjectId = new ObjectId(userId);
+
+        const message = await messagesCollection.findOne({ _id: messageObjectId });
+
+        if (!message) {
+            return res.status(404).json({ message: 'Message not found' });
+        }
+
+        // Initialize likes/dislikes arrays if they don't exist
+        if (!message.likes) message.likes = [];
+        if (!message.dislikes) message.dislikes = [];
+
+        const alreadyLiked = message.likes.some(id => id.equals(userObjectId));
+        const alreadyDisliked = message.dislikes.some(id => id.equals(userObjectId));
+
+        let updateQuery = {};
+
+        if (actionType === 'like') {
+            if (alreadyLiked) {
+                // User wants to unlike
+                updateQuery = { $pull: { likes: userObjectId } };
+            } else {
+                // User wants to like
+                updateQuery = { $addToSet: { likes: userObjectId }, $pull: { dislikes: userObjectId } };
+            }
+        } else if (actionType === 'dislike') {
+            if (alreadyDisliked) {
+                // User wants to undislike
+                updateQuery = { $pull: { dislikes: userObjectId } };
+            } else {
+                // User wants to dislike
+                updateQuery = { $addToSet: { dislikes: userObjectId }, $pull: { likes: userObjectId } };
+            }
+        }
+
+        await messagesCollection.updateOne({ _id: messageObjectId }, updateQuery);
+
+        // Fetch the updated message to get accurate counts
+        const updatedMessage = await messagesCollection.findOne({ _id: messageObjectId });
+
+        // Update likeCount and dislikeCount
+        const finalUpdate = {
+            $set: {
+                likeCount: updatedMessage.likes?.length || 0,
+                dislikeCount: updatedMessage.dislikes?.length || 0,
+            }
+        };
+        await messagesCollection.updateOne({ _id: messageObjectId }, finalUpdate);
+        
+        // Fetch the message one last time to return the fully updated document
+        const finalMessage = await messagesCollection.findOne({ _id: messageObjectId });
+
+        res.status(200).json({ message: finalMessage }); // Return as { message: finalMessage }
+
+    } catch (error) {
+        console.error("Error handling message reaction:", error);
         next(error);
     }
 };

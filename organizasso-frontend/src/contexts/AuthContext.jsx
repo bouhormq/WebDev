@@ -2,7 +2,7 @@ import React, { createContext, useState, useEffect, useCallback } from 'react';
 import * as authService from '../services/authService'; // Import the service
 import apiClient from '../services/apiClient'; // Import apiClient for setting auth header
 
-const AuthContext = createContext();
+export const AuthContext = createContext(); // Ensure AuthContext is exported
 
 // Helper to set Authorization header
 const setAuthToken = token => {
@@ -108,6 +108,7 @@ export const AuthProvider = ({ children }) => {
   const value = {
     token,
     currentUser,
+    setCurrentUser, // Add setCurrentUser here
     isAdmin,
     isLoggedIn,
     isLoading, 
@@ -122,5 +123,3 @@ export const AuthProvider = ({ children }) => {
     </AuthContext.Provider>
   );
 };
-
-export default AuthContext;

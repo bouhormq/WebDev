@@ -4,7 +4,8 @@ import {
     getClosedForumThreads,
     getThreadMessages,
     createThread,
-    postReply
+    postReply,
+    handleMessageReaction // Import the new controller
 } from '../controllers/forumController.js';
 import { protect, approved, admin } from '../middleware/authMiddleware.js';
 
@@ -23,6 +24,9 @@ router.post('/open/threads', protect, approved, createThread);
 
 // POST Post a reply to any thread (Open or Closed - handled by controller)
 router.post('/threads/:threadId/messages', protect, approved, postReply);
+
+// POST Like/Dislike a message
+router.post('/messages/:messageId/reaction', protect, approved, handleMessageReaction);
 
 
 // --- Admin Routes (Require login + approval + admin) ---

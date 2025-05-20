@@ -1,5 +1,3 @@
-// organizasso-frontend/src/services/forumService.js
-// eslint-disable-next-line no-unused-vars
 import apiClient from './apiClient';
 
 // Fetch Open Forum Threads
@@ -47,9 +45,26 @@ export const getThreadMessages = async (threadId) => {
 };
 
 // Post a Reply to a Thread
-export const postReply = async (threadId, content) => {
+export const postReply = async (threadId, content, parentId = null, imageFile = null) => {
   try {
-    const response = await apiClient.post(`/forums/threads/${threadId}/messages`, { content });
+    const formData = new FormData();
+    formData.append('content', content);
+    if (parentId) {
+      formData.append('parentId', parentId);
+    }
+    if (imageFile) {
+      formData.append('replyImage', imageFile); // Field name must match backend (uploadContentImage.single('replyImage'))
+    }
+
+    // Use the new endpoint: /api/threads/:threadId/replies
+    // If no image, and no parentId, we could send as application/json, but FormData works for all cases.
+    const response = await apiClient.post(`/threads/${threadId}/replies`, formData, {
+      headers: {
+        // Axios will set Content-Type to multipart/form-data automatically for FormData
+        // if we don't explicitly set it, or set it to undefined.
+        'Content-Type': undefined,
+      }
+    });
     return response.data; // Returns the newly created message object
   } catch (error) {
     console.error(`API Error posting reply to thread ${threadId}:`, error.response?.data || error.message);
@@ -58,13 +73,46 @@ export const postReply = async (threadId, content) => {
 };
 
 // Create a New Thread
-export const createThread = async (forumType, title, content) => {
+export const createThread = async (forumType, title, content, imageFile = null) => {
   try {
-    // Use the single /api/threads endpoint
-    const response = await apiClient.post('/threads', { forumType, title, content });
+    const formData = new FormData();
+    formData.append('forumType', forumType);
+    formData.append('title', title);
+    formData.append('content', content);
+    if (imageFile) {
+      formData.append('threadImage', imageFile); // Field name must match backend (uploadContentImage.single('threadImage'))
+    }
+
+    // If no image, we could send as application/json, but FormData works for all cases.
+    const response = await apiClient.post('/threads', formData, {
+      headers: {
+        'Content-Type': undefined, // Let Axios handle Content-Type for FormData
+      }
+    });
     return response.data; // Returns the newly created thread object
   } catch (error) {
     console.error(`API Error creating thread in ${forumType} forum:`, error.response?.data || error.message);
     throw new Error(error.response?.data?.message || "Failed to create thread");
+  }
+};
+
+// Like or Dislike a message
+export const likeDislikeMessage = async (messageId, actionType) => {
+  try {
+    const response = await apiClient.post(`/forums/messages/${messageId}/reaction`, { actionType });
+    return response.data; // Returns the updated message object
+  } catch (error) {
+    console.error(`API Error ${actionType}ing message ${messageId}:`, error.response?.data || error.message);
+    throw new Error(error.response?.data?.message || `Failed to ${actionType} message`);
+  }
+};
+
+// Delete a message
+export const deleteMessage = async (messageId) => {
+  try {
+    await apiClient.delete(`/threads/messages/${messageId}`);
+  } catch (error) {
+    console.error(`API Error deleting message ${messageId}:`, error.response?.data || error.message);
+    throw new Error(error.response?.data?.message || "Failed to delete message");
   }
 };

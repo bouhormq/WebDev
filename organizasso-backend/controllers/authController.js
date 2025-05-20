@@ -71,6 +71,8 @@ export const registerUser = async (req, res, next) => {
             username: username,
             email: email,
             password: hashedPassword,
+            displayName: username, // Default displayName to username
+            profilePicUrl: '', // Default to empty string
             isApproved: false, // Default: not approved
             isAdmin: false,    // Default: not admin
             createdAt: new Date(),
@@ -160,6 +162,8 @@ export const loginUser = async (req, res, next) => {
                         id: user._id,
                         username: user.username,
                         email: user.email,
+                        displayName: user.displayName || user.username, // Send displayName
+                        profilePicUrl: user.profilePicUrl, // Send profilePicUrl
                         isAdmin: user.isAdmin,
                         isApproved: user.isApproved,
                         createdAt: user.createdAt
@@ -191,7 +195,14 @@ export const getMe = async (req, res, next) => {
             return res.status(404).json({ message: 'User not found' });
         }
 
-        res.json(user); // Send back the full user object (without password)
+        // Ensure displayName and profilePicUrl are included
+        const userResponse = {
+            ...user,
+            displayName: user.displayName || user.username,
+            profilePicUrl: user.profilePicUrl || '',
+        };
+
+        res.json(userResponse); // Send back the full user object (without password)
 
     } catch (error) {
         console.error("GetMe Error:", error);

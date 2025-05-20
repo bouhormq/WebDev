@@ -1,0 +1,62 @@
+/* Styles for OpenForumPage.jsx */
+
+.pageContainer {
+  background: #E0F2F7;
+  min-height: calc(100vh - var(--header-height, 60px));
+  padding: 2rem;
+}
+
+.headerDiv {
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.h1Style {
+  font-size: 2.5rem;
+  font-weight: bold;
+  letter-spacing: -0.02em;
+  color: #00796B;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+.pMuted {
+  color: #004D40;
+  font-size: 1.1rem;
+  margin-top: 0.5rem;
+}
+
+.contentWrapper {
+  max-width: 768px;
+  margin: 0 auto;
+  background: #FFFFFF;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 105, 92, 0.1);
+  padding: 2rem;
+  border: 1px solid #B2DFDB;
+}
+
+.errorAlert {
+  margin-top: 2rem;
+  border-color: #FFAB91;
+  background-color: #FFF3E0;
+}
+
+.errorAlertDesc {
+  color: #D9534F;
+  font-weight: 500;
+}
+
+.spinnerContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 300px;
+}
+
+.separator {
+  margin: 2.5rem 0;
+  background-color: var(--border);;
+} 

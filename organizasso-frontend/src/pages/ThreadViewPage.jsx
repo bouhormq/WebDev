@@ -9,36 +9,57 @@ import { deleteUserMessage } from '../services/userService';
 import { toast } from "sonner";
 import Spinner from '../components/Common/Spinner';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react'; // Import ArrowLeft
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const ThreadViewPage = () => {
   const { threadId } = useParams();
   const { currentUser } = useAuth();
-  const [threadTitle, setThreadTitle] = useState(`Thread Details`);
-  const [messages, setMessages] = useState([]);
+  const [threadTitle, setThreadTitle] = useState('Thread Details');
+  const [messages, setMessages] = useState([]); // This will store the hierarchical messages
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [isReplying, setIsReplying] = useState(false);
+  const [isPostingReply, setIsPostingReply] = useState(false); // Renamed for clarity
 
   const fetchThreadData = useCallback(async () => {
     setIsLoading(true);
     setError(null);
     try {
       console.log(`ThreadViewPage (${threadId}): Fetching messages from API...`);
+      // Fetched messages are now expected to be hierarchical
       const fetchedMessages = await getThreadMessages(threadId);
-      const formattedMessages = fetchedMessages.map(msg => ({
-        ...msg,
-        _id: msg._id,
-        createdAt: msg.createdAt ? new Date(msg.createdAt) : null,
-        authorName: msg.authorName || 'Unknown',
-      }));
-      setMessages(formattedMessages);
-      if (formattedMessages.length > 0) {
-        setThreadTitle(formattedMessages[0].threadTitle || `Discussion (${formattedMessages.length} messages)`);
+      
+      // The backend now structures messages, so less client-side formatting is needed here.
+      // We still might want to process dates or ensure certain fields.
+      const processMessages = (msgs) => {
+        return msgs.map(msg => ({
+          ...msg,
+          createdAt: msg.createdAt ? new Date(msg.createdAt) : null,
+          // Recursively process replies
+          replies: msg.replies ? processMessages(msg.replies) : [] 
+        }));
+      };
+
+      const hierarchicalMessages = processMessages(fetchedMessages);
+      setMessages(hierarchicalMessages);
+
+      // Determine thread title - assuming the first message is the original post
+      // or that thread metadata (like title) might come with the messages payload or a separate call.
+      // For now, if there are messages, we try to get title from the first one (original post).
+      // If the backend provides thread metadata separately or as part of the main response, adjust this.
+      if (hierarchicalMessages.length > 0 && hierarchicalMessages[0].threadTitle) {
+        setThreadTitle(hierarchicalMessages[0].threadTitle);
+      } else if (hierarchicalMessages.length > 0) {
+        // Fallback if threadTitle is not directly on messages, but we have them.
+        // This might need adjustment based on actual data structure for thread title.
+        setThreadTitle(`Discussion in Thread ID: ${threadId}`); 
       } else {
-        setThreadTitle('Empty Thread');
+        // If no messages, it could be an empty thread. A separate fetch for thread metadata (e.g., title)
+        // would be ideal here. For now, using a placeholder.
+        // TODO: Fetch thread title separately if messages are empty.
+        setThreadTitle('Thread Details'); 
       }
+
     } catch (err) {
       const message = err.message || "Failed to fetch thread details.";
       console.error(message, err);
@@ -54,29 +75,25 @@ const ThreadViewPage = () => {
     fetchThreadData();
   }, [fetchThreadData]);
 
-  const handleReplySubmit = async (replyContent) => {
-    setIsReplying(true);
+  const handleReplySubmit = async (replyContent, parentId, imageFile) => {
+    setIsPostingReply(true);
     try {
-      console.log(`ThreadViewPage (${threadId}): Posting reply via API...`);
-      const newReply = await postReply(threadId, replyContent);
-      const formattedReply = {
-        ...newReply,
-        _id: newReply._id,
-        createdAt: newReply.createdAt ? new Date(newReply.createdAt) : null,
-        authorName: newReply.authorName || currentUser?.username || 'You',
-        threadId: threadId,
-        threadTitle: threadTitle,
-      };
-      setMessages(prevMessages => [...prevMessages, formattedReply]);
+      console.log(`ThreadViewPage (${threadId}): Posting reply via API. ParentID: ${parentId}, Image: ${imageFile ? imageFile.name : 'none'}`);
+      // The result of postReply isn't directly used here anymore, as we re-fetch.
+      await postReply(threadId, replyContent, parentId, imageFile);
+      
+      // After a successful post, re-fetch all messages to get the updated hierarchy
+      // This is simpler than trying to manually insert the new reply into the correct place in the local state tree.
+      await fetchThreadData(); 
       toast.success("Reply posted successfully!");
-      return true;
+      return true; 
     } catch (err) {
       const message = err.message || "Failed to post reply.";
       console.error(message, err);
       toast.error(message);
       return false;
     } finally {
-      setIsReplying(false);
+      setIsPostingReply(false);
     }
   };
 
@@ -84,37 +101,33 @@ const ThreadViewPage = () => {
     if (!window.confirm("Are you sure you want to delete this message?")) {
       return;
     }
-
-    const originalMessages = messages;
-    setMessages(prev => prev.filter(msg => msg._id !== messageId));
     toast.info("Deleting message...");
-
     try {
       console.log(`ThreadViewPage (${threadId}): Deleting message ${messageId} via API...`);
       await deleteUserMessage(messageId);
+      // Re-fetch messages to reflect the deletion and any structural changes
+      await fetchThreadData(); 
       toast.success("Message deleted successfully!");
     } catch (err) {
       const message = err.message || "Failed to delete message.";
       console.error(message, err);
       toast.error(message);
-      setMessages(originalMessages);
+      // No need to revert local state if re-fetching
     }
   };
 
   const backLink = '/forum/open';
 
-  // --- Inline Styles ---
-  const backButtonDivStyle = { marginBottom: '1rem' }; // mb-4
-  const backLinkStyle = { display: 'inline-flex', alignItems: 'center' }; // inline-flex items-center
-  const backIconStyle = { marginRight: '0.5rem', height: '1rem', width: '1rem' }; // mr-2 h-4 w-4
+  // --- Inline Styles (keep as is or refactor to CSS modules/Tailwind) ---
+  const backButtonDivStyle = { marginBottom: '1rem' };
+  const backLinkStyle = { display: 'inline-flex', alignItems: 'center' };
+  const backIconStyle = { marginRight: '0.5rem', height: '1rem', width: '1rem' };
   const centeredFlexMinHeightStyle = { display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px' };
-  const errorCardStyle = { width: '100%', maxWidth: '32rem', textAlign: 'center', padding: '1.5rem' }; // w-full max-w-md text-center p-6
-  const errorTitleStyle = { fontSize: '1.25rem', fontWeight: 600, color: 'var(--destructive)' }; // text-xl font-semibold text-destructive
-  const errorPStyle = { color: 'var(--muted-foreground)' }; // text-muted-foreground
-  const errorButtonStyle = { marginTop: '1rem' }; // mt-4
-  // space-y-6 lost
-  const h1Style = { fontSize: '1.875rem', fontWeight: 'bold', letterSpacing: '-0.02em', borderBottom: '1px solid var(--border)', paddingBottom: '1rem', marginBottom: '1.5rem' }; // text-3xl font-bold tracking-tight border-b pb-4 (added margin for space-y)
-  const replyCardStyle = { marginTop: '2rem' }; // mt-8 (adjusted for space-y)
+  const errorCardStyle = { width: '100%', maxWidth: '32rem', textAlign: 'center', padding: '1.5rem' };
+  const errorTitleStyle = { fontSize: '1.25rem', fontWeight: 600, color: 'var(--destructive)' };
+  const errorPStyle = { color: 'var(--muted-foreground)' };
+  const errorButtonStyle = { marginTop: '1rem' };
+  const h1Style = { fontSize: '1.875rem', fontWeight: 'bold', letterSpacing: '-0.02em', borderBottom: '1px solid var(--border)', paddingBottom: '1rem', marginBottom: '1.5rem' };
   // --- End Inline Styles ---
 
   return (
@@ -144,26 +157,19 @@ const ThreadViewPage = () => {
           </Card>
         </div>
       ) : (
-        // space-y-6 lost, approximated with margins
         <div>
           <h1 style={h1Style}>{threadTitle}</h1>
-
-          {/* Added margin bottom to simulate space-y-6 */}
-          <div style={{ marginBottom: '1.5rem' }}>
-            <MessageList
-              messages={messages}
-              currentUserId={currentUser?._id}
-              onDeleteRequest={handleDeleteMessage}
-            />
-          </div>
-
-          <Card style={replyCardStyle}>
-            <ReplyForm
-              threadId={threadId}
-              onReplySubmit={handleReplySubmit}
-              isLoading={isReplying}
-            />
-          </Card>
+          {/* MessageList now receives the potentially hierarchical messages array */}
+          {console.log(`ThreadViewPage: currentUser before rendering MessageList:`, currentUser)}
+          <MessageList
+            messages={messages} // Pass the full, potentially hierarchical, list of messages
+            threadId={threadId}
+            onDirectReplySubmit={handleReplySubmit} // This will be used by ReplyForms within MessageList
+            currentUserId={currentUser?._id}
+            onDeleteRequest={handleDeleteMessage}
+            replyFormIsLoading={isPostingReply} // Pass the loading state for reply forms
+            // nestingLevel is managed internally by MessageList starting from 0
+          />
         </div>
       )}
     </PageWrapper>

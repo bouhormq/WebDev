@@ -17,10 +17,81 @@ export const getUserProfile = async (req, res, next) => {
         if (!userProfile) {
             return res.status(404).json({ message: 'User not found' });
         }
+
+        // Ensure displayName and profilePicUrl are included
+        const userResponse = {
+            ...userProfile,
+            displayName: userProfile.displayName || userProfile.username,
+            profilePicUrl: userProfile.profilePicUrl || '',
+        };
         
-        res.json(userProfile);
+        res.json(userResponse);
     } catch (error) {
         console.error("Error fetching user profile:", error);
+        next(error);
+    }
+};
+
+// Controller to update user profile information (displayName and profilePicUrl)
+export const updateUserProfile = async (req, res, next) => {
+    const { userId } = req.params;
+    const { displayName } = req.body;
+    const loggedInUserId = req.user.id; // From protect middleware
+
+    // Ensure the user is updating their own profile
+    if (userId !== loggedInUserId) {
+        return res.status(403).json({ message: 'User not authorized to update this profile' });
+    }
+
+    try {
+        if (!ObjectId.isValid(userId)) {
+            return res.status(400).json({ message: 'Invalid user ID format' });
+        }
+
+        const usersCollection = getCollection('users');
+        const updateData = {};
+
+        if (displayName) {
+            updateData.displayName = displayName;
+        }
+
+        // Handle file upload if a new profile picture is provided
+        if (req.file) {
+            // Construct the URL path for the uploaded file
+            // This assumes you have a static file server setup for the 'uploads' directory
+            // e.g., app.use('/uploads', express.static('uploads')); in server.js
+            updateData.profilePicUrl = `/uploads/profile-pics/${req.file.filename}`;
+        }
+
+        if (Object.keys(updateData).length === 0) {
+            return res.status(400).json({ message: 'No update data provided' });
+        }
+
+        const result = await usersCollection.updateOne(
+            { _id: new ObjectId(userId) },
+            { $set: updateData }
+        );
+
+        if (result.matchedCount === 0) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        // Fetch the updated user profile to return
+        const updatedUserProfile = await usersCollection.findOne(
+            { _id: new ObjectId(userId) },
+            { projection: { password: 0 } }
+        );
+
+        // Ensure displayName and profilePicUrl are included in the response
+        const userResponse = {
+            ...updatedUserProfile,
+            displayName: updatedUserProfile.displayName || updatedUserProfile.username,
+            profilePicUrl: updatedUserProfile.profilePicUrl || '',
+        };
+
+        res.json(userResponse);
+    } catch (error) {
+        console.error("Error updating user profile:", error);
         next(error);
     }
 };

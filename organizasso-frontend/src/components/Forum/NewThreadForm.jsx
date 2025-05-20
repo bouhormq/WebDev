@@ -14,12 +14,13 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import Spinner from '../Common/Spinner';
-import { Send } from 'lucide-react';
+import { Send, Paperclip } from 'lucide-react'; // Added Paperclip
 
 // Zod schema (can be shared or redefined here if preferred)
 const formSchema = z.object({
   title: z.string().min(3, { message: "Title must be at least 3 characters." }).max(150, { message: "Title cannot exceed 150 characters." }),
   content: z.string().min(10, { message: "Message content must be at least 10 characters." }).max(5000, { message: "Message content cannot exceed 5000 characters." }),
+  imageFile: z.instanceof(File).optional(), // Added for image upload
 });
 
 const NewThreadForm = ({ onSubmit, isLoading }) => {
@@ -28,30 +29,38 @@ const NewThreadForm = ({ onSubmit, isLoading }) => {
     defaultValues: {
       title: "",
       content: "",
+      imageFile: undefined, // Initialize imageFile
     },
   });
 
+  const [fileName, setFileName] = React.useState('');
+
   const handleFormSubmit = async (values) => {
-    await onSubmit(values);
+    // onSubmit expects (title, content, imageFile)
+    // The imageFile is already in values.imageFile due to the form field
+    await onSubmit(values.title, values.content, values.imageFile);
     form.reset();
+    setFileName(''); // Reset file name display
   };
   
   // --- Inline Styles (Updated) ---
   const formContainerStyle = {
     padding: '1rem',
     marginBottom: '1.5rem',
-    backgroundColor: 'var(--card)', // This will be the background for the form area
+    // backgroundColor: 'var(--card)', // Removing this as the card itself has the pastel brown
   };
   const formStyle = { display: 'flex', flexDirection: 'column', gap: '1rem' };
-  const inputBaseStyle = { // New base style for inputs
+  const inputBaseStyle = { 
     width: '100%', 
-    // If var(--card) is visually distinct and desired as input background, change to 'transparent'
-    // and ensure var(--card) gives enough contrast for placeholder text.
-    fontSize: '1rem', // Uniform font size for placeholder and input text
-    padding: '0.75rem 1rem', // Consistent padding
-    border: '1px solid var(--border)', // Standard border for inputs
-    borderRadius: 'var(--radius)', // Standard radius
-    boxSizing: 'border-box', // Add box-sizing
+    fontSize: '1rem', 
+    padding: '0.75rem 1rem', 
+    borderRadius: 'var(--radius)', 
+    boxSizing: 'border-box',
+    backgroundColor: '#FDFBF9', // New background color
+    border: '1px solid #D3C1B1', // New border color
+    color: '#333', // Ensuring text color is readable
+    // Placeholder color is typically handled by the ::placeholder pseudo-element
+    // but direct JS style for placeholder isn't possible. We'll rely on default or CSS if available.
   };
   const titleInputStyle = { 
     ...inputBaseStyle 
@@ -75,6 +84,24 @@ const NewThreadForm = ({ onSubmit, isLoading }) => {
     borderRadius: 'var(--radius)', // Use theme radius for rounded corners (e.g., 6px or 0.375rem)
     // padding: '0.5rem 1rem', // Default padding is usually fine with size="sm"
   };
+  const fileInputLabelStyle = {
+    display: 'flex',
+    alignItems: 'center',
+    cursor: 'pointer',
+    color: '#555', // Darker grey for better visibility
+    padding: '0.5rem 0',
+    fontSize: '0.9rem',
+  };
+
+  const fileInputStyle = {
+    display: 'none', // Hide the actual input
+  };
+
+  const fileNameStyle = {
+    marginLeft: '0.5rem',
+    fontStyle: 'italic',
+    color: '#333',
+  };
   // --- End Inline Styles ---
 
   return (
@@ -92,6 +119,14 @@ const NewThreadForm = ({ onSubmit, isLoading }) => {
                     placeholder="Thread Title (optional, but recommended)" 
                     {...field} 
                     style={titleInputStyle} 
+                    onFocus={(e) => {
+                      e.target.style.borderColor = '#00796B';
+                      e.target.style.boxShadow = '0 0 0 1px #00796B';
+                    }}
+                    onBlur={(e) => {
+                      e.target.style.borderColor = '#D3C1B1';
+                      e.target.style.boxShadow = 'none';
+                    }}
                   />
                 </FormControl>
                 <FormMessage />
@@ -110,6 +145,49 @@ const NewThreadForm = ({ onSubmit, isLoading }) => {
                     style={contentTextareaStyle}
                     {...field}
                     rows={4} // Suggest initial rows
+                    onFocus={(e) => {
+                      e.target.style.borderColor = '#00796B';
+                      e.target.style.boxShadow = '0 0 0 1px #00796B';
+                    }}
+                    onBlur={(e) => {
+                      e.target.style.borderColor = '#D3C1B1';
+                      e.target.style.boxShadow = 'none';
+                    }}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="imageFile"
+            render={({ field: { onChange, onBlur, name, ref } }) => (
+              <FormItem>
+                <FormLabel htmlFor="thread-image-upload" style={fileInputLabelStyle}>
+                  <Paperclip style={{ ...iconStyle, marginRight: '0.25rem' }} />
+                  Attach Image (Optional)
+                  {fileName && <span style={fileNameStyle}>{fileName}</span>}
+                </FormLabel>
+                <FormControl>
+                  <Input
+                    id="thread-image-upload"
+                    type="file"
+                    accept="image/*"
+                    style={fileInputStyle}
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        onChange(file); // Update react-hook-form state
+                        setFileName(file.name);
+                      } else {
+                        onChange(undefined);
+                        setFileName('');
+                      }
+                    }}
+                    onBlur={onBlur}
+                    name={name}
+                    ref={ref}
                   />
                 </FormControl>
                 <FormMessage />
@@ -117,7 +195,7 @@ const NewThreadForm = ({ onSubmit, isLoading }) => {
             )}
           />
           <div style={buttonContainerStyle}>
-              <Button 
+              <Button
                 type="submit" 
                 disabled={isLoading} 
                 size="sm" 
@@ -137,4 +215,4 @@ const NewThreadForm = ({ onSubmit, isLoading }) => {
   );
 };
 
-export default NewThreadForm; 
+export default NewThreadForm;

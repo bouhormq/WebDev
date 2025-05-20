@@ -3,6 +3,9 @@ import dotenv from 'dotenv';
 import cors from 'cors';
 import bcrypt from 'bcrypt'; // Import bcrypt
 import { connectDB, getCollection } from './config/db.js'; // Import getCollection
+import { fileURLToPath } from 'url';
+import path, { dirname } from 'path';
+import fs from 'fs'; // Import fs
 
 // Import routes
 import authRoutes from './routes/auth.js';
@@ -16,6 +19,18 @@ dotenv.config(); // Load environment variables
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+
+// Define originalDirname at a higher scope based on import.meta.url
+const __filename = fileURLToPath(import.meta.url);
+const originalDirname = dirname(__filename); 
+
+// Log initial paths and environment details early
+console.log(`Server_Log: Current working directory (process.cwd()): '${process.cwd()}'`);
+console.log(`Server_Log: Original __dirname (from import.meta.url): '${originalDirname}'`);
+console.log(`Server_Log: process.platform: '${process.platform}'`);
+console.log(`Server_Log: process.env.USER: '${process.env.USER}'`);
+console.log(`Server_Log: process.env.HOME: '${process.env.HOME}'`);
+
 
 // Function to Seed Default Admin User
 const seedAdminUser = async () => {
@@ -65,11 +80,42 @@ const startServer = async () => {
     await connectDB(); // Wait for DB connection
     await seedAdminUser(); // Seed admin user after DB is connected
 
-    // Middleware (place after DB connection ensures getCollection works)
+    // Middleware
     app.use(cors()); 
     app.use(express.json()); 
     app.use(express.urlencoded({ extended: true })); 
-
+    
+    const uploadsDirectory = path.resolve(originalDirname, 'uploads');
+    const contentImagesUploadsDirectory = path.join(uploadsDirectory, 'content-images');
+    
+    console.log(`Server_Log: Root uploads directory for static serving: '${uploadsDirectory}'`);
+    console.log(`Server_Log: Content images directory for static serving: '${contentImagesUploadsDirectory}'`);
+    
+    // Simplified fs.access check for the root uploads directory
+    fs.access(uploadsDirectory, fs.constants.F_OK, (err) => {
+      if (err) {
+        console.error(`Server_Log: fs.access ERROR - Root directory '${uploadsDirectory}' does NOT exist or is NOT accessible.`);
+        console.error(`Server_Log: fs.access error details: ${err.message}`);
+      } else {
+        console.log(`Server_Log: fs.access SUCCESS - Root directory '${uploadsDirectory}' confirmed to exist and is accessible.`);
+      }
+    });
+    
+    // Configure express.static with explicit options
+    const staticOptions = {
+      dotfiles: 'ignore',      // How to handle dotfiles
+      etag: true,               // Enable ETag generation
+      fallthrough: false,       // Let serve-static handle its own errors (like 404)
+      immutable: false,         // No immutable caching for now
+      index: false,             // Disable directory indexing
+      lastModified: true,       // Set Last-Modified header
+      maxAge: 0,                // Disable browser caching for assets during debugging
+      redirect: false           // Disable redirecting to trailing slashes for directories
+    };
+    console.log(`Server_Log: Using express.static for '/uploads' with options: ${JSON.stringify(staticOptions)}`);
+    app.use('/uploads', express.static(uploadsDirectory, staticOptions));
+    app.use('/uploads/content-images', express.static(contentImagesUploadsDirectory, staticOptions)); // Serve content images
+    
     // Basic Route
     app.get('/', (req, res) => {
       res.send("Organiz'asso Backend API Running"); 

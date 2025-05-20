@@ -1,154 +1,143 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import PageWrapper from '../components/Layout/PageWrapper';
-import ThreadList from '../components/Forum/ThreadList'; 
 import NewThreadForm from '../components/Forum/NewThreadForm';
-import { createThread, getOpenForumThreads } from '../services/forumService';
+import ThreadList from '../components/Forum/ThreadList';
+import { getOpenForumThreads, createThread } from '../services/forumService';
+import useAuth from '../hooks/useAuth';
 import { toast } from "sonner";
-import Spinner from '../components/Common/Spinner'; 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import Spinner from '../components/Common/Spinner';
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Separator } from "@/components/ui/separator";
+import styles from './OpenForumPage.module.css';
 
 const OpenForumPage = () => {
+  const { currentUser } = useAuth();
   const [threads, setThreads] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [isSubmittingThread, setIsSubmittingThread] = useState(false); // For new thread form loading state
-  const [openThreadIds, setOpenThreadIds] = useState(new Set()); // Changed from selectedThreadId
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [openThreadIds, setOpenThreadIds] = useState(new Set()); // For toggling replies
 
   useEffect(() => {
-    document.title = 'Open Forum | Organizasso';
+    document.title = 'Open Forum 💬 | Organizasso';
   }, []);
 
   const fetchThreads = useCallback(async () => {
-      setIsLoading(true);
-      setError(null);
-      try {
-        console.log('OpenForumPage: Fetching threads from API...');
-        const fetchedThreads = await getOpenForumThreads();
-        console.log('OpenForumPage: Raw fetched threads:', fetchedThreads);
-        const formattedThreads = fetchedThreads.map(thread => ({
-            ...thread,
-            createdAt: thread.createdAt ? new Date(thread.createdAt) : null,
-            lastPostTime: thread.lastReplyAt ? new Date(thread.lastReplyAt) : (thread.createdAt ? new Date(thread.createdAt) : null)
-        }));
-        setThreads(formattedThreads);
-      } catch (err) {
-        const message = err.message || "Failed to fetch open forum threads.";
-        console.error(message, err);
-        setError(message);
-        toast.error(message);
-      } finally {
-        setIsLoading(false);
-      }
-    }, []);
+    setIsLoading(true);
+    setError(null);
+    try {
+      const fetchedThreads = await getOpenForumThreads();
+      setThreads(fetchedThreads.map(t => ({...t, lastPostTime: new Date(t.lastPostTime)})));
+    } catch (err) {
+      setError(err.message);
+      toast.error(err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
     fetchThreads();
   }, [fetchThreads]);
 
-  const handleCreateThread = async (values) => {
-    setIsSubmittingThread(true);
+  // Corrected to accept title, content, imageFile as separate arguments
+  const handleCreateThread = async (title, content, imageFile) => { 
+    if (!currentUser) {
+      toast.error("You must be logged in to create a thread.");
+      return;
+    }
+    setIsSubmitting(true);
     try {
-      console.log("Submitting new thread:", values);
-      const newThread = await createThread('open', values.title, values.content);
-      toast.success(`Thread "${newThread.title}" created successfully!`);
-      await fetchThreads(); // Refresh the thread list
+      await createThread('open', title, content, imageFile);
+      toast.success("Thread created successfully! ✨");
+      fetchThreads(); 
     } catch (err) {
-      const message = err.message || "Failed to create thread.";
-      console.error("Thread creation failed:", err);
-      toast.error(message);
+      toast.error(err.message || "Failed to create thread.");
     } finally {
-      setIsSubmittingThread(false);
+      setIsSubmitting(false);
     }
   };
 
-  const handleInlineThreadView = (threadId) => {
-    setOpenThreadIds(prevOpenThreadIds => {
-      const newOpenThreadIds = new Set(prevOpenThreadIds);
-      if (newOpenThreadIds.has(threadId)) {
-        newOpenThreadIds.delete(threadId);
+  const handleThreadClick = (threadId) => {
+    setOpenThreadIds(prevIds => {
+      const newIds = new Set(prevIds);
+      if (newIds.has(threadId)) {
+        newIds.delete(threadId);
       } else {
-        newOpenThreadIds.add(threadId);
+        newIds.add(threadId);
       }
-      return newOpenThreadIds;
+      return newIds;
     });
   };
 
-  // --- Inline Styles ---
-  const h1Style = { fontSize: '1.875rem', fontWeight: 'bold', letterSpacing: '-0.02em' };
-  const pMutedStyle = { color: 'var(--muted-foreground)' };
-  const listContainerStyle = { marginTop: '1rem', minHeight: '300px' };
-  const centeredFlexStyle = { display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' };
-  const feedbackCardStyle = { width: '100%', maxWidth: '32rem', textAlign: 'center', padding: '1.5rem' };
-  const errorTitleStyle = { fontSize: '1.25rem', fontWeight: 600, color: 'var(--destructive)' };
-  const emptyTitleStyle = { fontSize: '1.125rem', fontWeight: 600 };
-  const emptyContentStyle = {};
-  // --- End Inline Styles ---
+  const ensureThreadOpen = (threadId) => {
+    setOpenThreadIds(prevIds => {
+      if (prevIds.has(threadId)) {
+        return prevIds; // Already open, no change needed to the set
+      }
+      const newIds = new Set(prevIds);
+      newIds.add(threadId);
+      return newIds;
+    });
+  };
+
+  const handleReplyPosted = useCallback((threadId, newMessage) => {
+    // Update the specific thread in the local state
+    setThreads(prevThreads => 
+      prevThreads.map(t => {
+        if (t._id === threadId) {
+          // Increment messageCount and update lastPostTime
+          // If newMessage has a createdAt, use that, otherwise use current time
+          const newLastPostTime = newMessage?.createdAt ? new Date(newMessage.createdAt) : new Date();
+          return {
+            ...t,
+            messageCount: (t.messageCount || 0) + 1,
+            lastPostTime: newLastPostTime,
+            // Potentially update other fields if your newMessage object contains them
+            // e.g., lastReplier: newMessage.author.displayName,
+          };
+        }
+        return t;
+      })
+    );
+    // No need to call fetchThreads() if we update locally, unless ThreadDetailView needs it.
+    // The key change in ThreadItem should refresh ThreadDetailView for that specific item.
+    // toast.info(\"Refreshing threads after new reply...\");
+    // fetchThreads();
+  }, []);
 
   return (
-    <PageWrapper>
-      <div style={{
-        display: 'flex', 
-        justifyContent: 'space-between', 
-        alignItems: 'center', 
-        marginBottom: '1.5rem',
-        position: 'relative',
-        zIndex: 0
-      }}>
-        <div>
-          <h1 style={h1Style}>Open Forum</h1>
-          <p style={pMutedStyle}>Discuss topics relevant to all members.</p>
+    <PageWrapper className={styles.pageContainer}>
+      <div className={styles.contentWrapper}>
+        <div className={styles.headerDiv}>
+          <h1 className={styles.h1Style}>
+            <span role="img" aria-label="forum">📢</span> Open Forum 
+          </h1>
+          <p className={styles.pMuted}>Discuss topics relevant to all members. Share your thoughts and ideas!</p>
         </div>
-      </div>
 
-      {/* New Thread Form */}
-      <NewThreadForm onSubmit={handleCreateThread} isLoading={isSubmittingThread} />
+        <NewThreadForm onSubmit={handleCreateThread} isLoading={isSubmitting} />
+        
+        <Separator className={styles.separator} />
 
-      {/* Separator Line - Attempting full-width breakout */}
-      <hr 
-        style={{
-          width: 'calc(100% + 2rem)', // Counteract 1rem padding on each side of mainStyle
-          marginLeft: '-1rem',      // Pull left by 1rem
-          marginRight: '-1rem',     // Pull right by 1rem (though width might handle this)
-          marginTop: '2rem',
-          marginBottom: '2rem',
-          borderColor: 'var(--border)',
-          borderWidth: '0 0 0.5px 0', // Only bottom border, if preferred for <hr>
-          borderStyle: 'solid'
-        }}
-      />
-
-      {/* Thread List */}
-      <div style={listContainerStyle}>
-        {isLoading && !isSubmittingThread ? (
-          <div style={centeredFlexStyle}><Spinner size="lg" /></div>
-        ) : error ? (
-          <div style={centeredFlexStyle}>
-            <Card style={feedbackCardStyle}>
-              <CardHeader>
-                <CardTitle style={errorTitleStyle}>Error Loading Forum</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p style={pMutedStyle}>{error}</p>
-              </CardContent>
-            </Card>
+        {isLoading && (
+          <div className={styles.spinnerContainer}>
+            <Spinner size="xl" />
           </div>
-        ) : threads.length > 0 ? (
+        )}
+        {error && (
+          <Alert className={styles.errorAlert}>
+            <AlertDescription className={styles.errorAlertDesc}>{error}</AlertDescription>
+          </Alert>
+        )}
+        {!isLoading && !error && (
           <ThreadList 
             threads={threads} 
-            onThreadClick={handleInlineThreadView} 
+            onThreadClick={handleThreadClick} 
             openThreadIds={openThreadIds}
+            onReplyPosted={handleReplyPosted} // Pass the new handler here
+            ensureThreadOpen={ensureThreadOpen} // Pass down the new function
           />
-        ) : (
-          <div style={centeredFlexStyle}>
-            <Card style={feedbackCardStyle}>
-              <CardHeader>
-                <CardTitle style={emptyTitleStyle}>No Threads Yet</CardTitle>
-              </CardHeader>
-              <CardContent style={emptyContentStyle}>
-                <p style={{ ...pMutedStyle, marginBottom: '1rem' }}>Be the first to start a discussion using the form above.</p>
-              </CardContent>
-            </Card>
-          </div>
         )}
       </div>
     </PageWrapper>

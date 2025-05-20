@@ -8,20 +8,23 @@ import { toast } from "sonner";
 import Spinner from '../components/Common/Spinner';
 import { getUserProfile, getUserMessages, deleteUserMessage } from '../services/userService';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import EditProfileForm from '../components/Profile/EditProfileForm'; // Import EditProfileForm
+import { Button } from "@/components/ui/button"; // Import Button
 
 const ProfilePage = () => {
   const { userId } = useParams();
-  const { currentUser } = useAuth();
+  const { currentUser, setCurrentUser } = useAuth(); // Get setCurrentUser from useAuth
   const isOwnProfile = currentUser?._id === userId;
 
   const [userInfo, setUserInfo] = useState(null);
   const [userMessages, setUserMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [showEditForm, setShowEditForm] = useState(false); // State to toggle edit form
 
   useEffect(() => {
-    if (userInfo && userInfo.username) {
-      document.title = `${userInfo.username}'s Profile | Organizasso`;
+    if (userInfo && (userInfo.displayName || userInfo.username)) {
+      document.title = `${userInfo.displayName || userInfo.username}'s Profile | Organizasso`;
     } else {
       document.title = 'Profile | Organizasso';
     }
@@ -39,8 +42,11 @@ const ProfilePage = () => {
 
       const formattedProfile = {
         ...profile,
+        id: profile._id, // Ensure id is available for EditProfileForm
         createdAt: profile.createdAt ? new Date(profile.createdAt) : null,
         joinDate: profile.joinDate ? new Date(profile.joinDate) : (profile.createdAt ? new Date(profile.createdAt) : null),
+        displayName: profile.displayName || profile.username,
+        profilePicUrl: profile.profilePicUrl || '',
       };
       const formattedMessages = messages.map(msg => ({
         ...msg,
@@ -93,6 +99,22 @@ const ProfilePage = () => {
     }
   }, [isOwnProfile, userMessages, userId]);
 
+  const handleProfileUpdate = (updatedProfile) => {
+    const formattedUpdatedProfile = {
+      ...updatedProfile,
+      id: updatedProfile._id,
+      createdAt: updatedProfile.createdAt ? new Date(updatedProfile.createdAt) : null,
+      joinDate: updatedProfile.joinDate ? new Date(updatedProfile.joinDate) : (updatedProfile.createdAt ? new Date(updatedProfile.createdAt) : null),
+      displayName: updatedProfile.displayName || updatedProfile.username,
+      profilePicUrl: updatedProfile.profilePicUrl || '',
+    };
+    setUserInfo(formattedUpdatedProfile);
+    if (isOwnProfile) {
+      setCurrentUser(formattedUpdatedProfile); // Update AuthContext if it's the current user
+    }
+    setShowEditForm(false); // Hide form after update
+  };
+
   // --- Inline Styles ---
   const centeredFlexMinHeightStyle = { display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '300px' };
   const errorCardStyle = { width: '100%', maxWidth: '32rem', textAlign: 'center', padding: '1.5rem' };
@@ -103,36 +125,73 @@ const ProfilePage = () => {
   const notFoundPStyle = { color: 'var(--muted-foreground)' };
   // --- End Inline Styles ---
 
-  return (
-    <PageWrapper>
-      {isLoading ? (
-        <div style={centeredFlexMinHeightStyle}><Spinner size="lg" /></div>
-      ) : error ? (
+  if (isLoading) {
+    return (
+      <PageWrapper>
+        <div style={centeredFlexMinHeightStyle}><Spinner size="large" /></div>
+      </PageWrapper>
+    );
+  }
+
+  if (error && !userInfo) { // Show error only if userInfo is not loaded
+    return (
+      <PageWrapper>
         <div style={centeredFlexMinHeightStyle}>
           <div style={errorCardStyle}>
             <div style={errorTitleStyle}>Error Loading Profile</div>
             <p style={errorPStyle}>{error}</p>
           </div>
         </div>
-      ) : userInfo ? (
-        <div>
-          <div style={{ marginBottom: '1.5rem' }}>
-            <UserInfo user={userInfo} isCurrentUserProfile={isOwnProfile} />
-          </div>
-          <div style={{ width: '100%' }}>
-            <UserMessages
-              messages={userMessages}
-              isOwnProfile={isOwnProfile}
-              onDelete={handleDeleteMessage}
-            />
-          </div>
-        </div>
-      ) : (
+      </PageWrapper>
+    );
+  }
+
+  if (!userInfo) {
+    return (
+      <PageWrapper>
         <div style={notFoundDivStyle}>
-          <h2 style={notFoundH2Style}>Profile Not Found</h2>
-          <p style={notFoundPStyle}>The requested user profile could not be found.</p>
+          <CardHeader>
+            <CardTitle style={{ textAlign: 'center' }}>User Not Found</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p>The profile you are looking for does not exist or could not be loaded.</p>
+          </CardContent>
         </div>
-      )}
+      </PageWrapper>
+    );
+  }
+
+  return (
+    <PageWrapper>
+      <div className="container mx-auto px-4 py-8">
+        <Card className="mb-6">
+          <CardHeader>
+            <div className="flex justify-between items-center">
+              <CardTitle className="text-2xl font-bold">
+                {userInfo.displayName || userInfo.username}'s Profile
+              </CardTitle>
+              {isOwnProfile && (
+                <Button onClick={() => setShowEditForm(!showEditForm)} variant="outline">
+                  {showEditForm ? 'Cancel Edit' : 'Edit Profile'}
+                </Button>
+              )}
+            </div>
+          </CardHeader>
+          <CardContent>
+            {isOwnProfile && showEditForm ? (
+              <EditProfileForm currentUser={userInfo} onProfileUpdate={handleProfileUpdate} />
+            ) : (
+              <UserInfo userInfo={userInfo} />
+            )}
+          </CardContent>
+        </Card>
+
+        <UserMessages
+          messages={userMessages}
+          isOwnProfile={isOwnProfile}
+          onDelete={handleDeleteMessage}
+        />
+      </div>
     </PageWrapper>
   );
 };

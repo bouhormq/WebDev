@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { getThreadMessages } from '../../services/forumService'; // Removed getThreadDetails
+import { getThreadMessages } from '../../services/forumService';
 import MessageList from './MessageList';
 import Spinner from '../Common/Spinner';
 import { Alert, AlertDescription } from "@/components/ui/alert"; // For errors
 
-const ThreadDetailView = ({ threadId, originalThreadContent }) => {
+const ThreadDetailView = ({ threadId, originalThreadContent, onPostReply, isPostingReply, currentUserId, onDeleteMessage }) => { // Added currentUserId and onDeleteMessage
   const [messages, setMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -14,12 +14,9 @@ const ThreadDetailView = ({ threadId, originalThreadContent }) => {
     setIsLoading(true);
     setError(null);
     try {
-      // Only fetch replies (messages)
       const fetchedMessages = await getThreadMessages(threadId);
       let processedMessages = fetchedMessages;
 
-      // If originalThreadContent is a non-empty string, 
-      // filter out messages from the fetched list that have identical content.
       if (originalThreadContent && typeof originalThreadContent === 'string' && originalThreadContent.trim() !== '') {
         processedMessages = fetchedMessages.filter(msg => msg.content !== originalThreadContent);
       }
@@ -41,26 +38,10 @@ const ThreadDetailView = ({ threadId, originalThreadContent }) => {
     fetchRepliesData();
   }, [fetchRepliesData]);
 
-  const handleReplySubmitted = async () => {
-    // Re-fetch messages to include the new reply
-    // forumService.postReply should handle the actual submission
-    // This is called by ReplyForm (via MessageList)
-    try {
-      const updatedMessages = await getThreadMessages(threadId);
-      setMessages(updatedMessages.map(msg => ({
-        ...msg,
-        createdAt: msg.createdAt ? new Date(msg.createdAt) : new Date()
-      })));
-    } catch (err) {
-      console.error("Failed to refresh replies after submission", err);
-      // Optionally show a toast or error message
-    }
-  };
-
   // --- Inline Styles ---
-  const detailViewContainerStyle = { marginTop: '0.5rem', marginBottom: '1rem', padding: '0 0.5rem' }; // Adjusted margin
+  const detailViewContainerStyle = { marginTop: '0.5rem', marginBottom: '1rem', padding: '0 0.5rem' };
   const centeredFlexStyle = { display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100px' };
-  const repliesHeaderStyle = { fontSize: '1rem', fontWeight: '600', marginBottom: '0.5rem', borderTop: '1px solid var(--border)', paddingTop: '1rem' }; // Adjusted margins
+  const repliesHeaderStyle = { fontSize: '1rem', fontWeight: '600', marginBottom: '0.5rem', borderTop: '1px solid var(--border)', paddingTop: '1rem' };
   // --- End Inline Styles ---
 
   if (!threadId) return null;
@@ -75,8 +56,6 @@ const ThreadDetailView = ({ threadId, originalThreadContent }) => {
 
   return (
     <div style={detailViewContainerStyle}>
-      {/* Original Post Content - REMOVED */}
-      
       {/* Replies Section */}
       {isLoading ? (
         <div style={centeredFlexStyle}><Spinner /></div>
@@ -86,15 +65,17 @@ const ThreadDetailView = ({ threadId, originalThreadContent }) => {
           <MessageList 
             messages={messages} 
             threadId={threadId} 
-            onReplySubmitted={handleReplySubmitted} 
+            onDirectReplySubmit={onPostReply} // Pass onPostReply as onDirectReplySubmit
+            replyFormIsLoading={isPostingReply} // Pass isPostingReply as replyFormIsLoading
+            currentUserId={currentUserId} // Pass currentUserId down
+            onDeleteRequest={onDeleteMessage} // Pass onDeleteMessage as onDeleteRequest to MessageList
           />
         </>
       ) : (
         !error && <p style={{ fontSize: '0.875rem', color: 'var(--muted-foreground)', textAlign: 'center', padding: '1rem' }}>No replies yet.</p>
       )}
-      {/* We don't show a specific error for replies not loading here, the main error handles it */}
     </div>
   );
 };
 
-export default ThreadDetailView; 
+export default ThreadDetailView;
