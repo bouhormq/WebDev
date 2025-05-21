@@ -1,0 +1,317 @@
+/* /Users/salim/Desktop/WebDev/organizasso-frontend/src/pages/ProfilePage.module.css */
+
+.pageContainer {
+  /* Corresponds to: container mx-auto px-4 py-8 */
+  max-width: 768px; /* Max width for content */
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1rem; /* px-4 */
+  padding-right: 1rem; /* px-4 */
+  padding-bottom: 2rem; /* py-8 */
+}
+
+.headerDiv {
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.h1Style {
+  font-size: 2.5rem; /* Consistent with SearchPage */
+  font-weight: bold;
+  letter-spacing: -0.02em;
+  color: #007bff; /* Theme foreground */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+.pMuted {
+  color: #007bff; /* Theme muted foreground */
+  font-size: 1.1rem;
+  margin-top: 0.5rem;
+}
+
+.profileCard {
+  /* Corresponds to: Card className="mb-6" */
+  margin-bottom: 1.5rem; /* mb-6 */
+  /* Add other card-like styles if not handled by a base Card component */
+  background-color: #fff; /* Example */
+  border-radius: 0.5rem; /* Example */
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06); /* Example */
+  border: 1px solid #007bff; /* Example for a light border */
+}
+
+.cardHeader {
+  /* Corresponds to: CardHeader className="p-6" */
+  padding: 1.5rem; /* p-6 */
+}
+
+.headerLayout {
+  /* Corresponds to: flex flex-col md:flex-row items-center md:items-start gap-6 */
+  display: flex;
+  flex-direction: column; /* Default: mobile */
+  align-items: center; /* Default: mobile */
+  gap: 1.5rem; /* gap-6 */
+}
+
+.avatarContainer {
+  /* Corresponds to: div className="flex-shrink-0" */
+  flex-shrink: 0;
+  display: flex; /* Added to help center avatar if needed */
+  justify-content: center; /* Added to help center avatar if needed */
+  position: relative; /* For positioning the overlay */
+}
+
+.clickableAvatarContainer {
+  cursor: pointer;
+}
+
+.avatar {
+  /* Corresponds to: Avatar className="h-32 w-32 md:h-40 md:w-40" */
+  height: 8rem !important; /* h-32 */
+  width: 8rem !important; /* w-32 */
+}
+
+.avatarFallback {
+  /* Corresponds to: AvatarFallback className="text-4xl md:text-5xl" */
+  font-size: 2.25rem; /* text-4xl */
+  line-height: 2.5rem;
+}
+
+/* Renamed from .titleButtonColumn to .userInfoColumn */
+.userInfoColumn {
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Default: mobile, centers name and stars block */
+  flex-grow: 1;
+  margin-top: 1rem; /* mt-4 */
+}
+
+.nameAndEditContainer {
+  display: flex;
+  align-items: center; /* Vertically align name and edit icon */
+  gap: 8px; /* Space between name and edit icon */
+  /* Ensure this container itself doesn't cause unwanted centering if .userInfoColumn handles it */
+}
+
+.cardTitle {
+  /* Corresponds to: CardTitle className="text-3xl md:text-4xl font-bold text-center md:text-left mb-2" */
+  font-size: 1.875rem; /* text-3xl */
+  line-height: 2.25rem;
+  font-weight: 700; /* font-bold */
+  text-align: center; /* Default: mobile */
+  margin-bottom: 0.5rem; /* mb-2 */
+}
+
+.editButton {
+  /* Corresponds to: Button className="mt-4 w-full md:w-auto" */
+  margin-top: 1rem; /* mt-4 */
+  /* Add other button styles if not handled by a base Button component */
+  padding: 0.5rem 1rem; /* Example */
+  border: 1px solid #ccc; /* Example */
+  border-radius: 0.375rem; /* Example */
+  background-color: #f9f9f9; /* Example */
+  cursor: pointer;
+}
+
+.cardContent {
+  /* Corresponds to: CardContent className="p-6" */
+  padding: 1.5rem; /* p-6 */
+}
+
+/* Inline name editing styles */
+.inlineNameInput {
+  margin-bottom: 8px;
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1.25rem; /* Match CardTitle or adjust as needed */
+}
+
+.inlineEditActions {
+  display: flex;
+  gap: 8px;
+  align-items: center; /* Align items vertically */
+}
+
+.saveNameButton,
+.cancelNameButton {
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.saveNameButton {
+  background-color: #28a745; /* Green */
+  color: white;
+  border: 1px solid #28a745;
+}
+
+.saveNameButton:disabled {
+  background-color: #cccccc;
+  border-color: #cccccc;
+  cursor: not-allowed;
+}
+
+.cancelNameButton {
+  background-color: #6c757d; /* Gray */
+  border: 1px solid #6c757d;
+}
+
+.nameDisplayContainer {
+  display: flex;
+  align-items: center;
+  gap: 8px; /* Space between name and icon */
+}
+
+.starRatingContainer {
+  margin-top: 4px; /* Add some space above the stars */
+  /* Removed alignment properties, will be controlled by .userInfoColumn */
+}
+
+.editNameIcon {
+  cursor: pointer;
+  color: #007bff; /* Or your preferred icon color */
+  transition: color 0.2s ease-in-out;
+}
+
+.editNameIcon:hover,
+.editNameIcon:focus {
+  color: #0056b3; /* Darker shade on hover/focus */
+}
+
+/* Ensure the main edit button is appropriately styled if it wasn't already */
+.editButton {
+  /* Add any specific styles for the main edit button if needed */
+  /* For example, to ensure it aligns well if it's visible */
+  margin-top: 8px; /* Example: if it needs space from the title */
+}
+
+/* Medium screen adjustments (md breakpoint, typically 768px) */
+@media (min-width: 768px) {
+  .headerLayout {
+    flex-direction: row;
+    align-items: flex-start; /* md:items-start */
+  }
+
+  .avatar {
+    height: 10rem; /* md:h-40 */
+    width: 10rem; /* md:w-40 */
+  }
+  
+  .avatarContainer {
+    justify-content: flex-start; /* md:justify-start */
+  }
+
+  .avatarFallback {
+    font-size: 3rem; /* md:text-5xl */
+    line-height: 1;
+  }
+
+  /* Renamed from .titleButtonColumn to .userInfoColumn */
+  .userInfoColumn {
+    align-items: flex-start; /* md:items-start, aligns name and stars block to the left */
+    margin-top: 0; /* md:mt-0 */
+  }
+
+  .cardTitle {
+    font-size: 2.25rem; /* md:text-4xl */
+    line-height: 2.5rem;
+    text-align: left; /* md:text-left */
+  }
+
+  .editButton {
+    width: auto; /* md:w-auto */
+  }
+}
+
+/* Responsive adjustments for the inline edit form if necessary */
+@media (max-width: 768px) {
+  .inlineNameInput {
+    font-size: 1.1rem; /* Slightly smaller font on smaller screens */
+  }
+}
+
+/* Styles for loading/error/not found states */
+.centeredFlexMinHeight {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 300px;
+}
+
+.errorCard {
+  width: 100%;
+  max-width: 32rem;
+  text-align: center;
+  padding: 1.5rem;
+  /* Add card-like styles if needed */
+  background-color: #fff;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+}
+
+.errorTitle {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #dc2626; /* Example for var(--destructive) */
+}
+
+.errorParagraph {
+  color: #71717a; /* Example for var(--muted-foreground) */
+}
+
+.notFoundContainer {
+  text-align: center;
+  padding-top: 3rem;
+}
+
+.avatarSettingsOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent black shadow */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
+  border-radius: 50%; /* Ensure it matches avatar's shape if avatar is circular */
+  pointer-events: none; /* Allows clicks to pass through if needed, though not for this specific request */
+}
+
+/* Updated class names for clarity */
+.avatarOverlayIconContainer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent black shadow */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
+  border-radius: 50%; /* Ensure it matches avatar's shape if avatar is circular */
+  pointer-events: none; /* Overlay should not be interactive itself */
+}
+
+.avatarContainer:hover .avatarOverlayIconContainer {
+  opacity: 1;
+}
+
+.settingsIcon {
+  color: white; /* Icon color */
+  width: 50%; /* Adjust size as needed */
+  height: 50%; /* Adjust size as needed */
+}
+
+.avatarPencilIcon {
+  color: white; /* Icon color */
+  width: 40%; /* Adjust size as needed, pencil might look better slightly smaller */
+  height: 40%; /* Adjust size as needed */
+}

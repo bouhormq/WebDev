@@ -105,15 +105,74 @@ export const getUserMessages = async (req, res, next) => {
         }
         
         const messagesCollection = getCollection('messages');
-        // Find messages where authorId matches the requested userId
-        // We also need user info (username) for display, so we can use $lookup
-        // Or, fetch user info separately if needed, or store authorName on message
-        // For simplicity now, just fetch messages by authorId
-        const userMessages = await messagesCollection.find(
-            { authorId: new ObjectId(userId) }
-        ).sort({ createdAt: -1 }).toArray(); // Sort by newest first
         
-        // TODO: Potentially add author username to messages via $lookup or store denormalized
+        const userMessages = await messagesCollection.aggregate([
+            {
+                $match: { authorId: new ObjectId(userId) }
+            },
+            {
+                $lookup: { // Lookup author details
+                    from: "users",
+                    localField: "authorId",
+                    foreignField: "_id",
+                    as: "authorInfo"
+                }
+            },
+            {
+                $unwind: {
+                    path: "$authorInfo",
+                    preserveNullAndEmptyArrays: true // Keep messages even if author is somehow not found
+                }
+            },
+            // Lookup the first message of the thread to determine if the current message is the initial post
+            {
+                $lookup: {
+                    from: "messages", // Self-lookup on messages collection
+                    let: { current_thread_id: "$threadId" },
+                    pipeline: [
+                        { $match: { $expr: { $eq: ["$threadId", "$$current_thread_id"] } } },
+                        { $sort: { createdAt: 1 } }, // Sort by oldest first
+                        { $limit: 1 }, // Get only the first message
+                        { $project: { _id: 1 } } // Project only its ID
+                    ],
+                    as: "firstMessageOfThreadInfo" // Renamed to avoid conflict if a field is named firstMessageOfThread
+                }
+            },
+            {
+                $unwind: {
+                    path: "$firstMessageOfThreadInfo",
+                    preserveNullAndEmptyArrays: true // Keep message if its thread has no messages (shouldn't happen) or if lookup fails
+                }
+            },
+            {
+                $addFields: {
+                    authorName: { $ifNull: ["$authorInfo.displayName", "$authorInfo.username", "Unknown"] },
+                    profilePicUrl: { $ifNull: ["$authorInfo.profilePicUrl", ""] },
+                    isInitialPost: {
+                        $cond: {
+                            if: {
+                                $and: [
+                                    { $ne: ["$firstMessageOfThreadInfo", null] },
+                                    { $ne: ["$firstMessageOfThreadInfo._id", null] },
+                                    { $eq: ["$_id", "$firstMessageOfThreadInfo._id"] }
+                                ]
+                            },
+                            then: true,
+                            else: false
+                        }
+                    }
+                }
+            },
+            {
+                $project: { // Clean up temporary fields
+                    authorInfo: 0,
+                    firstMessageOfThreadInfo: 0
+                }
+            },
+            {
+                $sort: { createdAt: -1 } // Sort by newest first
+            }
+        ]).toArray();
 
         res.json(userMessages);
     } catch (error) {
