@@ -98,7 +98,7 @@ const SearchForm = ({ onSearch, isLoading }) => {
                 <FormItem style={{ width: '100%' }}>
                   <FormLabel>Keywords</FormLabel>
                   <FormControl>
-                    <Input style={{ width: '100%', boxSizing: 'border-box' }} placeholder="Search content..." {...field} disabled={isLoading}/>
+                    <Input style={{ width: '100%', boxSizing: 'border-box', backgroundColor: '#FDFBF9', border: '1px solid #D3C1B1' }} placeholder="Search content..." {...field} disabled={isLoading}/>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -113,7 +113,7 @@ const SearchForm = ({ onSearch, isLoading }) => {
                 <FormItem style={{ width: '100%' }}>
                   <FormLabel>Author Username</FormLabel>
                   <FormControl>
-                    <Input style={{ width: '100%', boxSizing: 'border-box' }} placeholder="Filter by author..." {...field} disabled={isLoading} />
+                    <Input style={{ width: '100%', boxSizing: 'border-box', backgroundColor: '#FDFBF9', border: '1px solid #D3C1B1'  }} placeholder="Filter by author..." {...field} disabled={isLoading} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -132,11 +132,11 @@ const SearchForm = ({ onSearch, isLoading }) => {
                         <FormControl>
                           <Button
                             variant={"outline"}
-                            style={{ ...dateButtonStyle, width: '100%' }}
+                            style={{ ...dateButtonStyle, width: '100%', backgroundColor: '#FDFBF9', border: '1px solid #D3C1B1'  }}
                             disabled={isLoading}
                           >
                             <CalendarIcon style={calendarIconStyle} />
-                            {field.value ? format(field.value, "PPP") : <span>Pick a start date</span>}
+                            {field.value ? format(field.value, "PPP") : <span style={{color:'grey'}}>Pick a start date</span>}
                           </Button>
                         </FormControl>
                       </PopoverTrigger>
@@ -144,6 +144,7 @@ const SearchForm = ({ onSearch, isLoading }) => {
                         <Calendar
                           mode="single"
                           selected={field.value}
+                          style={{backgroundColor: '#FDFBF9', border: '1px solid #D3C1B1' }}
                           onSelect={field.onChange}
                            disabled={(date) =>
                              form.getValues("endDate") ? date > form.getValues("endDate") : false
@@ -160,24 +161,25 @@ const SearchForm = ({ onSearch, isLoading }) => {
               control={form.control}
               name="endDate"
               render={({ field }) => (
-                <FormItem style={{ ...formItemColStyle, width: '100%' }}>
+                <FormItem style={{ ...formItemColStyle, width: '100%',  }}>
                   <FormLabel>End Date</FormLabel>
                   <Popover>
                     <PopoverTrigger asChild>
                       <FormControl>
                         <Button
                           variant={"outline"}
-                          style={{ ...dateButtonStyle, width: '100%' }}
+                          style={{ ...dateButtonStyle, width: '100%', backgroundColor: '#FDFBF9', border: '1px solid #D3C1B1'  }}
                           disabled={isLoading}
                         >
                           <CalendarIcon style={calendarIconStyle} />
-                          {field.value ? format(field.value, "PPP") : <span>Pick an end date</span>}
+                          {field.value ? format(field.value, "PPP") : <span style={{color:'grey'}}>Pick an end date</span>}
                         </Button>
                       </FormControl>
                     </PopoverTrigger>
                     <PopoverContent style={popoverContentStyle} align="start">
                       <Calendar
                         mode="single"
+                        style={{backgroundColor: '#FDFBF9', border: '1px solid #D3C1B1' }}
                         selected={field.value}
                         onSelect={field.onChange}
                         disabled={(date) =>

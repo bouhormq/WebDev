@@ -1,0 +1,83 @@
+/* Styles for SearchPage.jsx */
+
+.pageContainer {
+  background: #E0F2F7; /* Light blue-gray background, can be adjusted */
+  min-height: calc(100vh - var(--header-height, 60px));
+  padding: 2rem;
+}
+
+.contentWrapper {
+  max-width: 768px; /* Max width for content */
+  margin: 0 auto; /* Center content */
+  background: #FFFFFF; /* White background for the content area */
+  border-radius: 12px; /* Rounded corners */
+  box-shadow: 0 8px 24px rgba(132, 71, 62, 0.1); /* Subtle shadow */
+  padding: 2rem;
+  border: 1px solid purple; /* Softer border color */
+}
+
+.headerDiv {
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.h1Style {
+  font-size: 2.5rem; /* Slightly smaller than ClosedForum for differentiation */
+  font-weight: bold;
+  letter-spacing: -0.02em;
+  color: purple; /* Standard text color */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+.pMuted {
+  color: purple; /* Standard muted text color */
+  font-size: 1rem;
+  margin-top: 0.5rem;
+}
+
+.separator {
+  margin: 2rem 0; /* Adjusted margin */
+  background-color: var(--border);
+}
+
+.spinnerContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px; /* Adjusted height */
+}
+
+.errorAlert {
+  margin-top: 1.5rem; /* Adjusted margin */
+  border-color: var(--destructive);
+  background-color: hsl(var(--destructive) / 0.1); /* Lighter background for error */
+}
+
+.errorAlertDesc {
+  color: var(--destructive);
+  font-weight: 500;
+}
+
+/* Styles for the initial "Start Searching" message container */
+.initialMessageContainer {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px; /* Same as spinner for consistency */
+  padding: 1.5rem;
+  text-align: center;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+  background: hsl(var(--background)); /* Use theme background */
+}
+
+.initialTitleStyle {
+  font-size: 1.125rem; /* text-lg */
+  font-weight: 600; /* font-semibold */
+  color: var(--foreground);
+  margin-bottom: 0.5rem;
+}

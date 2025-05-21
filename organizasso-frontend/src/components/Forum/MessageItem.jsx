@@ -6,7 +6,32 @@ import { Trash2, ThumbsUp, ThumbsDown, MessageSquare } from 'lucide-react';
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { likeDislikeMessage } from '../../services/forumService'; 
 import ReplyForm from './ReplyForm';
-import { toast } from "sonner"; // Import toast
+import { toast } from "sonner";
+
+// Helper function to render content
+const renderContent = (content) => {
+  if (Array.isArray(content)) {
+    // If content is an array (e.g., from highlighting),
+    // React can render an array of strings and valid React elements directly.
+    // The highlightKeywords function should already be providing keys for <mark> elements.
+    return content; // Directly return the array of mixed strings and React elements
+  }
+
+  // Fallback for content that is not an array (e.g., plain string from non-search contexts)
+  // or if backend sends a different structure for non-highlighted content.
+  if (typeof content === 'object' && content !== null) {
+    // Example: if backend sometimes sends { snippet: "..." } for non-highlighted search results
+    if (Object.prototype.hasOwnProperty.call(content, 'snippet') && typeof content.snippet === 'string') {
+      return content.snippet;
+    }
+    // Fallback for other unexpected object structures
+    console.warn("MessageItem renderContent received an unexpected object:", content);
+    return '[Unsupported content object]'; 
+  }
+  
+  // Default: treat as a string
+  return String(content);
+};
 
 const MessageItem = ({ 
   message: initialMessage, 
@@ -29,6 +54,7 @@ const MessageItem = ({
   const [localLikeCount, setLocalLikeCount] = useState(initialMessage?.likeCount || 0);
   const [localDislikeCount, setLocalDislikeCount] = useState(initialMessage?.dislikeCount || 0);
   const [isLikingOrDisliking, setIsLikingOrDisliking] = useState(false); 
+  // eslint-disable-next-line no-unused-vars
   const [isSubmittingDirectReply, setIsSubmittingDirectReply] = useState(false); 
   const [showReplyForm, setShowReplyForm] = useState(false);
 
@@ -38,7 +64,13 @@ const MessageItem = ({
   console.log(`MessageItem (${message?._id || 'new'}): typeof onReply:`, typeof onReply);
   console.log(`MessageItem (${message?._id || 'new'}): showReplyForm state:`, showReplyForm);
   if (message) {
-    console.log(`MessageItem (${message._id}): initialMessage.content:`, initialMessage?.content?.substring(0, 30));
+    // Safely log a preview of initialMessage.content
+    const contentPreview = initialMessage && typeof initialMessage.content === 'string'
+      ? initialMessage.content.substring(0, 30)
+      : initialMessage?.content !== undefined && initialMessage?.content !== null 
+        ? String(initialMessage.content).substring(0, 30) 
+        : '[content not available]';
+    console.log(`MessageItem (${message._id}): initialMessage.content (preview):`, contentPreview);
     console.log(`MessageItem (${message._id}): nestingLevel:`, nestingLevel);
   }
   // DEBUGGING LOGS END
@@ -284,7 +316,8 @@ const MessageItem = ({
                   </Button>
                 )}
             </div>
-            <div style={contentDivStyle} dangerouslySetInnerHTML={{ __html: message.content }}></div>
+            {/* MODIFIED PART: Render content directly, not using dangerouslySetInnerHTML */}
+            <div style={contentDivStyle}>{renderContent(message.content)}</div>
             {finalContentImageUrl && (
               <img src={finalContentImageUrl} alt="Message content" style={contentImageStyle} />
             )}

@@ -13,7 +13,14 @@ const ReplyForm = ({ threadId, parentId = null, onReplySubmit, isLoading }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!content.trim() || isLoading) return;
+    console.log("[ReplyForm] handleSubmit called"); // Debug log
+    console.log("[ReplyForm] isLoading:", isLoading); // Debug log
+    console.log("[ReplyForm] content.trim().length:", content.trim().length); // Debug log
+
+    if (isLoading || content.trim().length === 0) {
+      console.log("[ReplyForm] Submission blocked: isLoading or empty content"); // Debug log
+      return;
+    }
 
     const success = await onReplySubmit(content, parentId, imageFile);
     if (success) {

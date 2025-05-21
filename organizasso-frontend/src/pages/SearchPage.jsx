@@ -6,12 +6,14 @@ import useAuth from '../hooks/useAuth';
 import { toast } from "sonner";
 import Spinner from '../components/Common/Spinner';
 import { searchMessages } from '../services/searchService';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"; // CardTitle might be used for initial message
 import { Separator } from "@/components/ui/separator";
+import { Alert, AlertDescription } from "@/components/ui/alert"; // Import Alert and AlertDescription
+import styles from './SearchPage.module.css'; // Import the new CSS module
 
 const SearchPage = () => {
   const { currentUser } = useAuth();
-  const [results, setResults] = useState(null); // null: initial, []: no results, [...]: results
+  const [results, setResults] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [lastSearchParams, setLastSearchParams] = useState(null);
@@ -21,94 +23,83 @@ const SearchPage = () => {
   }, []);
 
   const handleSearch = async (searchParams) => {
-    // Rename keywords to query for backend compatibility
     const backendParams = {
-      query: searchParams.keywords, // Map frontend 'keywords' to backend 'query'
-      author: searchParams.author, // Author search is TODO on backend
+      query: searchParams.keywords,
+      author: searchParams.author,
       startDate: searchParams.startDate,
       endDate: searchParams.endDate,
     };
 
     setIsLoading(true);
     setError(null);
-    setResults(null);
-    setLastSearchParams(searchParams); // Store original frontend params for display
+    setResults(null); // Keep as null to distinguish from empty results array
+    setLastSearchParams(searchParams);
+
+    // Frontend validation: Prevent API call if keywords are empty and no other criteria are set
+    if (!backendParams.query && !backendParams.author && !backendParams.startDate && !backendParams.endDate) {
+      toast.info("Please enter keywords or specify other search criteria.");
+      setIsLoading(false);
+      // setResults([]); // Optionally set to empty array to clear previous results, or keep null
+      return;
+    }
 
     try {
       console.log("SearchPage: Performing search with params:", backendParams);
       const searchResults = await searchMessages(backendParams);
-
-      // Ensure createdAt is a Date object for MessageItem/SearchResults formatting
       const formattedResults = searchResults.map(msg => ({
-          ...msg,
-          _id: msg._id,
-          createdAt: msg.createdAt ? new Date(msg.createdAt) : null
+        ...msg,
+        _id: msg._id,
+        createdAt: msg.createdAt ? new Date(msg.createdAt) : null
       }));
-
       setResults(formattedResults);
       if (formattedResults.length === 0) {
-         toast.info("No messages found matching your criteria.");
+        toast.info("No messages found matching your criteria.");
       }
     } catch (err) {
       const message = err.message || "Failed to perform search.";
       console.error("Search failed:", err);
       setError(message);
-      toast.error(message);
-      setResults([]); // Set to empty array on error
+      toast.error("Search Error", { description: message });
+      setResults([]); // Set to empty array on error to clear previous results
     } finally {
       setIsLoading(false);
     }
   };
 
-  // --- Inline Styles ---
-  // space-y-6 lost
-  const headerDivStyle = { marginBottom: '1.5rem' }; // mb-6
-  const h1Style = { fontSize: '1.875rem', fontWeight: 'bold', letterSpacing: '-0.02em' }; // text-3xl font-bold tracking-tight (sm size lost)
-  const pMutedStyle = { color: 'var(--muted-foreground)' }; // text-muted-foreground
-  const resultsContainerStyle = { marginTop: '1.5rem', minHeight: '200px' }; // mt-6 min-h-[200px]
-  const centeredFlexStyle = { display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' };
-  const errorTitleStyle = { fontSize: '1.25rem', fontWeight: 600, color: 'var(--destructive)' }; // text-xl font-semibold text-destructive
-  const initialTitleStyle = { fontSize: '1.125rem', fontWeight: 600 }; // text-lg font-semibold
-  // --- End Inline Styles ---
-
   return (
-    <PageWrapper>
-      <div>
-        <div style={headerDivStyle}>
-          <h1 style={h1Style}>Search Messages</h1>
-          <p style={pMutedStyle}>Find messages by keyword, author, or date range.</p>
+    <PageWrapper className={styles.pageContainer}>
+      <div className={styles.contentWrapper}>
+        <div className={styles.headerDiv}>
+          <h1 className={styles.h1Style}>
+            <span role="img" aria-label="forum">🔍</span> Search Messages 
+          </h1>
+          <p className={styles.pMuted}>Find messages by keyword, author, or date range.</p>
         </div>
 
         <SearchForm onSearch={handleSearch} isLoading={isLoading} />
 
-        {/* Divider below search section */}
-        <Separator style={{ margin: '2rem 0' }} />
+        <Separator className={styles.separator} />
 
-        <div style={resultsContainerStyle}>
-          {isLoading ? (
-            <div style={centeredFlexStyle}><Spinner size="lg" /></div>
-          ) : error ? (
-            <div style={centeredFlexStyle}>
-              <div style={{ width: '100%', maxWidth: '32rem', textAlign: 'center', padding: '1.5rem', border: '1px solid var(--destructive)', borderRadius: 'var(--radius)', background: '#fff' }}>
-                <div style={errorTitleStyle}>Search Error</div>
-                <p style={pMutedStyle}>{error}</p>
-              </div>
-            </div>
-          ) : results !== null ? (
-            <SearchResults 
-              results={results} 
-              currentUserId={currentUser?._id}
-              searchParams={lastSearchParams} 
-            />
-          ) : ( 
-            <div style={centeredFlexStyle}>
-              <div style={{ width: '100%', maxWidth: '32rem', textAlign: 'center', padding: '1.5rem', border: '1px dashed var(--border)', borderRadius: 'var(--radius)', background: '#fff' }}>
-                <div style={initialTitleStyle}>Start Searching</div>
-                <p style={pMutedStyle}>Enter your search criteria above to find messages.</p>
-              </div>
-            </div>
-          )}
-        </div>
+        {/* Conditional rendering for loading, error, results, or initial state */}
+        {isLoading ? (
+          <div className={styles.spinnerContainer}>
+            <Spinner size="lg" />
+          </div>
+        ) : error ? (
+          <Alert className={styles.errorAlert}>
+            <AlertDescription className={styles.errorAlertDesc}>{error}</AlertDescription>
+          </Alert>
+        ) : results !== null ? ( // results is not null, meaning a search has been attempted
+          <SearchResults 
+            results={results} 
+            currentUserId={currentUser?._id}
+            searchParams={lastSearchParams} 
+          />
+        ) : ( 
+          // Initial state: results is null (no search performed yet)
+          <div >
+          </div>
+        )}
       </div>
     </PageWrapper>
   );

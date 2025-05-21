@@ -1,67 +1,39 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import PageWrapper from '../components/Layout/PageWrapper';
+import NewThreadForm from '../components/Forum/NewThreadForm';
 import ThreadList from '../components/Forum/ThreadList';
-import { Button } from "@/components/ui/button";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { createThread, getClosedForumThreads } from '../services/forumService';
+import { getClosedForumThreads, createThread } from '../services/forumService'; // Updated import
+import useAuth from '../hooks/useAuth';
 import { toast } from "sonner";
 import Spinner from '../components/Common/Spinner';
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Separator } from "@/components/ui/separator";
+import styles from './ClosedForumPage.module.css'; // Updated CSS import
 import { Send, ShieldAlert } from 'lucide-react';
-import styles from './ClosedForumPage.module.css';
 
-const formSchema = z.object({
-  title: z.string().min(3, { message: "Title must be at least 3 characters." }).max(150, { message: "Title cannot exceed 150 characters." }),
-  content: z.string().min(10, { message: "Message content must be at least 10 characters." }).max(5000, { message: "Message content cannot exceed 5000 characters." }),
-});
-
-const ClosedForumPage = () => {
+const ClosedForumPage = () => { // Renamed component
+  const { currentUser, isAdmin } = useAuth(); // Use isAdmin directly from AuthContext
+  console.log('ClosedForumPage - currentUser from useAuth:', currentUser);
+  console.log('ClosedForumPage - isAdmin from useAuth:', isAdmin);
   const [threads, setThreads] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [openThreadIds, setOpenThreadIds] = useState(new Set());
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [openThreadIds, setOpenThreadIds] = useState(new Set()); // For toggling replies
 
   useEffect(() => {
-    document.title = 'Closed Forum | Organizasso';
+    document.title = 'Closed Forum 🛡️ | Organizasso'; // Updated document title
   }, []);
-
-  const form = useForm({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      title: "",
-      content: "",
-    },
-  });
-  const { isSubmitting } = form.formState;
 
   const fetchThreads = useCallback(async () => {
     setIsLoading(true);
     setError(null);
     try {
-      console.log('ClosedForumPage: Fetching threads from API...');
-      const fetchedThreads = await getClosedForumThreads();
-      const formattedThreads = fetchedThreads.map(thread => ({
-        ...thread,
-        createdAt: thread.createdAt ? new Date(thread.createdAt) : null,
-        lastPostTime: thread.lastReplyAt ? new Date(thread.lastReplyAt) : (thread.createdAt ? new Date(thread.createdAt) : null),
-      }));
-      setThreads(formattedThreads);
+      const fetchedThreads = await getClosedForumThreads(); // Updated service call
+      setThreads(fetchedThreads.map(t => ({...t, lastPostTime: new Date(t.lastPostTime)})));
     } catch (err) {
-      const message = err.message || "Failed to fetch closed forum threads.";
-      console.error(message, err);
-      setError(message);
-      toast.error(message);
+      setError(err.message);
+      toast.error(err.message);
     } finally {
       setIsLoading(false);
     }
@@ -71,30 +43,109 @@ const ClosedForumPage = () => {
     fetchThreads();
   }, [fetchThreads]);
 
-  const onSubmit = async (values) => {
+  // Corrected to accept title, content, imageFile as separate arguments
+  const handleCreateThread = async (title, content, imageFile) => {
+    if (!currentUser) {
+      toast.error("You must be logged in to create a thread.");
+      return;
+    }
+    if (!isAdmin) { // Admin check using isAdmin from AuthContext
+      toast.error("Only administrators can create threads in the closed forum.");
+      return;
+    }
+    setIsSubmitting(true);
     try {
-      console.log("Submitting new closed thread:", values);
-      const newThread = await createThread('closed', values.title, values.content);
-      toast.success(`Admin thread "${newThread.title}" created successfully!`);
-      form.reset();
-      await fetchThreads();
+      await createThread('closed', title, content, imageFile); // Updated forumType to 'closed'
+      toast.success("Thread created successfully! ✨");
+      fetchThreads(); 
     } catch (err) {
-      const message = err.message || "Failed to create closed thread.";
-      console.error("Closed thread creation failed:", err);
-      toast.error(message);
+      toast.error(err.message || "Failed to create thread.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  const handleInlineThreadView = (threadId) => {
-    setOpenThreadIds(prevOpenThreadIds => {
-      const newOpenThreadIds = new Set(prevOpenThreadIds);
-      if (newOpenThreadIds.has(threadId)) {
-        newOpenThreadIds.delete(threadId);
+  const handleThreadClick = (threadId) => {
+    setOpenThreadIds(prevIds => {
+      const newIds = new Set(prevIds);
+      if (newIds.has(threadId)) {
+        newIds.delete(threadId);
       } else {
-        newOpenThreadIds.add(threadId);
+        newIds.add(threadId);
       }
-      return newOpenThreadIds;
+      return newIds;
     });
+  };
+
+  const ensureThreadOpen = (threadId) => {
+    setOpenThreadIds(prevIds => {
+      if (prevIds.has(threadId)) {
+        return prevIds; // Already open, no change needed to the set
+      }
+      const newIds = new Set(prevIds);
+      newIds.add(threadId);
+      return newIds;
+    });
+  };
+
+  const handleReplyPosted = useCallback((threadId, newMessage) => {
+    // Update the specific thread in the local state
+    setThreads(prevThreads => 
+      prevThreads.map(t => {
+        if (t._id === threadId) {
+          // Increment messageCount and update lastPostTime
+          // If newMessage has a createdAt, use that, otherwise use current time
+          const newLastPostTime = newMessage?.createdAt ? new Date(newMessage.createdAt) : new Date();
+          return {
+            ...t,
+            messageCount: (t.messageCount || 0) + 1,
+            lastPostTime: newLastPostTime,
+            // Potentially update other fields if your newMessage object contains them
+            // e.g., lastReplier: newMessage.author.displayName,
+          };
+        }
+        return t;
+      })
+    );
+    // No need to call fetchThreads() if we update locally, unless ThreadDetailView needs it.
+    // The key change in ThreadItem should refresh ThreadDetailView for that specific item.
+    // toast.info(\"Refreshing threads after new reply...\");
+    // fetchThreads();
+  }, []);
+
+  // Placeholder for future implementation
+  const handleDeleteThread = async (threadId) => {
+    // Logic to delete a thread (e.g., call a service, update state)
+    // For now, it can be a placeholder or log a message
+    console.log(`Attempting to delete thread: ${threadId}`);
+    toast.info(`Delete functionality for thread ${threadId} is not yet implemented.`);
+    // Example:
+    // try {
+    //   await deleteThreadService(threadId, 'closed');
+    //   toast.success("Thread deleted successfully.");
+    //   fetchThreads(); // Refresh threads list
+    // } catch (err) {
+    //   toast.error(err.message || "Failed to delete thread.");
+    // }
+  };
+
+  // Placeholder for future implementation
+  const handleDeleteMessage = async (messageId, threadId) => {
+    // Logic to delete a message (e.g., call a service, update state)
+    // For now, it can be a placeholder or log a message
+    console.log(`Attempting to delete message: ${messageId} from thread: ${threadId}`);
+    toast.info(`Delete functionality for message ${messageId} is not yet implemented.`);
+    // Example:
+    // try {
+    //   await deleteMessageService(messageId, threadId, 'closed');
+    //   toast.success("Message deleted successfully.");
+    //   // Optionally, refresh the specific thread's messages or the entire thread list
+    //   // This might involve a more granular update than fetchThreads()
+    //   // For simplicity, you might refetch the thread details or all threads
+    //   fetchThreads(); 
+    // } catch (err) {
+    //   toast.error(err.message || "Failed to delete message.");
+    // }
   };
 
   return (
@@ -104,90 +155,45 @@ const ClosedForumPage = () => {
           <h1 className={styles.h1Style}>
             <span role="img" aria-label="forum">📢</span> Closed Forum <ShieldAlert className={styles.shieldIcon} />
           </h1>
-          <p className={styles.pMuted}>Confidential discussions for administrators only.</p>
+          <p className={styles.pMuted}>Administrator-only discussions, internal announcements, and board topics.</p> {/* Updated descriptive text */}
         </div>
 
-        <div>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)}>
-              <div className={styles.formInputDiv}>
-                <div className={styles.formLabel}>Title</div>
-                <FormField
-                  control={form.control}
-                  name="title"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormControl>
-                        <Input placeholder="Admin topic title (optional, but recommended)" {...field} className={`${styles.inputField} ${styles.formInputBackground}`} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
+        {isAdmin && ( /* Conditionally render NewThreadForm for admins using isAdmin from AuthContext */
+          <NewThreadForm 
+            onSubmit={handleCreateThread} 
+            isLoading={isSubmitting} 
+            forumType="closed" /* Pass forumType prop */
+          />
+        )}
+        
+        <Separator className={styles.separator} />
 
-              <div className={styles.formInputDiv}>
-                <div className={styles.formLabel}>Content</div>
-                <FormField
-                  control={form.control}
-                  name="content"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormControl>
-                        <Textarea
-                          placeholder="Start the admin discussion here..."
-                          className={`${styles.textareaField} ${styles.formInputBackground}`}
-                          {...field}
-                          rows={4}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <div className={styles.submitButtonContainer}>
-                <Button type="submit" disabled={isSubmitting} size="sm" className={styles.submitButton}>
-                  {isSubmitting ? <Spinner size="sm" className={styles.submitButtonSpinner} /> : <Send className={styles.submitButtonIcon} />}
-                  Post Thread
-                </Button>
-              </div>
-            </form>
-          </Form>
-        </div>
-
-        <hr className={styles.separator} />
-
-        <div className={styles.listContainer}>
-          {isLoading ? (
-            <div className={styles.spinnerContainer}><Spinner size="lg" /></div>
-          ) : error ? (
-            <div className={styles.centeredFlex}>
-              <div className={`${styles.errorAlert} ${styles.errorContainer}`}>
-                <h2 className={styles.errorTitle}>Error Loading Forum</h2>
-                <p className={styles.errorAlertDesc}>{error}</p>
-              </div>
-            </div>
-          ) : threads.length > 0 ? (
-            <ThreadList 
-              threads={threads} 
-              forumType="closed" 
-              onThreadClick={handleInlineThreadView}
-              openThreadIds={openThreadIds}
-            />
-          ) : (
-            <div className={styles.centeredFlex}>
-              <div className={styles.noThreadsContainer}>
-                <h2 className={styles.noThreadsTitle}>No Threads Yet</h2>
-                <p className={`${styles.pMuted} ${styles.noThreadsParagraph}`}>No confidential discussions have been started.</p>
-              </div>
-            </div>
-          )}
-        </div>
+        {isLoading && (
+          <div className={styles.spinnerContainer}>
+            <Spinner size="xl" />
+          </div>
+        )}
+        {error && (
+          <Alert className={styles.errorAlert}>
+            <AlertDescription className={styles.errorAlertDesc}>{error}</AlertDescription>
+          </Alert>
+        )}
+        {!isLoading && !error && (
+          <ThreadList 
+            threads={threads} 
+            onThreadClick={handleThreadClick} 
+            openThreadIds={openThreadIds}
+            onReplyPosted={handleReplyPosted} 
+            ensureThreadOpen={ensureThreadOpen} 
+            forumType="closed" // Pass forumType prop
+            currentUserId={currentUser?._id} // Pass currentUserId
+            onDeleteThread={handleDeleteThread} // Pass onDeleteThread
+            onDeleteMessage={handleDeleteMessage} // Pass onDeleteMessage
+          />
+        )}
       </div>
     </PageWrapper>
   );
 };
 
-export default ClosedForumPage;
+export default ClosedForumPage; // Updated export

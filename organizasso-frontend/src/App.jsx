@@ -10,7 +10,6 @@ import RegisterPage from './pages/RegisterPage'
 import ProfilePage from './pages/ProfilePage'
 import OpenForumPage from './pages/OpenForumPage'
 import ClosedForumPage from './pages/ClosedForumPage'
-import ThreadViewPage from './pages/ThreadViewPage'
 import SearchPage from './pages/SearchPage'
 import AdminPanelPage from './pages/AdminPanelPage'
 import NotFoundPage from './pages/NotFoundPage'
@@ -63,7 +62,6 @@ function AppRoutes() {
       {/* <Route path="/dashboard" element={<ProtectedRoute><DashBoardPage /></ProtectedRoute>} /> */}
       <Route path="/profile/:userId" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
       <Route path="/forum/open" element={<ProtectedRoute><OpenForumPage /></ProtectedRoute>} />
-      <Route path="/forum/thread/:threadId" element={<ProtectedRoute><ThreadViewPage /></ProtectedRoute>} />
       <Route path="/search" element={<ProtectedRoute><SearchPage /></ProtectedRoute>} />
 
       {/* Admin Routes (require login + approval + admin role) */}
