@@ -8,7 +8,7 @@ import { postReply, likeDislikeMessage } from '../../services/forumService'; // 
 import { deleteUserMessage } from '../../services/userService'; // Import deleteUserMessage
 import { toast } from "sonner"; // For showing notifications
 import Spinner from '../Common/Spinner'; // For loading state in reply button
-import { AuthContext } from '../../contexts/AuthContext'; // Import AuthContext
+import { AuthContext } from '../../contexts/authContext.jsx'; // Import AuthContext
 
 // --- Inline Style for Thread Content ---
 const threadContentStyle = {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react'; // Added useMemo
+import React, { useState, useEffect, useMemo } from 'react';
 import { Button } from "@/components/ui/button";
 import { Link } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
@@ -7,6 +7,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { likeDislikeMessage } from '../../services/forumService'; 
 import ReplyForm from './ReplyForm';
 import { toast } from "sonner";
+import styles from './styles/MessageItem.module.css';
 
 // Helper function to render content
 const renderContent = (content) => {
@@ -40,8 +41,8 @@ const MessageItem = ({
   onReply, 
   nestingLevel = 0, 
   replyFormIsLoading: parentReplyFormIsLoading,
-  isUserLoggedIn, // Received from MessageList
-  currentUserId // Received from MessageList
+  isUserLoggedIn,
+  currentUserId
 }) => {
   const [message, setMessage] = useState(initialMessage);
 
@@ -54,7 +55,6 @@ const MessageItem = ({
   const [localLikeCount, setLocalLikeCount] = useState(initialMessage?.likeCount || 0);
   const [localDislikeCount, setLocalDislikeCount] = useState(initialMessage?.dislikeCount || 0);
   const [isLikingOrDisliking, setIsLikingOrDisliking] = useState(false); 
-  // eslint-disable-next-line no-unused-vars
   const [isSubmittingDirectReply, setIsSubmittingDirectReply] = useState(false); 
   const [showReplyForm, setShowReplyForm] = useState(false);
 
@@ -99,15 +99,10 @@ const MessageItem = ({
     if (currentUser && message) {
       setIsLiked(likesArray.includes(currentUser._id));
       setIsDisliked(dislikesArray.includes(currentUser._id));
-      // Update local counts if the message object (which includes counts) changes
-      // This is important if the message prop is updated from parent after a reply or other action
       setLocalLikeCount(message.likeCount || 0);
       setLocalDislikeCount(message.dislikeCount || 0);
     }
-    // Not resetting to false here as this effect primarily reacts to changes in the 'message' state
-    // or 'currentUser'. The initial state is handled by the first useEffect.
   }, [message, currentUser]);
-
 
   let timeAgo = 'Unknown time';
   if (message.createdAt) {
@@ -160,66 +155,20 @@ const MessageItem = ({
   };
 
   const indentSize = 20;
-  const outerDivStyle = {
-    position: 'relative', 
-    display: 'flex',
-    alignItems: 'flex-start',
-    gap: '0.75rem',
-    paddingTop: '0.75rem',
-    paddingBottom: '0.75rem',
-    paddingRight: '0.5rem',
-    paddingLeft: `${10 + nestingLevel * indentSize}px`, 
+  const outerDivDynamicStyle = {
+    paddingLeft: `${10 + nestingLevel * indentSize}px`,
   };
 
-  const avatarStyle = { height: '2rem', width: '2rem' };
-  const infoDivStyle = { flex: 1, paddingTop: '0.1rem' }; 
-  const headerDivStyle = { display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.25rem' };
-  const authorInfoDivStyle = { display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem' };
-  const authorLinkStyle = { fontWeight: 600, color: 'var(--foreground)', textDecoration: 'none' };
-  const timeSpanStyle = { fontSize: '0.75rem', color: 'var(--muted-foreground)' };
-  const deleteButtonStyle = {
-    display: 'inline-flex',
-    alignItems: 'center',
-    gap: '0.5rem',
-    border: '1px solid #d1d5db',
-    background: '#fff',
-    color: 'var(--muted-foreground)',
-    borderRadius: 'var(--radius)',
-    padding: '0.25rem 0.75rem',
-    fontSize: '0.95rem',
-    fontWeight: 500,
-    cursor: 'pointer',
-    transition: 'background 0.15s, border 0.15s',
+  const getIconButtonClassName = (isActive, type = 'default') => {
+    let classNames = `${styles.iconButton} `;
+    if (isActive) {
+      classNames += type === 'dislike' ? styles.iconButtonActiveDislike : styles.iconButtonActiveLike;
+    } else {
+      classNames += styles.iconButtonInactive;
+    }
+    return classNames;
   };
-  const deleteIconStyle = { height: '1rem', width: '1rem'};
-  const contentDivStyle = { fontSize: '0.875rem', color: 'var(--foreground)', whiteSpace: 'pre-wrap', wordBreak: 'break-words', lineHeight: '1.5' };
-  const contentImageStyle = {
-    maxWidth: '100%', 
-    maxHeight: '400px', 
-    marginTop: '0.75rem', 
-    borderRadius: 'var(--radius)', 
-    objectFit: 'contain', 
-  };
-  const actionsDivStyle = {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '0.75rem',
-    marginTop: '0.5rem',
-  };
-  const iconButtonStyle = (isActive, type = 'default') => ({
-    display: 'flex',
-    alignItems: 'center',
-    gap: '0.25rem',
-    padding: '0.25rem 0.5rem',
-    fontSize: '0.8rem',
-    color: isActive ? (type === 'dislike' ? 'var(--destructive)' : 'var(--primary)') : 'var(--muted-foreground)',
-    // Adding a subtle border for inactive, and stronger for active to match ThreadItem
-    border: '1px solid transparent', // Keep it subtle
-    borderRadius: 'var(--radius)',
-    backgroundColor: 'transparent',
-    lineHeight: '1',
-  });
-
+  
   const handleLikeDislike = async (actionType) => {
     if (!currentUser || !message?._id || isLikingOrDisliking) {
       if (!currentUser) toast.error("You must be logged in to react.");
@@ -227,7 +176,6 @@ const MessageItem = ({
     }
     setIsLikingOrDisliking(true);
     
-    // Optimistic UI updates
     const originalState = { 
       isLiked, 
       isDisliked, 
@@ -238,39 +186,33 @@ const MessageItem = ({
     if (actionType === 'like') {
       setLocalLikeCount(prev => isLiked ? prev - 1 : prev + 1);
       setIsLiked(!isLiked);
-      if (isDisliked) { // If previously disliked, remove dislike
+      if (isDisliked) {
         setLocalDislikeCount(prev => prev - 1);
         setIsDisliked(false);
       }
     } else if (actionType === 'dislike') {
       setLocalDislikeCount(prev => isDisliked ? prev - 1 : prev + 1);
       setIsDisliked(!isDisliked);
-      if (isLiked) { // If previously liked, remove like
+      if (isLiked) {
         setLocalLikeCount(prev => prev - 1);
         setIsLiked(false);
       }
     }
 
     try {
-      // The API returns the updated message object, including its new like/dislike arrays and counts
       const updatedMessageData = await likeDislikeMessage(message._id, actionType);
-      
-      // Update state with data from the server to ensure consistency
-      setMessage(prevMessage => ({ ...prevMessage, ...updatedMessageData.message })); // Update the whole message state
+      setMessage(prevMessage => ({ ...prevMessage, ...updatedMessageData.message }));
       setLocalLikeCount(updatedMessageData.message.likeCount);
       setLocalDislikeCount(updatedMessageData.message.dislikeCount);
-      // Server is the source of truth for who liked/disliked
       if (currentUser) {
         setIsLiked(updatedMessageData.message.likes.includes(currentUser._id));
         setIsDisliked(updatedMessageData.message.dislikes.includes(currentUser._id));
       }
-
     } catch (error) {
       console.error(`Failed to ${actionType} message:`, error);
       toast.error("Action Failed", {
         description: error.message || `Could not ${actionType} the message. Please try again.`,
       });
-      // Revert optimistic updates on error
       setIsLiked(originalState.isLiked);
       setIsDisliked(originalState.isDisliked);
       setLocalLikeCount(originalState.localLikeCount);
@@ -282,8 +224,8 @@ const MessageItem = ({
 
   return (
     <>
-      <div style={outerDivStyle}>
-        <Avatar style={avatarStyle}>
+      <div className={styles.outerDiv} style={outerDivDynamicStyle}>
+        <Avatar className={styles.avatar}>
            {finalProfilePicUrl ? (
               <AvatarImage src={finalProfilePicUrl} alt={message.authorName} />
            ) : (
@@ -291,85 +233,78 @@ const MessageItem = ({
            )}
         </Avatar>
 
-         <div style={infoDivStyle}>
-            <div style={headerDivStyle}>
-               <div style={authorInfoDivStyle}>
+         <div className={styles.infoDiv}>
+            <div className={styles.headerDiv}>
+               <div className={styles.authorInfoDiv}>
                    <Link 
                       to={`/profile/${message.authorId}`} 
-                      style={authorLinkStyle}
+                      className={styles.authorLink}
                     >
                        {message.authorName || 'Unknown User'}
                     </Link>
-                   <span style={timeSpanStyle}>· {timeAgo}</span>
+                   <span className={styles.timeSpan}>· {timeAgo}</span>
                </div>
-                {/* isOwnMessage is determined by MessageList comparing authorId to currentUserId prop */}
-                {/* onDelete is also determined by MessageList based on the same comparison */} 
                 {isOwnMessage && onDelete && (
                   <Button 
                     variant="ghost"
                     size="icon"
-                    style={{...deleteButtonStyle, padding: '0.25rem'}}
+                    className={styles.deleteButton}
                     onClick={handleDeleteClick}
                     title="Delete message"
                   >
-                    <Trash2 style={deleteIconStyle} />
+                    <Trash2 className={styles.deleteIcon} />
                   </Button>
                 )}
             </div>
-            {/* MODIFIED PART: Render content directly, not using dangerouslySetInnerHTML */}
-            <div style={contentDivStyle}>{renderContent(message.content)}</div>
+            <div className={styles.contentDiv}>{renderContent(message.content)}</div>
             {finalContentImageUrl && (
-              <img src={finalContentImageUrl} alt="Message content" style={contentImageStyle} />
+              <img src={finalContentImageUrl} alt="Message content" className={styles.contentImage} />
             )}
-            <div style={actionsDivStyle}>
-              {/* Like Button */}
+            <div className={styles.actionsDiv}>
               {currentUser && (
                 <Button
                   variant="ghost"
                   size="sm"
-                  style={iconButtonStyle(isLiked, 'like')}
+                  className={getIconButtonClassName(isLiked, 'like')}
                   onClick={() => handleLikeDislike('like')}
                   disabled={isLikingOrDisliking || !currentUser}
                   title={isLiked ? "Unlike" : "Like"}
                 >
                   <ThumbsUp size={16} className={isLiked ? "fill-primary" : ""} />
-                  <span style={{ marginLeft: '0.25rem' }}>{localLikeCount}</span>
+                  <span>{localLikeCount}</span>
                 </Button>
               )}
 
-              {/* Dislike Button */}
               {currentUser && (
                 <Button
                   variant="ghost"
                   size="sm"
-                  style={iconButtonStyle(isDisliked, 'dislike')}
+                  className={getIconButtonClassName(isDisliked, 'dislike')}
                   onClick={() => handleLikeDislike('dislike')}
                   disabled={isLikingOrDisliking || !currentUser}
                   title={isDisliked ? "Undislike" : "Dislike"}
                 >
                   <ThumbsDown size={16} className={isDisliked ? "fill-destructive" : ""} /> 
-                  <span style={{ marginLeft: '0.25rem' }}>{localDislikeCount}</span>
+                  <span>{localDislikeCount}</span>
                 </Button>
               )}
               
-              {/* Reply Button */}
               {isUserLoggedIn && onReply && (
                 <Button
                   variant="ghost"
                   size="sm"
-                  style={iconButtonStyle(false)} 
+                  className={getIconButtonClassName(false)}
                   onClick={handleReplyClick}
                   title="Reply to this message"
                   disabled={isSubmittingDirectReply || parentReplyFormIsLoading || !isUserLoggedIn} 
                 >
                   <MessageSquare size={16} />
-                  <span style={{ marginLeft: '0.25rem' }}>Reply</span>
+                  <span>Reply</span>
                 </Button>
               )}
             </div>
          </div>
       </div>
-      {/* Use isUserLoggedIn prop for ReplyForm visibility */}
       {showReplyForm && isUserLoggedIn && onReply && (
          <ReplyForm 
             threadId={message.threadId}

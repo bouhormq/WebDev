@@ -3,8 +3,9 @@ import { getThreadMessages } from '../../services/forumService';
 import MessageList from './MessageList';
 import Spinner from '../Common/Spinner';
 import { Alert, AlertDescription } from "@/components/ui/alert"; // For errors
+import styles from './styles/ThreadDetailView.module.css'; // Import CSS module
 
-const ThreadDetailView = ({ threadId, originalThreadContent, onPostReply, isPostingReply, currentUserId, onDeleteMessage }) => { // Added currentUserId and onDeleteMessage
+const ThreadDetailView = ({ threadId, originalThreadContent, onPostReply, isPostingReply, currentUserId, onDeleteMessage }) => {
   const [messages, setMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -38,41 +39,35 @@ const ThreadDetailView = ({ threadId, originalThreadContent, onPostReply, isPost
     fetchRepliesData();
   }, [fetchRepliesData]);
 
-  // --- Inline Styles ---
-  const detailViewContainerStyle = { marginTop: '0.5rem', marginBottom: '1rem', padding: '0 0.5rem' };
-  const centeredFlexStyle = { display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100px' };
-  const repliesHeaderStyle = { fontSize: '1rem', fontWeight: '600', marginBottom: '0.5rem', borderTop: '1px solid var(--border)', paddingTop: '1rem' };
-  // --- End Inline Styles ---
-
   if (!threadId) return null;
 
   if (error) {
     return (
-      <Alert variant="destructive" style={{margin: '1rem'}}>
+      <Alert variant="destructive" className={styles.errorAlertStyle}>
         <AlertDescription>{error}</AlertDescription>
       </Alert>
     );
   }
 
   return (
-    <div style={detailViewContainerStyle}>
+    <div className={styles.detailViewContainerStyle}>
       {/* Replies Section */}
       {isLoading ? (
-        <div style={centeredFlexStyle}><Spinner /></div>
+        <div className={styles.centeredFlexStyle}><Spinner /></div>
       ) : messages.length > 0 ? (
         <>
-          <h3 style={repliesHeaderStyle}>Replies</h3>
+          <h3 className={styles.repliesHeaderStyle}>Replies</h3>
           <MessageList 
             messages={messages} 
             threadId={threadId} 
-            onDirectReplySubmit={onPostReply} // Pass onPostReply as onDirectReplySubmit
-            replyFormIsLoading={isPostingReply} // Pass isPostingReply as replyFormIsLoading
-            currentUserId={currentUserId} // Pass currentUserId down
-            onDeleteRequest={onDeleteMessage} // Pass onDeleteMessage as onDeleteRequest to MessageList
+            onDirectReplySubmit={onPostReply} 
+            replyFormIsLoading={isPostingReply} 
+            currentUserId={currentUserId} 
+            onDeleteRequest={onDeleteMessage} 
           />
         </>
       ) : (
-        !error && <p style={{ fontSize: '0.875rem', color: 'var(--muted-foreground)', textAlign: 'center', padding: '1rem' }}>No replies yet.</p>
+        !error && <p className={styles.noRepliesTextStyle}>No replies yet.</p>
       )}
     </div>
   );

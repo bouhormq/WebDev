@@ -1,0 +1,23 @@
+/* styles/UserMessages.module.css */
+.container {
+  background: var(--card-background, #fff); /* Assuming #fff is a fallback */
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  margin-top: 0; /* Explicitly set, though it was 0 in inline style */
+}
+
+.title {
+  font-size: 1.125rem; /* Corresponds to text-lg or similar */
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.emptyStateDiv {
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.emptyStateP {
+  color: var(--muted-foreground);
+  font-style: italic;
+}

@@ -1,0 +1,29 @@
+.loginFormContainer {
+  padding: 1.5rem; /* p-6 */
+}
+
+.alert {
+  margin-bottom: 1rem; /* mb-4 */
+}
+
+.alertIcon {
+  height: 1rem; /* h-4 */
+  width: 1rem;  /* w-4 */
+}
+
+.formItem {
+  margin-bottom: 1.5rem; /* mb-6 */
+}
+
+.inputField {
+  width: 100%;
+}
+
+.submitButton {
+  width: 100%;
+  margin-top: 0.75rem; /* mt-3 */
+}
+
+.spinner {
+  margin-right: 0.5rem; /* mr-2 */
+}

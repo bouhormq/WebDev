@@ -438,7 +438,7 @@ Visually represented in the provided dependency graph image (`image_e23876.jpg`)
 │   │   │   ├── Profile/
 │   │   │   ├── Search/
 │   │   │   └── ui/       # Shadcn/ui components (generated)
-│   │   ├── contexts/   # React Context (AuthContext.jsx)
+│   │   ├── contexts/   # React Context (authContext.jsx)
 │   │   ├── hooks/      # Custom React hooks (useAuth.js, useApi.js [placeholder])
 │   │   ├── lib/        # Utility libraries (e.g., Shadcn utils.js)
 │   │   ├── pages/      # Top-level page components corresponding to routes

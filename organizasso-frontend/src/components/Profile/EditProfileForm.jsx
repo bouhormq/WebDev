@@ -5,6 +5,7 @@ import { Input } from '../ui/input';
 import { Button } from '../ui/button';
 import { Label } from '../ui/label';
 import { toast } from 'sonner';
+import styles from './styles/EditProfileForm.module.css'; // Import CSS module
 
 const EditProfileForm = ({ currentUser, onProfileUpdate }) => {
   const [displayName, setDisplayName] = useState('');
@@ -82,34 +83,34 @@ const EditProfileForm = ({ currentUser, onProfileUpdate }) => {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className={styles.form}>
       <div>
-        <Label htmlFor="displayName">Display Name</Label>
+        <Label htmlFor="displayName" className={styles.label}>Display Name</Label>
         <Input
           id="displayName"
           type="text"
           value={displayName}
           onChange={(e) => setDisplayName(e.target.value)}
           placeholder="Enter your display name"
-          className="mt-1"
+          className={styles.input}
         />
       </div>
       <div>
-        <Label htmlFor="profilePic">Profile Picture</Label>
+        <Label htmlFor="profilePic" className={styles.label}>Profile Picture</Label>
         <Input
           id="profilePic"
           type="file"
           accept="image/*"
           onChange={handleFileChange}
-          className="mt-1"
+          className={styles.input}
         />
         {profilePicPreview && (
-          <div className="mt-2">
-            <img src={profilePicPreview} alt="Profile Preview" className="h-20 w-20 rounded-full object-cover" />
+          <div className={styles.profilePicPreviewContainer}>
+            <img src={profilePicPreview} alt="Profile Preview" className={styles.profilePicPreview} />
           </div>
         )}
       </div>
-      <Button type="submit" disabled={isLoading} className="w-full">
+      <Button type="submit" disabled={isLoading} className={styles.submitButton}>
         {isLoading ? 'Saving...' : 'Save Changes'}
       </Button>
     </form>

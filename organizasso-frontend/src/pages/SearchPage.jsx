@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import PageWrapper from '../components/Layout/PageWrapper';
 import SearchForm from '../components/Search/SearchForm';
 import SearchResults from '../components/Search/SearchResults';
@@ -6,10 +6,10 @@ import useAuth from '../hooks/useAuth';
 import { toast } from "sonner";
 import Spinner from '../components/Common/Spinner';
 import { searchMessages } from '../services/searchService';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"; // CardTitle might be used for initial message
+import { CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription } from "@/components/ui/alert"; // Import Alert and AlertDescription
-import styles from './SearchPage.module.css'; // Import the new CSS module
+import styles from './styles/SearchPage.module.css'; // Import the new CSS module
 
 const SearchPage = () => {
   const { currentUser } = useAuth();
@@ -39,7 +39,6 @@ const SearchPage = () => {
     if (!backendParams.query && !backendParams.author && !backendParams.startDate && !backendParams.endDate) {
       toast.info("Please enter keywords or specify other search criteria.");
       setIsLoading(false);
-      // setResults([]); // Optionally set to empty array to clear previous results, or keep null
       return;
     }
 
@@ -97,7 +96,9 @@ const SearchPage = () => {
           />
         ) : ( 
           // Initial state: results is null (no search performed yet)
-          <div >
+          <div className={styles.initialMessageContainer}>
+            <CardTitle className={styles.initialTitleStyle}>Start Searching</CardTitle>
+            <p className={styles.pMuted}>Enter your query above to find messages.</p>
           </div>
         )}
       </div>

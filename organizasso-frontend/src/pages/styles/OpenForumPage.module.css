@@ -15,7 +15,7 @@
   font-size: 2.5rem;
   font-weight: bold;
   letter-spacing: -0.02em;
-  color: #D9534F;
+  color: #00796B;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -23,7 +23,7 @@
 }
 
 .pMuted {
-  color: #D9534F;
+  color: #004D40;
   font-size: 1.1rem;
   margin-top: 0.5rem;
 }
@@ -33,9 +33,9 @@
   margin: 0 auto;
   background: #FFFFFF;
   border-radius: 12px;
-  box-shadow: 0 8px 24px #84473e1a;
+  box-shadow: 0 8px 24px rgba(0, 105, 92, 0.1);
   padding: 2rem;
-  border: 1px solid #D9534F;
+  border: 1px solid #B2DFDB;
 }
 
 .errorAlert {
@@ -59,4 +59,4 @@
 .separator {
   margin: 2.5rem 0;
   background-color: var(--border);;
-} 
+}

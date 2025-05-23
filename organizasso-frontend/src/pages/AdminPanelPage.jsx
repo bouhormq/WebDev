@@ -26,7 +26,7 @@ import useAuth from '../hooks/useAuth';
 import { Card, CardContent} from "@/components/ui/card"; // For empty states
 import { UserCheck, UserCog } from 'lucide-react'; // Icons for tabs
 import { Separator } from "@/components/ui/separator"; // Import Separator
-import styles from './AdminPanelPage.module.css'; // Import the new CSS module
+import styles from './styles/AdminPanelPage.module.css'; // Import the new CSS module
 
 const AdminPanelPage = () => {
   const { currentUser } = useAuth();
@@ -144,10 +144,6 @@ const AdminPanelPage = () => {
       if (action === 'reject') {
         responseMessage = (await rejectRegistration(userId)).message;
         await fetchPending(); 
-      } else if (action === 'demote') {
-         if (userId === currentUser?._id) throw new Error("Cannot change your own admin status."); 
-         responseMessage = (await revokeAdminStatus(userId)).message;
-         await fetchMembers();
       }
        toast.success(responseMessage || `Action "${action}" successful.`);
     } catch (err) {
@@ -185,13 +181,6 @@ const AdminPanelPage = () => {
 
   return (
     <PageWrapper className={styles.pageContainer}>
-      {/* Add style tag to inject custom CSS - consider moving to CSS module or global CSS */}
-      <style dangerouslySetInnerHTML={{ __html: `
-        .black-white-tab[data-state="active"] {
-          background-color: #000000 !important;
-          color: #FFFFFF !important;
-        }
-      `}} />
         
       <div className={styles.contentWrapper}>
         <div className={styles.headerDiv}>
@@ -203,25 +192,23 @@ const AdminPanelPage = () => {
 
         <Separator className={styles.separator} />
 
-        <Tabs defaultValue="pending" style={{ width: '100%' }}> {/* Keep existing Tabs styling for now or move to CSS module */}
-          <TabsList style={{ display: 'grid', width: '100%', gridTemplateColumns: 'repeat(2, 1fr)', height: '2.75rem' }}> {/* Keep existing TabsList styling */}
+        <Tabs defaultValue="pending" className={styles.tabsRoot}>
+          <TabsList className={styles.tabsList}>
             <TabsTrigger 
               value="pending" 
-              style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }} /* Keep existing TabsTrigger styling */
-              className="black-white-tab"
+              className={`${styles.tabsTrigger} black-white-tab`} // Added black-white-tab for specific active state styling if needed
             >
-              <UserCheck style={{ height: '1rem', width: '1rem' }}/> Pending ({pendingUsers.length})
+              <UserCheck className={styles.tabIcon}/> Pending ({pendingUsers.length})
             </TabsTrigger>
             <TabsTrigger 
               value="manageAdmins" 
-              style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }} /* Keep existing TabsTrigger styling */
-              className="black-white-tab"
+              className={`${styles.tabsTrigger} black-white-tab`} // Added black-white-tab
             >
-              <UserCog style={{ height: '1rem', width: '1rem' }}/> Members ({members.length})
+              <UserCog className={styles.tabIcon}/> Members ({members.length})
             </TabsTrigger>
           </TabsList>
           
-          <TabsContent value="pending" style={{ marginTop: '1rem', width: '100%' }}>
+          <TabsContent value="pending" className={styles.tabsContent}>
              <StatusDisplay isLoading={isLoadingPending} error={errorPending} emptyMessage="No pending registrations found.">
                {/* Only render UsernameList if there are users */}
                {pendingUsers.length > 0 && (
@@ -236,7 +223,7 @@ const AdminPanelPage = () => {
              </StatusDisplay>
           </TabsContent>
 
-          <TabsContent value="manageAdmins" style={{ marginTop: '1rem', width: '100%' }}>
+          <TabsContent value="manageAdmins" className={styles.tabsContent}>
              <StatusDisplay isLoading={isLoadingMembers} error={errorMembers} emptyMessage="No members found.">
                {members.length > 0 && (
                    <UsernameList 
@@ -268,7 +255,7 @@ const AdminPanelPage = () => {
             <AlertDialogAction 
               onClick={confirmAndExecuteAction}
               // Apply variant directly if available, or use a conditional class from CSS module
-              variant={actionToConfirm?.action === 'reject' || actionToConfirm?.action === 'demote' ? "destructive" : "default"}
+              variant={actionToConfirm?.action === 'reject' ? "destructive" : "default"}
             >
                   Confirm {actionToConfirm?.action}
               </AlertDialogAction>

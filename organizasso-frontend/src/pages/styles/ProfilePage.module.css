@@ -315,3 +315,11 @@
   width: 40%; /* Adjust size as needed, pencil might look better slightly smaller */
   height: 40%; /* Adjust size as needed */
 }
+
+.notFoundTitle {
+  text-align: center;
+}
+
+.hiddenInput {
+  display: none;
+}

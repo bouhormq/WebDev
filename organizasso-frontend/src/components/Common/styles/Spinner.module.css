@@ -1,0 +1,24 @@
+.spinnerBase {
+  color: var(--primary);
+  /* animation: spin 1s linear infinite; /* Re-add if animate-spin was intended */
+}
+
+.spinnerSm {
+  height: 1rem; /* h-4 */
+  width: 1rem;  /* w-4 */
+}
+
+.spinnerDefault {
+  height: 1.5rem; /* h-6 */
+  width: 1.5rem;  /* w-6 */
+}
+
+.spinnerLg {
+  height: 2.5rem; /* h-10 */
+  width: 2.5rem;  /* w-10 */
+}
+
+.spinnerXl {
+  height: 4rem; /* h-16 */
+  width: 4rem;  /* w-16 */
+}

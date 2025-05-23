@@ -1,8 +1,8 @@
-import bcrypt from 'bcrypt';
+import { ObjectId } from 'mongodb'; // Need ObjectId for fetching user by ID
+import dotenv from 'dotenv';
+import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { getCollection } from '../config/db.js';
-import dotenv from 'dotenv';
-import { ObjectId } from 'mongodb'; // Need ObjectId for fetching user by ID
 
 dotenv.config();
 
@@ -185,27 +185,70 @@ export const getMe = async (req, res, next) => {
     try {
         const usersCollection = getCollection('users');
         // Fetch fresh user data from DB to ensure it's up-to-date
-        const user = await usersCollection.findOne(
-            { _id: new ObjectId(userId) },
-            { projection: { password: 0 } } // Exclude password
-        );
+        // Exclude password field from the result
+        const user = await usersCollection.findOne({ _id: new ObjectId(userId) }, { projection: { password: 0 } });
 
         if (!user) {
-            // This case should be rare if token is valid, but handles deleted users
+            // This case should ideally not happen if token is valid and user exists
             return res.status(404).json({ message: 'User not found' });
         }
-
-        // Ensure displayName and profilePicUrl are included
-        const userResponse = {
-            ...user,
-            displayName: user.displayName || user.username,
-            profilePicUrl: user.profilePicUrl || '',
-        };
-
-        res.json(userResponse); // Send back the full user object (without password)
-
+        res.json(user); // Send back the user data (excluding password)
     } catch (error) {
         console.error("GetMe Error:", error);
-        next(error); // Pass error to global handler
+        next(error); // Pass error to global error handler
+    }
+};
+
+// --- Logout User Controller ---
+export const logoutUser = async (req, res, next) => {
+    try {
+        const authHeader = req.header('Authorization');
+        const token = authHeader && authHeader.startsWith('Bearer ') ? authHeader.split(' ')[1] : null;
+
+        if (!token) {
+            // This should be caught by 'protect' middleware, but as a safeguard:
+            return res.status(401).json({ message: 'No token provided for logout' });
+        }
+
+        // Decode token to get its expiration time (exp is in seconds)
+        const decodedToken = jwt.decode(token);
+        if (!decodedToken || typeof decodedToken.exp !== 'number') {
+            // This indicates a malformed token if it reached here bypassing 'protect' somehow,
+            // or if the token structure is unexpected.
+            console.warn('Logout attempt with malformed or unexpected token structure.');
+            return res.status(400).json({ message: 'Invalid token structure for logout' });
+        }
+
+        const tokenDenylistCollection = getCollection('token_denylist');
+        
+        // Ensure indexes for efficient cleanup and lookup.
+        // These are idempotent operations. Ideally, run at app startup.
+        try {
+            await tokenDenylistCollection.createIndex({ token: 1 }, { unique: true });
+            await tokenDenylistCollection.createIndex({ expiresAt: 1 }, { expireAfterSeconds: 0 }); // TTL index
+        } catch (indexError) {
+            console.error("Error creating indexes for token_denylist:", indexError);
+            // Proceeding, but this might indicate a DB configuration issue.
+        }
+
+        // Store the token in the denylist.
+        // The TTL index will automatically remove documents when 'expiresAt' is reached.
+        await tokenDenylistCollection.insertOne({
+            token: token,
+            expiresAt: new Date(decodedToken.exp * 1000) // Convert exp (seconds) to a Date object
+        });
+
+        const username = req.user?.username || (decodedToken.user?.username || 'unknown_user');
+        console.log(`Token for user '${username}' denylisted upon logout.`);
+        res.status(200).json({ message: 'Logged out successfully. Token invalidated.' });
+
+    } catch (error) {
+        console.error("Logout Error:", error);
+        // Handle duplicate key error if token is already in the denylist
+        if (error.code === 11000) { // MongoDB duplicate key error code
+            return res.status(200).json({ message: 'Token already invalidated or logout previously processed.' });
+        }
+        // For other errors, pass to the global error handler
+        next(error);
     }
 };

@@ -1,0 +1,42 @@
+/* styles/UserInfo.module.css */
+.userInfoContainer {
+  width: 100%;
+  background: var(--card-background, #fff); /* Assuming #fff is a fallback for card background */
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.avatar {
+  height: 3rem;
+  width: 3rem;
+}
+
+.avatarFallbackIcon {
+  height: 1.5rem; /* Adjusted from h-4 (1rem) to better fit 3rem avatar if needed, or keep as 1rem */
+  width: 1.5rem;  /* Adjusted from w-4 (1rem) */
+}
+
+.infoDiv {
+  flex: 1;
+  margin: 0.125rem 0;
+}
+
+.title {
+  font-size: 1.25rem;
+  /* Add other title styles if needed, e.g., font-weight */
+}
+
+.youSpan {
+  font-size: 0.875rem;
+  font-weight: normal;
+  color: var(--muted-foreground);
+  margin-left: 0.5rem;
+}
+
+.description {
+  color: var(--muted-foreground);
+  font-size: 1rem; /* Tailwind 'text-base' is typically 1rem */
+}

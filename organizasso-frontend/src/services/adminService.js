@@ -1,5 +1,3 @@
-// organizasso-frontend/src/services/adminService.js
-// eslint-disable-next-line no-unused-vars
 import apiClient from './apiClient';
 
 // Get Pending Registrations
@@ -28,7 +26,7 @@ export const getMembers = async () => {
 export const approveRegistration = async (userId) => {
   try {
     const response = await apiClient.post(`/admin/users/${userId}/approve`);
-    return response.data; // { message: "..." }
+    return response.data;
   } catch (error) {
     console.error(`API Error approving user ${userId}:`, error.response?.data || error.message);
     throw new Error(error.response?.data?.message || "Failed to approve user");
@@ -39,7 +37,7 @@ export const approveRegistration = async (userId) => {
 export const rejectRegistration = async (userId) => {
   try {
     const response = await apiClient.post(`/admin/users/${userId}/reject`);
-    return response.data; // { message: "..." }
+    return response.data;
   } catch (error) {
     console.error(`API Error rejecting user ${userId}:`, error.response?.data || error.message);
     throw new Error(error.response?.data?.message || "Failed to reject user");
@@ -50,7 +48,7 @@ export const rejectRegistration = async (userId) => {
 export const grantAdminStatus = async (userId) => {
   try {
     const response = await apiClient.post(`/admin/users/${userId}/grant-admin`);
-    return response.data; // { message: "..." }
+    return response.data;
   } catch (error) {
     console.error(`API Error granting admin to user ${userId}:`, error.response?.data || error.message);
     throw new Error(error.response?.data?.message || "Failed to grant admin status");
@@ -61,7 +59,7 @@ export const grantAdminStatus = async (userId) => {
 export const revokeAdminStatus = async (userId) => {
   try {
     const response = await apiClient.post(`/admin/users/${userId}/revoke-admin`);
-    return response.data; // { message: "..." }
+    return response.data;
   } catch (error) {
     console.error(`API Error revoking admin from user ${userId}:`, error.response?.data || error.message);
     throw new Error(error.response?.data?.message || "Failed to revoke admin status");

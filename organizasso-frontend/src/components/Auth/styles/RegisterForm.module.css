@@ -1,0 +1,20 @@
+.alert {
+  margin-bottom: 1rem; /* mb-4 */
+}
+
+.alertIcon {
+  height: 1rem; /* h-4 */
+  width: 1rem;  /* w-4 */
+}
+
+.formItem {
+  margin-bottom: 1rem; /* approximation for space-y-4 */
+}
+
+.submitButton {
+  width: 100%; /* w-full */
+}
+
+.spinner {
+  margin-right: 0.5rem; /* mr-2 */
+}

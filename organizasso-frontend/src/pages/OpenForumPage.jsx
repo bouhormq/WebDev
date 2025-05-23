@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import PageWrapper from '../components/Layout/PageWrapper';
 import NewThreadForm from '../components/Forum/NewThreadForm';
 import ThreadList from '../components/Forum/ThreadList';
@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import Spinner from '../components/Common/Spinner';
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
-import styles from './OpenForumPage.module.css';
+import styles from './styles/OpenForumPage.module.css';
 
 const OpenForumPage = () => {
   const { currentUser } = useAuth();
@@ -82,28 +82,19 @@ const OpenForumPage = () => {
   };
 
   const handleReplyPosted = useCallback((threadId, newMessage) => {
-    // Update the specific thread in the local state
     setThreads(prevThreads => 
       prevThreads.map(t => {
         if (t._id === threadId) {
-          // Increment messageCount and update lastPostTime
-          // If newMessage has a createdAt, use that, otherwise use current time
           const newLastPostTime = newMessage?.createdAt ? new Date(newMessage.createdAt) : new Date();
           return {
             ...t,
             messageCount: (t.messageCount || 0) + 1,
             lastPostTime: newLastPostTime,
-            // Potentially update other fields if your newMessage object contains them
-            // e.g., lastReplier: newMessage.author.displayName,
           };
         }
         return t;
       })
     );
-    // No need to call fetchThreads() if we update locally, unless ThreadDetailView needs it.
-    // The key change in ThreadItem should refresh ThreadDetailView for that specific item.
-    // toast.info(\"Refreshing threads after new reply...\");
-    // fetchThreads();
   }, []);
 
   return (

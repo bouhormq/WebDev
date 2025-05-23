@@ -1,14 +1,10 @@
-// organizasso-frontend/src/pages/LoginPage.jsx
 import React, { useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-// Import from correct Auth directory
 import LoginForm from '../components/Auth/LoginForm'; 
 import useAuth from '../hooks/useAuth';
-// No need to import Header/Footer if page is simple or uses a different layout
-// import Header from '../components/Layout/Header'; 
-// import Footer from '../components/Layout/Footer'; 
 import { toast } from "sonner";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import styles from './styles/LoginPage.module.css';
 
 const LoginPage = () => {
   const { login, error, isLoading } = useAuth();
@@ -32,42 +28,20 @@ const LoginPage = () => {
     }
   };
 
-  // --- Inline Styles ---
-  const pageStyle = {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    minHeight: '100vh',
-    // bg-gradient lost
-    backgroundColor: 'var(--background)', // Fallback background
-    padding: '1rem', // p-4
-  };
-  const cardStyle = {
-      width: '100%',
-      maxWidth: '24rem', // max-w-sm
-      // shadow-lg is handled by the Card component itself now
-  };
-  const headerStyle = { textAlign: 'center' };
-  const titleStyle = { fontSize: '1.5rem', fontWeight: 'bold' }; // text-2xl font-bold
-  const footerStyle = { display: 'flex', flexDirection: 'column', alignItems: 'center', fontSize: '0.875rem' }; // flex flex-col items-center text-sm
-  const footerPStyle = { color: 'var(--muted-foreground)' }; // text-muted-foreground
-  const footerLinkStyle = { fontWeight: 500, color: 'var(--primary)' }; // font-medium text-primary (hover lost)
-  // --- End Inline Styles ---
-
   return (
-    <div style={pageStyle}>
-      <Card style={cardStyle}>
-        <CardHeader style={headerStyle}>
-          <CardTitle style={titleStyle}>Login</CardTitle>
+    <div className={styles.pageStyle}>
+      <Card className={styles.cardStyle}>
+        <CardHeader className={styles.headerStyle}>
+          <CardTitle className={styles.titleStyle}>Login</CardTitle>
           <CardDescription>Welcome back to Organizasso</CardDescription>
         </CardHeader>
         <CardContent>
            <LoginForm onSubmit={handleLogin} error={error} isLoading={isLoading} />
         </CardContent>
-        <CardFooter style={footerStyle}>
-           <p style={footerPStyle}>
+        <CardFooter className={styles.footerStyle}>
+           <p className={styles.footerPStyle}>
              Don&apos;t have an account?{" "}
-             <Link to="/register" style={footerLinkStyle}>
+             <Link to="/register" className={styles.footerLinkStyle}>
                Register here
              </Link>
            </p>

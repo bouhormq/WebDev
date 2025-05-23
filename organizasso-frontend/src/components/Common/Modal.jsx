@@ -1,8 +1,16 @@
 import React from 'react';
+import styles from './styles/Modal.module.css'; // Import the CSS module
 
-const Modal = ({ children, isOpen, onClose }) => { // eslint-disable-line no-unused-vars
+const Modal = ({ children, isOpen, onClose }) => {
   if (!isOpen) return null;
-  return <div>Modal Component: {children}</div>;
+  return (
+    <div className={styles.modal}>
+      Modal Component: {children}
+      <button onClick={onClose} className={styles.closeButton}>
+        Close
+      </button>
+    </div>
+  );
 };
 
 export default Modal;

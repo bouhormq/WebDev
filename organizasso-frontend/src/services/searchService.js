@@ -25,14 +25,10 @@ export const searchMessages = async (params) => {
         const response = await apiClient.get('/search', { 
             params: validParams 
         });
-        
-        // Backend currently returns messages without populated author username
-        // TODO: Add author lookup on frontend if needed, or wait for backend aggregation
         return response.data;
 
     } catch (error) {
         console.error("API Error searching messages:", error.response?.data || error.message);
-        // Check for the specific text index error from the backend
         if (error.response?.data?.message?.includes('text index')) {
              throw new Error('Search requires a text index. Please contact an administrator.');
         }

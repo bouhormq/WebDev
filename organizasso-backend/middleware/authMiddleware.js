@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
+import { getCollection } from '../config/db.js'; // Import getCollection
 
 dotenv.config();
 
@@ -11,18 +12,25 @@ if (!jwtSecret) {
 }
 
 // Base middleware to protect routes and verify token
-export const protect = (req, res, next) => {
-    // Get token from header (e.g., "Bearer <token>")
+export const protect = async (req, res, next) => { // Make it async
     const authHeader = req.header('Authorization');
     const token = authHeader && authHeader.startsWith('Bearer ') ? authHeader.split(' ')[1] : null;
 
-    // Check if no token
     if (!token) {
         return res.status(401).json({ message: 'No token, authorization denied' });
     }
 
-    // Verify token
     try {
+        // Check token against denylist first
+        const denylistCollection = getCollection('token_denylist');
+        const denylistedToken = await denylistCollection.findOne({ token: token });
+
+        if (denylistedToken) {
+            console.log('Access denied. Token is denylisted (user logged out).');
+            return res.status(401).json({ message: 'Token is denylisted. Please log in again.' });
+        }
+
+        // Verify token signature and expiration
         const decoded = jwt.verify(token, jwtSecret);
         
         // Add user from payload to request object
@@ -31,7 +39,15 @@ export const protect = (req, res, next) => {
 
     } catch (err) {
         console.error('Token verification failed:', err.message);
-        res.status(401).json({ message: 'Token is not valid' });
+        if (err.name === 'TokenExpiredError') {
+            return res.status(401).json({ message: 'Token has expired.' });
+        }
+        if (err.name === 'JsonWebTokenError') {
+            // This covers signature issues, malformed tokens, etc.
+            return res.status(401).json({ message: 'Token is not valid.' });
+        }
+        // For other errors (e.g., database errors during denylist check), pass to the global error handler
+        next(err);
     }
 };
 

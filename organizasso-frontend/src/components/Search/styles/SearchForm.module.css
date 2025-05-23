@@ -1,0 +1,92 @@
+/* styles/SearchForm.module.css */
+.searchFormContainer {
+  width: 100%;
+}
+
+.title {
+  font-size: 1.125rem; /* text-lg */
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.form {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+}
+
+.formItemFullWidth {
+  width: 100%;
+}
+
+.formItemCol {
+  display: flex;
+  flex-direction: column;
+  width: 100%; /* Combined from formItemColStyle and width: '100%' */
+}
+
+.inputField {
+  width: 100%;
+  box-sizing: border-box;
+  background-color: #FDFBF9; /* Consider CSS variables if this is part of a theme */
+  border: 1px solid #D3C1B1; /* Consider CSS variables */
+}
+
+.dateButton {
+  width: 100%;
+  justify-content: flex-start;
+  text-align: left;
+  font-weight: normal;
+  background-color: #FDFBF9; /* From inline style */
+  border: 1px solid #D3C1B1;   /* From inline style */
+}
+
+.datePlaceholder {
+  color: grey;
+}
+
+.calendarIcon {
+  margin-right: 0.5rem;
+  height: 1rem;
+  width: 1rem;
+}
+
+.popoverContent {
+  width: auto;
+  padding: 0;
+}
+
+.calendarPopup {
+  background-color: #FDFBF9;
+  border: 1px solid #D3C1B1;
+}
+
+.submitButtonContainer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 1.5rem;
+}
+
+.submitButton {
+  background-color: #000000;
+  color: #FFFFFF;
+  border: none;
+  border-radius: var(--radius);
+  /* Add hover/focus styles if needed */
+}
+
+.submitButtonIcon {
+  height: 1rem;
+  width: 1rem;
+  margin-right: 0.5rem;
+}
+
+.spinner {
+  margin-right: 0.5rem;
+}

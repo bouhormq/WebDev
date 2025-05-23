@@ -1,4 +1,4 @@
-/* Styles for OpenForumPage.jsx */
+/* Styles for ClosedForumPage.jsx */
 
 .pageContainer {
   background: #E0F2F7;
@@ -15,7 +15,7 @@
   font-size: 2.5rem;
   font-weight: bold;
   letter-spacing: -0.02em;
-  color: #00796B;
+  color: #D9534F;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -23,7 +23,7 @@
 }
 
 .pMuted {
-  color: #004D40;
+  color: #D9534F;
   font-size: 1.1rem;
   margin-top: 0.5rem;
 }
@@ -33,9 +33,9 @@
   margin: 0 auto;
   background: #FFFFFF;
   border-radius: 12px;
-  box-shadow: 0 8px 24px rgba(0, 105, 92, 0.1);
+  box-shadow: 0 8px 24px #84473e1a;
   padding: 2rem;
-  border: 1px solid #B2DFDB;
+  border: 1px solid #D9534F;
 }
 
 .errorAlert {
@@ -58,5 +58,10 @@
 
 .separator {
   margin: 2.5rem 0;
-  background-color: var(--border);;
-} 
+  background-color: var(--border);
+}
+
+.shieldIcon {
+    margin-left: 0.5rem;
+    color: #D9534F; /* Or a color that fits your theme */
+}

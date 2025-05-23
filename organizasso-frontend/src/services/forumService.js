@@ -55,9 +55,6 @@ export const postReply = async (threadId, content, parentId = null, imageFile = 
     if (imageFile) {
       formData.append('replyImage', imageFile); // Field name must match backend (uploadContentImage.single('replyImage'))
     }
-
-    // Use the new endpoint: /api/threads/:threadId/replies
-    // If no image, and no parentId, we could send as application/json, but FormData works for all cases.
     const response = await apiClient.post(`/threads/${threadId}/replies`, formData, {
       headers: {
         // Axios will set Content-Type to multipart/form-data automatically for FormData
@@ -104,15 +101,5 @@ export const likeDislikeMessage = async (messageId, actionType) => {
   } catch (error) {
     console.error(`API Error ${actionType}ing message ${messageId}:`, error.response?.data || error.message);
     throw new Error(error.response?.data?.message || `Failed to ${actionType} message`);
-  }
-};
-
-// Delete a message
-export const deleteMessage = async (messageId) => {
-  try {
-    await apiClient.delete(`/threads/messages/${messageId}`);
-  } catch (error) {
-    console.error(`API Error deleting message ${messageId}:`, error.response?.data || error.message);
-    throw new Error(error.response?.data?.message || "Failed to delete message");
   }
 };

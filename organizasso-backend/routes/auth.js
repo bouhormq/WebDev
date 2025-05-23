@@ -1,5 +1,5 @@
 import express from 'express';
-import { registerUser, loginUser, getMe } from '../controllers/authController.js';
+import { registerUser, loginUser, getMe, logoutUser } from '../controllers/authController.js';
 import { protect } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
@@ -18,5 +18,10 @@ router.post('/login', loginUser);
 // @desc    Get current logged-in user data (using token)
 // @access  Private
 router.get('/me', protect, getMe);
+
+// @route   POST api/auth/logout
+// @desc    Logout user (e.g., invalidate token on server-side)
+// @access  Private (user must be logged in to log out)
+router.post('/logout', protect, logoutUser);
 
 export default router;

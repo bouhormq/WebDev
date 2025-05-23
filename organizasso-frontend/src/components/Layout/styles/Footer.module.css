@@ -1,0 +1,24 @@
+.footer {
+  padding-top: 1.5rem;
+  padding-bottom: 1.5rem;
+  border-top: 1px solid var(--border-alpha);
+  /* md:px-8 md:py-0 was noted as lost, not included */
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  /* md:h-24 md:flex-row was noted as lost, not included */
+}
+
+.footerText { /* Renamed from pStyle for clarity */
+  text-align: center;
+  font-size: 0.875rem;
+  line-height: 1.8;
+  color: var(--muted-foreground);
+  /* textBalance: 'balance' was noted as needing CSS support, not included directly */
+  /* md:text-left was noted as lost, not included */
+}

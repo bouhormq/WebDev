@@ -5,6 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import Spinner from '../Common/Spinner';
 import { Send, Paperclip } from 'lucide-react';
+import styles from './styles/ReplyForm.module.css'; // Import the CSS module
 
 const ReplyForm = ({ threadId, parentId = null, onReplySubmit, isLoading }) => {
   const [content, setContent] = useState('');
@@ -32,35 +33,10 @@ const ReplyForm = ({ threadId, parentId = null, onReplySubmit, isLoading }) => {
     }
   };
 
-  // --- Inline Styles ---
-  const formStyle = { padding: '1.5rem' };
-  const textareaStyle = { marginTop: '0.25rem', resize: 'vertical', minHeight: '80px' };
-  const buttonDivStyle = { display: 'flex', justifyContent: 'flex-end', marginTop: '1rem' };
-  const iconStyle = { marginRight: '0.5rem', height: '1rem', width: '1rem' };
-  const spinnerStyle = { ...iconStyle };
-  const fileInputContainerStyle = { marginTop: '0.75rem' };
-  const fileInputLabelStyle = {
-    display: 'flex',
-    alignItems: 'center',
-    cursor: 'pointer',
-    color: '#555',
-    fontSize: '0.9rem',
-    padding: '0.25rem 0',
-  };
-  const hiddenFileInputStyle = {
-    display: 'none',
-  };
-  const fileNameStyle = {
-    marginLeft: '0.5rem',
-    fontStyle: 'italic',
-    color: '#333',
-  };
-  // --- End Inline Styles ---
-
   const fileInputId = `reply-image-upload-${threadId}-${parentId || 'root'}`;
 
   return (
-    <form onSubmit={handleSubmit} style={formStyle}>
+    <form onSubmit={handleSubmit} className={styles.formStyle}>
       <div style={{ marginBottom: '1rem' }}>
         <Textarea
           id="reply-content"
@@ -71,21 +47,21 @@ const ReplyForm = ({ threadId, parentId = null, onReplySubmit, isLoading }) => {
           minLength={10}
           rows={4}
           disabled={isLoading}
-          style={textareaStyle}
+          className={styles.textareaStyle}
         />
       </div>
 
-      <div style={fileInputContainerStyle}>
-        <Label htmlFor={fileInputId} style={fileInputLabelStyle}>
-          <Paperclip style={{ ...iconStyle, marginRight: '0.25rem' }} />
+      <div className={styles.fileInputContainerStyle}>
+        <Label htmlFor={fileInputId} className={styles.fileInputLabelStyle}>
+          <Paperclip className={styles.paperclipIcon} />
           Attach Image (Optional)
-          {fileName && <span style={fileNameStyle}>{fileName}</span>}
+          {fileName && <span className={styles.fileNameStyle}>{fileName}</span>}
         </Label>
         <Input
           type="file"
           id={fileInputId}
           accept="image/*"
-          style={hiddenFileInputStyle}
+          className={styles.hiddenFileInputStyle}
           onChange={(e) => {
             const file = e.target.files?.[0];
             if (file) {
@@ -100,9 +76,9 @@ const ReplyForm = ({ threadId, parentId = null, onReplySubmit, isLoading }) => {
         />
       </div>
 
-      <div style={buttonDivStyle}>
+      <div className={styles.buttonDivStyle}>
         <Button type="submit" disabled={isLoading || content.trim().length < 10} size="sm">
-          {isLoading ? <Spinner size="sm" style={spinnerStyle}/> : <Send style={iconStyle} />}
+          {isLoading ? <Spinner size="sm" className={styles.spinnerStyle}/> : <Send className={styles.iconStyle} />}
           Post Reply
         </Button>
       </div>

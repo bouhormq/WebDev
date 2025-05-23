@@ -1,0 +1,8 @@
+/* CSS module for Button component */
+.button {
+    /* Add default button styles here */
+    padding: 0.5rem 1rem;
+    border-radius: 0.25rem;
+    cursor: pointer;
+  }
+  

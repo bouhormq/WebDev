@@ -1,0 +1,13 @@
+/* styles/ProfileMessageList.module.css */
+.noMessages {
+  color: var(--muted-foreground);
+  padding: 1rem 0;
+}
+
+.messageListContainer {
+  /* Add any container-specific styles if needed */
+}
+
+.separator {
+  margin: 1rem 0 1rem 10px; 
+}

@@ -15,6 +15,7 @@ import { Input } from "@/components/ui/input";
 import Spinner from '../Common/Spinner';
 import { AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import styles from './styles/LoginForm.module.css';
 
 // Zod schema for login validation
 const loginSchema = z.object({
@@ -34,21 +35,12 @@ const LoginForm = ({ onSubmit, error, isLoading }) => {
   // Use form's handleSubmit which validates before calling our onSubmit
   const handleFormSubmit = form.handleSubmit(onSubmit);
 
-  const formStyle = { padding: '1.5rem' }; // p-6
-  const alertStyle = { marginBottom: '1rem' }; // mb-4
-  const alertIconStyle = { height: '1rem', width: '1rem' }; // h-4 w-4
-  const formItemStyle = { marginBottom: '1.5rem' }; // mb-6
-  // Input pt-1 removed - spacing may be off
-  const submitButtonStyle = { width: '100%', marginTop: '0.75rem' }; // Reduced from 1.5rem (mt-6 to mt-3)
-  const spinnerStyle = { marginRight: '0.5rem' }; // mr-2
-  const inputStyle = { width: '100%' }; // Added width: 100%
-
   return (
     <Form {...form}>
-      <form onSubmit={handleFormSubmit} style={formStyle}>
+      <form onSubmit={handleFormSubmit} className={styles.loginFormContainer}>
         {error && (
-          <Alert variant="destructive" style={alertStyle}>
-            <AlertCircle style={alertIconStyle} />
+          <Alert variant="destructive" className={styles.alert}>
+            <AlertCircle className={styles.alertIcon} />
             <AlertDescription>{error}</AlertDescription>
           </Alert>
         )}
@@ -56,10 +48,10 @@ const LoginForm = ({ onSubmit, error, isLoading }) => {
           control={form.control}
           name="username"
           render={({ field }) => (
-            <FormItem style={formItemStyle}>
+            <FormItem className={styles.formItem}>
               <FormLabel>Username</FormLabel>
               <FormControl>
-                <Input placeholder="Enter your username" {...field} disabled={isLoading} style={inputStyle} />
+                <Input placeholder="Enter your username" {...field} disabled={isLoading} className={styles.inputField} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -69,18 +61,18 @@ const LoginForm = ({ onSubmit, error, isLoading }) => {
           control={form.control}
           name="password"
           render={({ field }) => (
-            <FormItem style={formItemStyle}>
+            <FormItem className={styles.formItem}>
               <FormLabel>Password</FormLabel>
               {/* TODO: Add forgot password link maybe? */}
               <FormControl>
-                <Input type="password" placeholder="Enter your password" {...field} disabled={isLoading} style={inputStyle} />
+                <Input type="password" placeholder="Enter your password" {...field} disabled={isLoading} className={styles.inputField} />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
-        <Button type="submit" style={submitButtonStyle} disabled={isLoading}>
-          {isLoading && <Spinner size="sm" style={spinnerStyle}/>}
+        <Button type="submit" className={styles.submitButton} disabled={isLoading}>
+          {isLoading && <Spinner size="sm" className={styles.spinner}/>}
           Login
         </Button>
       </form>

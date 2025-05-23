@@ -2,7 +2,7 @@ import React, { createContext, useState, useEffect, useCallback } from 'react';
 import * as authService from '../services/authService'; // Import the service
 import apiClient from '../services/apiClient'; // Import apiClient for setting auth header
 
-export const AuthContext = createContext(); // Ensure AuthContext is exported
+export const AuthContext = createContext();
 
 // Helper to set Authorization header
 const setAuthToken = token => {
@@ -93,12 +93,20 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Logout function (remove user from localStorage)
-  const logout = () => {
-    console.log('Logging out - clearing state and token');
+  // Logout function (remove user from localStorage and call backend)
+  const logout = async () => { // Make the function async
+    console.log('Logging out - clearing state and token, and calling backend.');
+    try {
+      await authService.logout(); // Call the backend logout service
+    } catch (error) {
+      // Log error from authService.logout if it re-throws,
+      // but proceed with client-side cleanup regardless.
+      console.error("Error during backend logout, proceeding with client-side cleanup:", error);
+    }
+    
+    // Client-side cleanup
     localStorage.removeItem('token');
-    // localStorage.removeItem('user'); // Removed this line
-    setAuthToken(null);
+    setAuthToken(null); // Clears the Authorization header in apiClient
     setToken(null);
     setCurrentUser(null);
     setIsAdmin(false);

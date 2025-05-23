@@ -1,10 +1,11 @@
 import React from 'react';
 import Username from './Username';
 import { Separator } from "@/components/ui/separator";
+import styles from './styles/UsernameList.module.css';
 
 const UsernameList = ({ users, type, onUserAction, actionLoading, currentUserId }) => { 
   return (
-    <div style={{ width: '100%' }}>
+    <div className={styles.usernameListContainer}>
       {users.map((user, index) => (
         <React.Fragment key={user._id}>
           <Username 

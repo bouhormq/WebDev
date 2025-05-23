@@ -1,0 +1,22 @@
+/* src/components/Forum/styles/MessageList.module.css */
+
+.noMessages {
+  color: var(--muted-foreground);
+  padding: 1rem 0;
+}
+
+.topLevelReplyFormContainer {
+  margin-top: 1rem;
+}
+
+/* Styles for the main container of the message list can be added here if needed */
+.messageListContainer {
+  /* Example: border-left: 1px solid var(--border); */
+}
+
+/* Separator styling will be partially dynamic due to nesting */
+.separator {
+  /* Base margin can be defined here if parts of it are static */
+  /* margin-top: 1rem; */
+  /* margin-bottom: 1rem; */
+}

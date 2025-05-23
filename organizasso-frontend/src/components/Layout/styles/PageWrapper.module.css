@@ -1,0 +1,33 @@
+/* styles/PageWrapper.module.css */
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: var(--background);
+  color: var(--foreground);
+}
+
+.main {
+  flex-grow: 1;
+  min-width: 60%; 
+  margin: 0 auto;
+  padding: 2rem 1rem; /* Corresponds to py-8 px-4 */
+  position: relative;
+  z-index: 1;
+}
+
+/* Media queries for responsive padding if needed, based on original comments */
+/* Example: Tailwind sm:px-6 lg:px-8 */
+/* @media (min-width: 640px) {
+  .main {
+    padding-left: 1.5rem; 
+    padding-right: 1.5rem;
+  }
+} */
+
+/* @media (min-width: 1024px) {
+  .main {
+    padding-left: 2rem; 
+    padding-right: 2rem;
+  }
+} */

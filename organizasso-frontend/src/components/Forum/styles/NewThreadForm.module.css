@@ -1,0 +1,117 @@
+/* src/components/Forum/styles/NewThreadForm.module.css */
+
+.formContainer {
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.formItemFullWidth {
+  width: 100%;
+}
+
+.inputBase {
+  width: 100%;
+  font-size: 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius);
+  box-sizing: border-box;
+  background-color: #FDFBF9; /* Lighter pastel brown */
+  border: 1px solid #D3C1B1; /* Darker pastel brown for border */
+  color: #333;
+  transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.inputBase::placeholder {
+  color: #888; /* Placeholder color */
+}
+
+.inputBase:focus {
+  border-color: #00796B; /* Teal focus color */
+  box-shadow: 0 0 0 1px #00796B;
+  outline: none; /* Remove default outline */
+}
+
+.titleInput {
+  /* Inherits from inputBase, no additional styles needed unless different from base */
+}
+
+.contentTextarea {
+  /* Inherits from inputBase */
+  resize: vertical;
+  min-height: 100px;
+}
+
+.buttonContainer {
+  width: 100%;
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 0.5rem;
+}
+
+.icon {
+  height: 1rem;
+  width: 1rem;
+  margin-right: 0.5rem;
+}
+
+.paperclipIcon {
+  height: 1rem;
+  width: 1rem;
+  margin-right: 0.25rem; /* Specific margin for paperclip */
+}
+
+.submitButton {
+  background-color: #000000;
+  color: #FFFFFF;
+  border: none;
+  border-radius: var(--radius);
+  /* padding: 0.5rem 1rem; */ /* Default padding from Button component size prop is usually fine */
+}
+
+.submitButton:hover {
+  background-color: #333333; /* Darken on hover */
+}
+
+.fileInputLabel {
+  /* Ensure your label is styled to look like a button or clickable area */
+  display: inline-flex; /* Or 'flex' if you want it to take full width of its container */
+  align-items: center;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background-color: var(--background);
+  color: var(--foreground);
+  /* Add other styles as needed to match your design */
+  transition: background-color 0.2s;
+}
+
+.fileInput {
+  /* Visually hide the default file input but keep it functional and accessible */
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px; /* To move it out of the flow if it takes up 1px space */
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap; /* prevent line breaks */
+  border: 0;
+}
+
+.fileName {
+  margin-left: 0.5rem;
+  font-style: italic;
+  color: #333;
+  font-size: 0.85rem; /* Slightly smaller for file name */
+}
+
+.spinner {
+  margin-right: 0.5rem;
+}

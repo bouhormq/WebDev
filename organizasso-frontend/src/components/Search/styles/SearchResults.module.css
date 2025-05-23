@@ -1,0 +1,41 @@
+/* styles/SearchResults.module.css */
+.container {
+  margin-top: 1.5rem;
+  width: 100%;
+}
+
+.title {
+  font-size: 1.125rem; /* text-lg */
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.description {
+  color: var(--muted-foreground);
+  margin-bottom: 1rem;
+  font-size: 0.95rem;
+}
+
+.emptyResults {
+  padding: 1.5rem;
+  text-align: center;
+  color: var(--muted-foreground);
+}
+
+.highlight {
+  background-color: #FEF08A; /* bg-yellow-200 */
+  border-radius: 0.125rem; /* rounded */
+  padding: 0 0.125rem; /* px-0.5 py-0 */
+  /* Add dark mode style if needed, e.g., using a CSS variable or a separate class for dark theme */
+  /* .dark .highlight { background-color: #dark-yellow; } */
+}
+
+.resultsListContainer {
+  /* Add any specific styles for the list container if needed */
+}
+
+/* Styles for Separator can be inherited or customized here if needed */
+.separator {
+  /* Default Separator styles or overrides */
+  /* margin: 1rem 0; */ /* Example if you want to control margin via this module */
+}

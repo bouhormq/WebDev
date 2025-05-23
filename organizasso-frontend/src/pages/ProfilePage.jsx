@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button"; // Keep for base structure
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { Pencil } from 'lucide-react';
-import styles from './ProfilePage.module.css';
+import styles from './styles/ProfilePage.module.css'; // Updated import path
 import StarRating from '../components/Common/StarRating'; // Import StarRating
 
 const ProfilePage = () => {
@@ -234,10 +234,10 @@ const ProfilePage = () => {
         <div className={styles.notFoundContainer}>
           {/* CardHeader and CardTitle might be from ui/card, so keep them if they provide base styling */}
           <CardHeader>
-            <CardTitle style={{ textAlign: 'center' }}>User Not Found</CardTitle>
+            <CardTitle className={styles.notFoundTitle}>User Not Found</CardTitle> {/* Added className */}
           </CardHeader>
           <CardContent>
-            <p>The profile you are looking for does not exist or could not be loaded.</p>
+            <p className={styles.notFoundText}>The profile you are looking for does not exist or could not be loaded.</p> {/* Added className */}
           </CardContent>
         </div>
       </PageWrapper>
@@ -299,7 +299,7 @@ const ProfilePage = () => {
                       type="file"
                       ref={fileInputRef}
                       onChange={handleProfilePicChange}
-                      style={{ display: 'none' }}
+                      className={styles.hiddenInput} // Added className
                       accept="image/*"
                     />
                   )}

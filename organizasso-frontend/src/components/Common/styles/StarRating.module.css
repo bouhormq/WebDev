@@ -1,0 +1,19 @@
+.starIcon {
+  height: 30px;
+  width: 30px;
+}
+
+.fullStar {
+  fill: rgb(250, 204, 21); /* Tailwind's yellow-400: #facc15 */
+  stroke: rgb(250, 204, 21);
+}
+
+.halfStar {
+  fill: rgb(250, 204, 21); /* Tailwind's yellow-400: #facc15 */
+  stroke: rgb(250, 204, 21);
+}
+
+.emptyStar {
+  fill: none;
+  stroke: rgb(156, 163, 175); /* Tailwind's gray-400: #9ca3af */
+}

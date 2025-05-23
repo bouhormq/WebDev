@@ -1,0 +1,111 @@
+/* styles/ProfileMessageItem.module.css */
+.outerDiv {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+  padding-right: 0.5rem;
+  padding-left: 10px; /* Fixed padding */
+}
+
+.avatar {
+  height: 2rem;
+  width: 2rem;
+}
+
+.infoDiv {
+  flex: 1;
+  padding-top: 0.1rem;
+}
+
+.headerDiv {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.25rem;
+}
+
+.authorInfoDiv {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+}
+
+.authorLink {
+  font-weight: 600;
+  color: var(--foreground);
+  text-decoration: none;
+}
+
+.timeSpan {
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+}
+
+.deleteButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border: 1px solid #d1d5db; /* Consider using a CSS variable */
+  background: #fff; /* Consider using a CSS variable */
+  color: var(--muted-foreground);
+  border-radius: var(--radius);
+  padding: 0.25rem; /* Adjusted for icon button size */
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s, border 0.15s;
+}
+
+.deleteButton:hover {
+  /* Add hover styles if needed, e.g., background-color: var(--accent); */
+}
+
+.deleteIcon {
+  height: 1rem;
+  width: 1rem;
+}
+
+.contentDiv {
+  font-size: 0.875rem;
+  color: var(--foreground);
+  white-space: pre-wrap;
+  word-break: break-words;
+  line-height: 1.5;
+}
+
+.contentImage {
+  max-width: 100%;
+  max-height: 400px;
+  margin-top: 0.75rem;
+  border-radius: var(--radius);
+  object-fit: contain;
+}
+
+.actionsDiv {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.iconButton {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.8rem;
+  color: var(--muted-foreground);
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  background-color: transparent;
+  line-height: 1;
+  cursor: default; /* Non-interactive */
+}
+
+.iconButton span {
+  margin-left: 0.25rem;
+}

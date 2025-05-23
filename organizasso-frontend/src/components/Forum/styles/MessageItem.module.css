@@ -1,0 +1,155 @@
+/* src/components/Forum/styles/MessageItem.module.css */
+
+.outerDiv {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem; /* gap-3 */
+  padding-top: 0.75rem; /* pt-3 */
+  padding-bottom: 0.75rem; /* pb-3 */
+  padding-right: 0.5rem; /* pr-2 */
+  /* Dynamic paddingLeft based on nestingLevel will be applied inline */
+}
+
+.avatar {
+  height: 2rem; /* h-8 */
+  width: 2rem;  /* w-8 */
+}
+
+.infoDiv {
+  flex: 1;
+  padding-top: 0.1rem; /* Approximation for vertical alignment if needed */
+}
+
+.headerDiv {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.25rem; /* mb-1 */
+}
+
+.authorInfoDiv {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem; /* gap-2 */
+  font-size: 0.8rem; /* Smaller text for author/time */
+}
+
+.authorLink {
+  font-weight: 600; /* semibold */
+  color: var(--foreground);
+  text-decoration: none;
+}
+
+.authorLink:hover {
+  text-decoration: underline;
+}
+
+.timeSpan {
+  font-size: 0.75rem; /* text-xs */
+  color: var(--muted-foreground);
+}
+
+.deleteButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center; /* Center icon in button */
+  border: 1px solid transparent; /* Cleaner look, rely on hover/focus for visibility */
+  background-color: transparent;
+  color: var(--muted-foreground);
+  border-radius: var(--radius);
+  padding: 0.25rem; /* p-1 for icon button */
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.deleteButton:hover {
+  background-color: var(--destructive-hover, hsl(var(--destructive) / 0.1));
+  color: var(--destructive);
+  border-color: hsl(var(--destructive) / 0.3);
+}
+
+.deleteIcon {
+  height: 1rem; /* h-4 */
+  width: 1rem;  /* w-4 */
+}
+
+.contentDiv {
+  font-size: 0.875rem; /* text-sm */
+  color: var(--foreground);
+  white-space: pre-wrap;
+  word-break: break-word;
+  line-height: 1.5;
+  margin-top: 0.25rem; /* Add some space above content */
+}
+
+.contentImage {
+  max-width: 100%;
+  max-height: 400px;
+  margin-top: 0.75rem; /* mt-3 */
+  border-radius: var(--radius);
+  object-fit: contain;
+  background-color: hsl(var(--muted) / 0.5); /* Added subtle background for images */
+}
+
+.actionsDiv {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem; /* Reduced gap slightly from 0.75rem */
+  margin-top: 0.5rem; /* mt-2 */
+}
+
+.iconButton {
+  display: inline-flex; /* Changed to inline-flex for better alignment with text */
+  align-items: center;
+  gap: 0.25rem; /* gap-1 */
+  padding: 0.25rem 0.5rem; /* p-1 px-2 */
+  font-size: 0.8rem;
+  border: 1px solid transparent; /* Base border */
+  border-radius: var(--radius);
+  background-color: transparent;
+  line-height: 1;
+  cursor: pointer;
+  transition: background-color 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.iconButton span {
+  margin-left: 0.25rem; /* Ensure space between icon and text if not covered by gap */
+}
+
+.iconButtonInactive {
+  color: var(--muted-foreground);
+}
+
+.iconButtonInactive:hover {
+  background-color: hsl(var(--muted) / 0.2);
+  color: var(--foreground);
+}
+
+.iconButtonActiveLike {
+  color: var(--primary);
+  /* border-color: hsl(var(--primary) / 0.3); /* Optional: border for active state */
+}
+
+.iconButtonActiveLike:hover {
+  background-color: hsl(var(--primary) / 0.1);
+}
+
+.iconButtonActiveDislike {
+  color: var(--destructive);
+  /* border-color: hsl(var(--destructive) / 0.3); /* Optional: border for active state */
+}
+
+.iconButtonActiveDislike:hover {
+  background-color: hsl(var(--destructive) / 0.1);
+}
+
+/* Highlight style for search results, if <mark> is used */
+.contentDiv mark {
+  background-color: hsl(var(--primary) / 0.3);
+  color: var(--primary-foreground);
+  padding: 0.1em 0.2em;
+  border-radius: 0.2em;
+}

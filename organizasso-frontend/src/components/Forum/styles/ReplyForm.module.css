@@ -1,0 +1,58 @@
+/* CSS module for ReplyForm component */
+.formStyle {
+  padding: 1.5rem;
+}
+
+.textareaStyle {
+  margin-top: 0.25rem;
+  resize: vertical;
+  min-height: 80px;
+}
+
+.buttonDivStyle {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 1rem;
+}
+
+.iconStyle {
+  margin-right: 0.5rem;
+  height: 1rem;
+  width: 1rem;
+}
+
+.spinnerStyle {
+  margin-right: 0.5rem; /* from iconStyle */
+  height: 1rem;       /* from iconStyle */
+  width: 1rem;        /* from iconStyle */
+}
+
+.fileInputContainerStyle {
+  margin-top: 0.75rem;
+}
+
+.fileInputLabelStyle {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  color: #555;
+  font-size: 0.9rem;
+  padding: 0.25rem 0;
+}
+
+.hiddenFileInputStyle {
+  display: none;
+}
+
+.fileNameStyle {
+  margin-left: 0.5rem;
+  font-style: italic;
+  color: #333;
+}
+
+/* Style for Paperclip icon within the label, combining iconStyle and specific marginRight */
+.paperclipIcon {
+  margin-right: 0.25rem; /* Specific marginRight */
+  height: 1rem;          /* from iconStyle */
+  width: 1rem;           /* from iconStyle */
+}

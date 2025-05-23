@@ -44,3 +44,58 @@
 }
 
 /* Specific styles for AdminPanel Tabs can be added here if needed in the future */
+
+.spinnerContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 200px;
+}
+
+.errorAlert {
+    margin-top: 1rem;
+    border-color: var(--destructive);
+    background-color: hsl(var(--destructive) / 0.1);
+}
+
+.errorAlertDesc {
+    color: var(--destructive);
+    font-weight: 500;
+}
+
+.emptyStateCard {
+    border: 1px dashed var(--border);
+    background-color: hsl(var(--muted) / 0.5);
+}
+
+.emptyStateCardContent {
+    padding: 2rem;
+    text-align: center;
+}
+
+.tabsRoot {
+    width: 100%;
+}
+
+.tabsList {
+    display: grid;
+    width: 100%;
+    grid-template-columns: repeat(2, 1fr);
+    height: 2.75rem;
+}
+
+.tabsTrigger {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.tabIcon {
+    height: 1rem;
+    width: 1rem;
+}
+
+.tabsContent {
+    margin-top: 1rem;
+    width: 100%;
+}

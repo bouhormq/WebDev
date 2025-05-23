@@ -1,0 +1,32 @@
+/* CSS module for ThreadDetailView component */
+.detailViewContainerStyle {
+  margin-top: 0.5rem;
+  margin-bottom: 1rem;
+  padding: 0 0.5rem;
+}
+
+.centeredFlexStyle {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100px;
+}
+
+.repliesHeaderStyle {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  border-top: 1px solid var(--border);
+  padding-top: 1rem;
+}
+
+.errorAlertStyle {
+  margin: 1rem;
+}
+
+.noRepliesTextStyle {
+  font-size: 0.875rem;
+  color: var(--muted-foreground);
+  text-align: center;
+  padding: 1rem;
+}
