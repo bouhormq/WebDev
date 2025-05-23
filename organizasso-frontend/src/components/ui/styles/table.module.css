@@ -1,0 +1,52 @@
+/* Table component styles */
+.tableContainer {
+  position: relative;
+  width: 100%;
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  caption-side: bottom;
+  font-size: 0.875rem;
+}
+
+.header {
+  /* Base styles for table header */
+}
+
+.body {
+  /* Base styles for table body */
+}
+
+.footer {
+  background-color: var(--muted-alpha);
+  border-top: 1px solid var(--border);
+  font-weight: 500;
+}
+
+.row {
+  transition: colors 0.2s ease-in-out;
+}
+
+.head {
+  color: var(--foreground);
+  height: 3rem;
+  padding: 0 1rem;
+  text-align: left;
+  vertical-align: middle;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.cell {
+  padding: 1rem;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.caption {
+  color: var(--muted-foreground);
+  margin-top: 1rem;
+  font-size: 0.875rem;
+}

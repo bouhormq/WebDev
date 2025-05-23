@@ -125,7 +125,7 @@ const MessageItem = ({
 
   let finalProfilePicUrl = null;
   if (message.profilePicUrl) {
-    let path = message.profilePicUrl.replace(/^\/?uploadss\//, '/uploads/'); 
+    let path = message.profilePicUrl.replace(/^\/?uploads\//, '/uploads/'); // Corrected regex
     if (!path.startsWith('/')) {
       path = '/' + path;
     }
@@ -223,87 +223,100 @@ const MessageItem = ({
   };
 
   return (
-    <>
-      <div className={styles.outerDiv} style={outerDivDynamicStyle}>
-        <Avatar className={styles.avatar}>
-           {finalProfilePicUrl ? (
-              <AvatarImage src={finalProfilePicUrl} alt={message.authorName} />
-           ) : (
-              <AvatarFallback>{authorInitial}</AvatarFallback>
-           )}
-        </Avatar>
-
-         <div className={styles.infoDiv}>
-            <div className={styles.headerDiv}>
-               <div className={styles.authorInfoDiv}>
-                   <Link 
-                      to={`/profile/${message.authorId}`} 
-                      className={styles.authorLink}
-                    >
-                       {message.authorName || 'Unknown User'}
-                    </Link>
-                   <span className={styles.timeSpan}>· {timeAgo}</span>
-               </div>
-                {isOwnMessage && onDelete && (
-                  <Button 
-                    variant="ghost"
-                    size="icon"
-                    className={styles.deleteButton}
-                    onClick={handleDeleteClick}
-                    title="Delete message"
-                  >
-                    <Trash2 className={styles.deleteIcon} />
-                  </Button>
+    <div className={styles.messageItemOuterContainer} style={outerDivDynamicStyle}>
+      <div className={styles.messageItemInnerContainer}>
+        <div className={styles.avatarContainer}>
+          {message.authorId ? (
+            <Link to={`/profile/${message.authorId}`} onClick={(e) => e.stopPropagation()} className={styles.avatarLink}>
+              <Avatar className={styles.avatar}>
+                {finalProfilePicUrl ? (
+                  <AvatarImage src={finalProfilePicUrl} alt={message.authorName} />
+                ) : (
+                  <AvatarFallback>{authorInitial}</AvatarFallback>
                 )}
+              </Avatar>
+            </Link>
+          ) : (
+            <Avatar className={styles.avatar}>
+              {finalProfilePicUrl ? (
+                <AvatarImage src={finalProfilePicUrl} alt={message.authorName || 'Unknown User'} />
+              ) : (
+                <AvatarFallback>{authorInitial}</AvatarFallback>
+              )}
+            </Avatar>
+          )}
+        </div>
+        <div className={styles.messageContentContainer}>
+          <div className={styles.headerDiv}>
+            <div className={styles.authorInfoDiv}>
+                <Link 
+                  to={`/profile/${message.authorId}`} 
+                  className={styles.authorLink}
+                >
+                   {message.authorName || 'Unknown User'}
+                </Link>
+               <span className={styles.timeSpan}>· {timeAgo}</span>
             </div>
-            <div className={styles.contentDiv}>{renderContent(message.content)}</div>
-            {finalContentImageUrl && (
-              <img src={finalContentImageUrl} alt="Message content" className={styles.contentImage} />
+            {isOwnMessage && onDelete && (
+              <Button 
+                variant="ghost"
+                size="icon"
+                className={styles.deleteButton}
+                onClick={handleDeleteClick}
+                title="Delete message"
+              >
+                <Trash2 className={styles.deleteIcon} />
+              </Button>
             )}
-            <div className={styles.actionsDiv}>
-              {currentUser && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className={getIconButtonClassName(isLiked, 'like')}
-                  onClick={() => handleLikeDislike('like')}
-                  disabled={isLikingOrDisliking || !currentUser}
-                  title={isLiked ? "Unlike" : "Like"}
-                >
-                  <ThumbsUp size={16} className={isLiked ? "fill-primary" : ""} />
-                  <span>{localLikeCount}</span>
-                </Button>
-              )}
+          </div>
+          <div className={styles.contentDiv}>{renderContent(message.content)}</div>
+          {finalContentImageUrl && (
+            <img src={finalContentImageUrl} alt="Message content" className={styles.contentImage} />
+          )}
+          <div className={styles.actionsDiv}>
+            {currentUser && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className={getIconButtonClassName(isLiked, 'like')}
+                onClick={() => handleLikeDislike('like')}
+                disabled={isLikingOrDisliking || !currentUser}
+                title={isLiked ? "Unlike" : "Like"}
+              >
+                <ThumbsUp size={16} className={isLiked ? "fill-primary" : ""} />
+                <span>{localLikeCount}</span>
+              </Button>
+            )}
 
-              {currentUser && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className={getIconButtonClassName(isDisliked, 'dislike')}
-                  onClick={() => handleLikeDislike('dislike')}
-                  disabled={isLikingOrDisliking || !currentUser}
-                  title={isDisliked ? "Undislike" : "Dislike"}
-                >
-                  <ThumbsDown size={16} className={isDisliked ? "fill-destructive" : ""} /> 
-                  <span>{localDislikeCount}</span>
-                </Button>
-              )}
-              
-              {isUserLoggedIn && onReply && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className={getIconButtonClassName(false)}
-                  onClick={handleReplyClick}
-                  title="Reply to this message"
-                  disabled={isSubmittingDirectReply || parentReplyFormIsLoading || !isUserLoggedIn} 
-                >
-                  <MessageSquare size={16} />
-                  <span>Reply</span>
-                </Button>
-              )}
-            </div>
-         </div>
+            {currentUser && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className={getIconButtonClassName(isDisliked, 'dislike')}
+                onClick={() => handleLikeDislike('dislike')}
+                disabled={isLikingOrDisliking || !currentUser}
+                title={isDisliked ? "Undislike" : "Dislike"}
+              >
+                <ThumbsDown size={16} className={isDisliked ? "fill-destructive" : ""} /> 
+                <span>{localDislikeCount}</span>
+              </Button>
+            )}
+            
+            {isUserLoggedIn && onReply && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className={getIconButtonClassName(false)}
+                onClick={handleReplyClick}
+                title="Reply to this message"
+                disabled={isSubmittingDirectReply || parentReplyFormIsLoading || !isUserLoggedIn} 
+              >
+                <MessageSquare size={16} />
+                <span>Reply</span>
+              </Button>
+            )}
+          </div>
+        </div>
       </div>
       {showReplyForm && isUserLoggedIn && onReply && (
          <ReplyForm 
@@ -324,7 +337,7 @@ const MessageItem = ({
             isLoading={isSubmittingDirectReply || parentReplyFormIsLoading} 
         />
       )}
-    </>
+    </div>
   );
 };
 

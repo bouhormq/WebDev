@@ -4,7 +4,8 @@ import {
     getThreadById,
     addReplyToThread, // Import the new controller function
     likeMessage, // Added
-    dislikeMessage // Added
+    dislikeMessage, // Added
+    deleteThreadAndReplies // Import the new controller function
 } from '../controllers/threadController.js';
 import { protect, approved } from '../middleware/authMiddleware.js';
 import { uploadContentImage } from '../middleware/multerConfig.js'; // Corrected import path
@@ -35,5 +36,10 @@ router.post('/messages/:messageId/like', protect, approved, likeMessage);
 // @desc    Dislike a message
 // @access  Protected (Approved Member)
 router.post('/messages/:messageId/dislike', protect, approved, dislikeMessage);
+
+// @route   DELETE api/threads/:threadId
+// @desc    Delete a thread and all its replies
+// @access  Protected (Thread Owner or Admin)
+router.delete('/:threadId', protect, approved, deleteThreadAndReplies);
 
 export default router;

@@ -1,0 +1,6 @@
+/* CSS module for Sonner toast component */
+.toasterWrapper :global(.sonner-toast) {
+  --normal-bg: var(--popover);
+  --normal-text: var(--popover-foreground);
+  --normal-border: var(--border);
+}

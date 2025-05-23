@@ -1,5 +1,6 @@
 import { useTheme } from "next-themes"
 import { Toaster as Sonner } from "sonner";
+import styles from './styles/sonner.module.css'; // Import CSS module
 
 const Toaster = ({
   ...props
@@ -7,16 +8,11 @@ const Toaster = ({
   const { theme = "system" } = useTheme()
 
   return (
-    <Sonner
-      theme={theme}
-      style={
-        {
-          "--normal-bg": "var(--popover)",
-          "--normal-text": "var(--popover-foreground)",
-          "--normal-border": "var(--border)"
-        }
-      }
-      {...props} />
+    <div className={styles.toasterWrapper}>
+      <Sonner
+        theme={theme}
+        {...props} />
+    </div>
   );
 }
 

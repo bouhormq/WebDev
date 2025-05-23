@@ -104,8 +104,10 @@ const ClosedForumPage = () => {
   }, []);
 
   const handleDeleteThread = async (threadId) => {
-    console.log(`Attempting to delete thread: ${threadId}`);
-    toast.info(`Delete functionality for thread ${threadId} is not yet implemented.`);
+    // This function is called by ThreadItem, which already handles the actual deletion and confirmation.
+    // This parent handler just needs to refresh the list.
+    console.log(`Thread deletion process completed for thread: ${threadId}, refreshing list.`);
+    fetchThreads(); 
   };
 
   const handleDeleteMessage = async (messageId, threadId) => {

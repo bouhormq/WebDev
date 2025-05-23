@@ -97,6 +97,10 @@ const OpenForumPage = () => {
     );
   }, []);
 
+  const handleThreadDeleted = useCallback(() => {
+    fetchThreads();
+  }, [fetchThreads]);
+
   return (
     <PageWrapper className={styles.pageContainer}>
       <div className={styles.contentWrapper}>
@@ -128,6 +132,7 @@ const OpenForumPage = () => {
             openThreadIds={openThreadIds}
             onReplyPosted={handleReplyPosted} // Pass the new handler here
             ensureThreadOpen={ensureThreadOpen} // Pass down the new function
+            onThreadDeleted={handleThreadDeleted} // Pass the new handler here
           />
         )}
       </div>

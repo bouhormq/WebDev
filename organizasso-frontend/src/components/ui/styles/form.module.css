@@ -1,0 +1,24 @@
+/* CSS module for Form components */
+.formItem {
+  /* Base styles for FormItem */
+}
+
+.formLabel {
+  font-weight: 500;
+  line-height: 1;
+}
+
+.formLabelError {
+  color: var(--destructive);
+}
+
+.formDescription {
+  font-size: 0.8rem;
+  color: var(--muted-foreground);
+}
+
+.formMessage {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--destructive);
+}

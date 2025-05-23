@@ -1,0 +1,11 @@
+/* CSS module for Popover component */
+.popoverContent {
+  background-color: var(--popover);
+  color: var(--popover-foreground);
+  z-index: 50;
+  width: 18rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--border);
+  padding: 1rem;
+  outline: none;
+}

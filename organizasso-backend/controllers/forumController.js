@@ -60,7 +60,7 @@ export const getOpenForumThreads = async (req, res, next) => {
                 ...thread,
                 authorName: authorName,
                 profilePicUrl: profilePicUrl,
-                replyCount: actualMessageCount, // Use actual count
+                replyCount: Math.max(0, actualMessageCount - 1), // Use actual count
                 messageCount: actualMessageCount, // Use actual count
                 lastPostTime: thread.lastActivity || thread.createdAt,
                 // Embed the initial post details
@@ -70,7 +70,7 @@ export const getOpenForumThreads = async (req, res, next) => {
                     imageUrl: null, 
                     likes: [], 
                     dislikes: [], 
-                    likeCount: 0, 
+                    likeCount: 0,  
                     dislikeCount: 0 
                 }
                 // Remove old content and imageUrl properties if they are now within initialPost
@@ -140,7 +140,7 @@ export const getClosedForumThreads = async (req, res, next) => {
                 ...thread,
                 authorName: authorName,
                 profilePicUrl: profilePicUrl,
-                replyCount: actualMessageCount, // Use actual count
+                replyCount: Math.max(0, actualMessageCount - 1), // Use actual count
                 messageCount: actualMessageCount, // Use actual count
                 lastPostTime: thread.lastActivity || thread.createdAt,
                 // Embed the initial post details
@@ -291,7 +291,7 @@ export const createThread = async (req, res, next) => {
             createdAt: now,
             lastActivity: now, // Initially, last activity is creation time
             // Optional: denormalized fields like replyCount start at 1 (initial message)
-            replyCount: 1 
+            replyCount: 0 
         };
         const threadResult = await threadsCollection.insertOne(newThread);
         const newThreadId = threadResult.insertedId;

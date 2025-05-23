@@ -1,0 +1,15 @@
+/* CSS module for Input component */
+.input {
+  display: flex;
+  height: 2.5rem;
+  width: 100%;
+  min-width: 0;
+  border-radius: 0.5rem;
+  border: 1px solid var(--input);
+  background-color: transparent;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  transition: color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  outline: none;
+}

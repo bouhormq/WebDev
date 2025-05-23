@@ -1,0 +1,15 @@
+/* Textarea component styles */
+.textarea {
+  display: flex;
+  min-height: 4rem;
+  width: 100%;
+  border-radius: 0.5rem;
+  border: 1px solid var(--input);
+  background-color: transparent;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  transition: color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  outline: none;
+  field-sizing: content;
+}

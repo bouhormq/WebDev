@@ -1,70 +1,39 @@
 import * as React from "react"
 import * as AvatarPrimitive from "@radix-ui/react-avatar"
+import styles from './styles/avatar.module.css'; // Import CSS module
 
 function Avatar({
   className,
-  style,
   ...props
 }) {
-  const avatarStyle = {
-    position: "relative",
-    display: "flex",
-    height: "2rem",
-    width: "2rem",
-    flexShrink: 0,
-    overflow: "hidden",
-    borderRadius: "9999px",
-    ...style,
-  };
   return (
     <AvatarPrimitive.Root
       data-slot="avatar"
-      style={avatarStyle}
-      className={className}
+      className={`${styles.avatarStyle} ${className || ''}`.trim()}
       {...props} />
   );
 }
 
 function AvatarImage({
   className,
-  style,
   ...props
 }) {
-  const imageStyle = {
-    aspectRatio: "1 / 1",
-    height: "100%",
-    width: "100%",
-    ...style,
-  };
   return (
     <AvatarPrimitive.Image
       data-slot="avatar-image"
-      style={imageStyle}
-      className={className}
+      className={`${styles.imageStyle} ${className || ''}`.trim()}
       {...props} />
   );
 }
 
 function AvatarFallback({
   className,
-  style,
   ...props
 }) {
-  const fallbackStyle = {
-    backgroundColor: "var(--muted)",
-    display: "flex",
-    height: "100%",
-    width: "100%",
-    alignItems: "center",
-    justifyContent: "center",
-    borderRadius: "9999px",
-    ...style,
-  };
   return (
     <AvatarPrimitive.Fallback
       data-slot="avatar-fallback"
-      style={fallbackStyle}
-      className={className}
+      className={`${styles.fallbackStyle} ${className || ''}`.trim()}
       {...props} />
   );
 }

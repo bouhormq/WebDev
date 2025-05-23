@@ -351,3 +351,47 @@ export const dislikeMessage = async (req, res, next) => {
         next(error);
     }
 };
+
+// Controller function to delete a thread and all its replies
+export const deleteThreadAndReplies = async (req, res, next) => {
+    const { threadId } = req.params;
+    const userId = req.user.id; // From protect middleware
+    const isAdmin = req.user.isAdmin; // From protect middleware
+
+    // Validate threadId format
+    if (!ObjectId.isValid(threadId)) {
+        return res.status(400).json({ message: 'Invalid thread ID format.' });
+    }
+
+    try {
+        const threadsCollection = getCollection('threads');
+        const messagesCollection = getCollection('messages');
+
+        // Fetch the thread to check ownership
+        const thread = await threadsCollection.findOne({ _id: new ObjectId(threadId) });
+
+        if (!thread) {
+            return res.status(404).json({ message: 'Thread not found.' });
+        }
+
+        // Authorization Check
+        if (thread.authorId.toString() !== userId && !isAdmin) {
+            return res.status(403).json({ message: 'You are not authorized to delete this thread.' });
+        }
+
+        // Deletion Logic:
+        // 1. Delete all messages associated with the thread
+        const deleteMessagesResult = await messagesCollection.deleteMany({ threadId: new ObjectId(threadId) });
+        console.log(`Deleted ${deleteMessagesResult.deletedCount} messages for thread ${threadId}`);
+
+        // 2. Delete the thread document itself
+        await threadsCollection.deleteOne({ _id: new ObjectId(threadId) });
+        console.log(`Deleted thread ${threadId}`);
+
+        res.status(200).json({ message: 'Thread and all its replies deleted successfully.' });
+
+    } catch (error) {
+        console.error(`Error deleting thread ${threadId} and its replies:`, error);
+        next(error); // Pass error to the global error handler
+    }
+};

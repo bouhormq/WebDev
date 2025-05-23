@@ -9,6 +9,7 @@ import {
 } from "react-hook-form";
 
 import { Label } from "@/components/ui/label";
+import styles from './styles/form.module.css'; // Import CSS module
 
 const Form = FormProvider;
 
@@ -47,41 +48,30 @@ const useFormField = () => {
 
 const FormItemContext = React.createContext({});
 
-function FormItem({ className, style, ...props }) {
+function FormItem({ className, ...props }) {
   const id = React.useId();
-
-  const itemStyle = {
-    ...style,
-  };
 
   return (
     <FormItemContext.Provider value={{ id }}>
       <div
         data-slot="form-item"
-        style={itemStyle}
-        className={className}
+        className={`${styles.formItem} ${className || ''}`.trim()}
         {...props}
       />
     </FormItemContext.Provider>
   );
 }
 
-function FormLabel({ className, style, ...props }) {
+function FormLabel({ className, ...props }) {
   const { error, formItemId } = useFormField();
-
-  const labelStyle = {
-    fontWeight: "500",
-    lineHeight: "1",
-    color: error ? "var(--destructive)" : undefined,
-    ...style,
-  };
+  
+  const labelClasses = `${styles.formLabel} ${error ? styles.formLabelError : ''} ${className || ''}`.trim();
 
   return (
     <Label
       data-slot="form-label"
       data-error={!!error}
-      style={labelStyle}
-      className={className}
+      className={labelClasses}
       htmlFor={formItemId}
       {...props}
     />
@@ -106,27 +96,20 @@ function FormControl({ ...props }) {
   );
 }
 
-function FormDescription({ className, style, ...props }) {
+function FormDescription({ className, ...props }) {
   const { formDescriptionId } = useFormField();
-
-  const descriptionStyle = {
-    fontSize: "0.8rem",
-    color: "var(--muted-foreground)",
-    ...style,
-  };
 
   return (
     <p
       data-slot="form-description"
       id={formDescriptionId}
-      style={descriptionStyle}
-      className={className}
+      className={`${styles.formDescription} ${className || ''}`.trim()}
       {...props}
     />
   );
 }
 
-function FormMessage({ className, style, ...props }) {
+function FormMessage({ className, ...props }) {
   const { error, formMessageId } = useFormField();
   const body = error ? String(error?.message ?? "") : props.children;
 
@@ -134,19 +117,11 @@ function FormMessage({ className, style, ...props }) {
     return null;
   }
 
-  const messageStyle = {
-    fontSize: "0.8rem",
-    fontWeight: "500",
-    color: "var(--destructive)",
-    ...style,
-  };
-
   return (
     <p
       data-slot="form-message"
       id={formMessageId}
-      style={messageStyle}
-      className={className}
+      className={`${styles.formMessage} ${className || ''}`.trim()}
       {...props}
     >
       {body}

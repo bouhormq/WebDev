@@ -1,0 +1,204 @@
+\
+.threadContentStyle {
+  padding: 1rem;
+  padding-top: 0.5rem;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: var(--foreground);
+}
+
+.itemContainerStyle {
+  /* No specific styles were defined, but can be added here if needed */
+}
+
+.summaryDivStyle {
+  display: flex;
+  align-items: center; /* Align items vertically in the center */
+  justify-content: space-between; /* Push info to left and stats to right */
+  gap: 1rem;
+  padding: 1rem;
+  transition: background-color 0.2s ease-in-out;
+  /* Add hover effect if desired, e.g.,
+  &:hover {
+    background-color: var(--muted);
+  }
+  */
+}
+
+.avatarStyle {
+  height: 2.25rem;
+  width: 2.25rem;
+}
+
+.infoDivStyle {
+  flex-grow: 1;
+  margin: 0.125rem 0;
+  overflow: hidden;
+}
+
+.titlePStyle {
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.25;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.authorInfoPStyle {
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+}
+
+.authorSpanStyle {
+  font-weight: 500;
+}
+
+.statsDivStyle {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column; /* Stack children vertically */
+  align-items: flex-end;   /* Align children to the right */
+  gap: 0.35rem; /* Gap between the stats text and delete button */
+}
+
+/* New style for the replies/last post time text block */
+.statsTextStyle {
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+  display: flex;
+  align-items: center;
+  gap: 0.25rem; /* Reduced gap for items within this text block */
+  white-space: nowrap; /* Prevent wrapping */
+}
+
+/* .statItemStyle was defined but not used directly in JSX with its own style prop */
+/* .iconStyle was defined but not used directly in JSX with its own style prop */
+
+.likeDislikeIconStyle {
+  height: 0.9rem;
+  width: 0.9rem;
+}
+
+.likeDislikeButtonSharedStyle {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.8rem;
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--radius);
+  background-color: transparent;
+  border: 1px solid transparent;
+  line-height: 1; /* For better alignment of icon and text */
+}
+
+.detailViewContainerStyle {
+  padding-left: 2rem;
+  padding-right: 1rem;
+  padding-bottom: 1rem;
+}
+
+.toggleRepliesButtonStyle {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--radius);
+  /* Add hover effect if desired, e.g.,
+  &:hover {
+    background-color: var(--accent);
+    color: var(--accent-foreground);
+  }
+  */
+}
+
+.contentImageStyle {
+  max-width: 100%;
+  max-height: 300px;
+  margin-top: 0.75rem;
+  border-radius: var(--radius);
+  object-fit: contain;
+}
+
+.actionsContainerStyle {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 1rem; /* Spacing between Reply, Like, Dislike */
+  padding: 0 1rem 0.5rem 1rem;
+  margin-top: 0.5rem;
+}
+
+.replyButtonStyle {
+  /* Extracted from likeDislikeButtonSharedStyle */
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.8rem;
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--radius);
+  background-color: transparent;
+  border: 1px solid transparent;
+  line-height: 1; /* For better alignment of icon and text */
+  /* Original replyButtonStyle specific style */
+  color: var(--primary);
+}
+
+.replyFormContainerStyle {
+  padding: 0 1rem 1rem 1rem;
+  margin-top: 0.5rem;
+}
+
+/* Style for the spinner inside the reply button */
+.replyButtonSpinner {
+  margin-right: 0.35rem;
+}
+
+/* Style for the like/dislike count span */
+.likeDislikeCount {
+  margin-left: 0.25rem;
+}
+
+/* Style for the CornerDownRight icon in the reply button */
+.replyButtonIcon {
+  /* uses likeDislikeIconStyle for size */
+  margin-right: 0.1rem;
+}
+
+/* For the italic placeholder text */
+.noContentPlaceholder {
+  /* Extracted from threadContentStyle */
+  padding: 1rem;
+  padding-top: 0.5rem;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-break: break-word;
+  /* Original noContentPlaceholder specific styles */
+  color: var(--muted-foreground);
+  font-style: italic;
+}
+
+.deleteButton {
+  background-color: transparent;
+  padding: 0.1rem; /* Minimal padding for a tighter look */
+  border-radius: var(--radius);
+  color: hsl(var(--muted-foreground) / 0.8); /* More subtle default color */
+  transition: all 0.2s ease-in-out;
+  display: flex; /* To align icon if needed */
+  align-items: center; /* To align icon if needed */
+  justify-content: center; /* To align icon if needed */
+}
+
+.deleteButton:hover {
+  background-color: hsl(var(--destructive) / 0.1);
+  color: hsl(var(--destructive-foreground));
+  transform: scale(1.1);
+}

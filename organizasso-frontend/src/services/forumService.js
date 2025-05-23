@@ -103,3 +103,15 @@ export const likeDislikeMessage = async (messageId, actionType) => {
     throw new Error(error.response?.data?.message || `Failed to ${actionType} message`);
   }
 };
+
+// Delete a Thread
+export const deleteThread = async (threadId) => {
+  try {
+    const response = await apiClient.delete(`/threads/${threadId}`);
+    return response.data;
+  } catch (error) {
+    console.error(`API Error deleting thread ${threadId}:`, error.response?.data || error.message);
+    // Rethrow a more specific error or the original error message
+    throw new Error(error.response?.data?.message || `Failed to delete thread ${threadId}`);
+  }
+};

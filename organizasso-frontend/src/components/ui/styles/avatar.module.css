@@ -1,0 +1,26 @@
+/* CSS module for Avatar component */
+.avatarStyle {
+  position: relative;
+  display: flex;
+  height: 2rem;
+  width: 2rem;
+  flex-shrink: 0;
+  overflow: hidden;
+  border-radius: 9999px; /* equivalent to rounded-full */
+}
+
+.imageStyle {
+  aspect-ratio: 1 / 1;
+  height: 100%;
+  width: 100%;
+}
+
+.fallbackStyle {
+  background-color: var(--muted);
+  display: flex;
+  height: 100%;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px; /* equivalent to rounded-full */
+}

@@ -1,59 +1,47 @@
-import React, { useState, useEffect, useContext } from 'react'; // Added useEffect, useContext
-import { formatDistanceToNow } from 'date-fns'; // For relative time
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"; // Import AvatarImage
-import { Clock, ChevronDown, ChevronUp, CornerDownRight, ThumbsUp, ThumbsDown } from 'lucide-react'; // Icons, Added ThumbsUp, ThumbsDown
-import ThreadDetailView from './ThreadDetailView'; // Import ThreadDetailView
-import ReplyForm from './ReplyForm'; // Import ReplyForm
-import { postReply, likeDislikeMessage } from '../../services/forumService'; // Import postReply and likeDislikeMessage
-import { deleteUserMessage } from '../../services/userService'; // Import deleteUserMessage
-import { toast } from "sonner"; // For showing notifications
-import Spinner from '../Common/Spinner'; // For loading state in reply button
-import { AuthContext } from '../../contexts/authContext.jsx'; // Import AuthContext
+import React, { useState, useEffect, useContext } from 'react';
+import { Link } from 'react-router-dom';
+import { formatDistanceToNow } from 'date-fns';
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Clock, ChevronDown, ChevronUp, CornerDownRight, ThumbsUp, ThumbsDown, Trash2 } from 'lucide-react';
+import ThreadDetailView from './ThreadDetailView';
+import ReplyForm from './ReplyForm';
+import { postReply, likeDislikeMessage, deleteThread } from '../../services/forumService';
+import { toast } from "sonner";
+import Spinner from '../Common/Spinner';
+import { AuthContext } from '../../contexts/authContext.jsx';
+import styles from './styles/ThreadItem.module.css';
 
-// --- Inline Style for Thread Content ---
-const threadContentStyle = {
-  padding: '1rem',
-  paddingTop: '0.5rem',
-  fontSize: '0.9rem',
-  lineHeight: '1.6',
-  whiteSpace: 'pre-wrap',
-  wordBreak: 'break-word',
-  color: 'var(--foreground)',
-};
-// --- End Inline Style ---
-
-const ThreadItem = ({ thread, onClick, isExpanded, onReplyPosted, ensureThreadOpen }) => {
-  const { currentUser } = useContext(AuthContext); // Get currentUser
+const ThreadItem = ({ thread, onClick, isExpanded, onReplyPosted, ensureThreadOpen, onThreadDeleted, currentUserId, onDeleteMessage }) => {
+  const { currentUser } = useContext(AuthContext);
   const [showInlineReplyForm, setShowInlineReplyForm] = useState(false);
   const [isSubmittingReply, setIsSubmittingReply] = useState(false);
   const [detailViewKey, setDetailViewKey] = useState(0);
 
-  // State for Like/Dislike functionality for the initial post
   const [isLiked, setIsLiked] = useState(false);
   const [isDisliked, setIsDisliked] = useState(false);
   const [localLikeCount, setLocalLikeCount] = useState(thread.initialPost?.likeCount || 0);
   const [localDislikeCount, setLocalDislikeCount] = useState(thread.initialPost?.dislikeCount || 0);
   const [isLikingOrDisliking, setIsLikingOrDisliking] = useState(false);
 
-  // Function to handle deleting a message from the detail view
-  const handleDeleteMessageInDetailView = async (messageId) => {
-    if (!currentUser) {
-      toast.error("Error", { description: "You must be logged in to delete messages." });
+  const canDelete = currentUser && thread && thread.authorId && (currentUser._id === thread.authorId || currentUser.isAdmin);
+
+  const handleDeleteThread = async (e) => {
+    e.stopPropagation();
+    if (!thread || !thread._id) {
+      toast.error("Cannot delete: Thread ID is missing.");
       return;
     }
-    // Optional: Add a confirmation dialog here if desired
-    // if (!window.confirm("Are you sure you want to delete this message?")) return;
-
-    toast.info("Deleting message...");
-    try {
-      await deleteUserMessage(messageId);
-      toast.success("Success!", { description: "Message deleted successfully." });
-      setDetailViewKey(prevKey => prevKey + 1); // Refresh ThreadDetailView
-    } catch (error) {
-      console.error("Failed to delete message:", error);
-      toast.error("Delete Failed", {
-        description: error.message || "Could not delete the message. Please try again.",
-      });
+    if (window.confirm("Are you sure you want to delete this thread? This will also delete all associated replies and cannot be undone.")) {
+      try {
+        await deleteThread(thread._id);
+        toast.success("Thread and all replies deleted successfully.");
+        if (onThreadDeleted) {
+          onThreadDeleted();
+        }
+      } catch (error) {
+        toast.error(error.message || "Failed to delete thread. Please try again.");
+        console.error("Error deleting thread:", error);
+      }
     }
   };
 
@@ -66,8 +54,6 @@ const ThreadItem = ({ thread, onClick, isExpanded, onReplyPosted, ensureThreadOp
     setLocalDislikeCount(thread.initialPost?.dislikeCount || 0);
   }, [currentUser, thread.initialPost]);
 
-
-  // Ensure lastPostTime is a valid Date object before formatting
   let lastPostTimeText = 'Unknown';
   if (thread.lastPostTime instanceof Date && !isNaN(thread.lastPostTime)) {
     try {
@@ -78,22 +64,19 @@ const ThreadItem = ({ thread, onClick, isExpanded, onReplyPosted, ensureThreadOp
     }
   }
 
-  // Get first letter for fallback avatar
   const authorInitial = thread.authorName ? thread.authorName.charAt(0).toUpperCase() : '?';
   
   let finalProfilePicUrl = null;
   if (thread.profilePicUrl) {
-    let path = thread.profilePicUrl.replace(/^\/?uploadss\//, '/uploads/'); // Corrects "uploadss" if present
+    let path = thread.profilePicUrl.replace(/^\/?uploads\//, '/uploads/');
     if (!path.startsWith('/')) {
       path = '/' + path;
     }
     const serverOrigin = new URL(import.meta.env.VITE_API_BASE_URL).origin;
     finalProfilePicUrl = serverOrigin + path;
-    // console.log('ThreadItem: Corrected Profile Pic URL:', finalProfilePicUrl, 'Original:', thread.profilePicUrl);
   }
 
   let finalContentImageUrl = null;
-  // Access imageUrl from initialPost
   if (thread.initialPost?.imageUrl) { 
     let imagePath = thread.initialPost.imageUrl.replace(/^\/?uploads\//, '/uploads/');
     if (!imagePath.startsWith('/')) {
@@ -101,22 +84,17 @@ const ThreadItem = ({ thread, onClick, isExpanded, onReplyPosted, ensureThreadOp
     }
     const serverOrigin = new URL(import.meta.env.VITE_API_BASE_URL).origin;
     finalContentImageUrl = serverOrigin + imagePath;
-    // console.log('ThreadItem: Content Image URL:', finalContentImageUrl, 'Original Initial Post imageUrl:', thread.initialPost.imageUrl);
   }
 
   const handleInlineReplySubmit = async (content, parentId, imageFile) => {
     if (!thread._id) {
-      toast.error("Error", {
-        description: "Thread ID is missing. Cannot post reply.",
-      });
+      toast.error("Error", { description: "Thread ID is missing. Cannot post reply." });
       return false;
     }
     setIsSubmittingReply(true);
     try {
       const newMessage = await postReply(thread._id, content, parentId, imageFile);
-      toast.success("Success!", {
-        description: "Your reply has been posted.",
-      });
+      toast.success("Success!", { description: "Your reply has been posted." });
       setShowInlineReplyForm(false);
       if (onReplyPosted) {
         onReplyPosted(thread._id, newMessage);
@@ -125,9 +103,7 @@ const ThreadItem = ({ thread, onClick, isExpanded, onReplyPosted, ensureThreadOp
       return true;
     } catch (error) {
       console.error("Failed to post inline reply:", error);
-      toast.error("Reply Failed", {
-        description: error.message || "Could not post your reply. Please try again.",
-      });
+      toast.error("Reply Failed", { description: error.message || "Could not post your reply. Please try again." });
       return false;
     } finally {
       setIsSubmittingReply(false);
@@ -137,225 +113,149 @@ const ThreadItem = ({ thread, onClick, isExpanded, onReplyPosted, ensureThreadOp
   const toggleInlineReplyForm = (e) => {
     e.stopPropagation();
     if (ensureThreadOpen && !isExpanded) {
-      ensureThreadOpen(thread._id); // Ensure the thread detail view is open
+      ensureThreadOpen(thread._id);
     }
     setShowInlineReplyForm(!showInlineReplyForm);
   };
 
   const handleInitialPostLikeDislike = async (actionType) => {
     if (!thread.initialPost?._id || !currentUser) {
-      toast.error("Error", {
-        description: "Cannot perform action. Please log in or ensure the post is valid.",
-      });
+      toast.error("Error", { description: "Cannot perform action. Please log in or ensure the post is valid." });
       return;
     }
     if (isLikingOrDisliking) return;
-
     setIsLikingOrDisliking(true);
     try {
       const response = await likeDislikeMessage(thread.initialPost._id, actionType);
-      // Correctly access the nested message object from the response
-      const updatedMessageData = response.message; 
-
+      const updatedMessageData = response.message;
       setLocalLikeCount(updatedMessageData.likeCount);
       setLocalDislikeCount(updatedMessageData.dislikeCount);
       setIsLiked(updatedMessageData.likes?.includes(currentUser._id) || false);
       setIsDisliked(updatedMessageData.dislikes?.includes(currentUser._id) || false);
-
     } catch (error) {
       console.error(`Failed to ${actionType} post:`, error);
-      toast.error("Action Failed", {
-        description: error.message || `Could not ${actionType} the post. Please try again.`,
-      });
+      toast.error("Action Failed", { description: error.message || `Could not ${actionType} the post. Please try again.` });
     } finally {
       setIsLikingOrDisliking(false);
     }
   };
 
-  // --- Styles ---
-  const itemContainerStyle = {};
-  const summaryDivStyle = {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '1rem',
-    padding: '1rem',
-    transition: 'background-color 0.2s ease-in-out',
-  };
-  const avatarStyle = { height: '2.25rem', width: '2.25rem'};
-  const infoDivStyle = { flexGrow: 1, margin: '0.125rem 0', overflow: 'hidden' };
-  const titlePStyle = { fontSize: '0.875rem', fontWeight: 500, lineHeight: 1.25, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' };
-  const authorInfoPStyle = { fontSize: '0.75rem', color: 'var(--muted-foreground)' };
-  const authorSpanStyle = { fontWeight: 500 };
-  const statsDivStyle = { flexShrink: 0, display: 'flex', alignItems: 'center', fontSize: '0.75rem', color: 'var(--muted-foreground)', gap: '1rem' };
-  const statItemStyle = { display: 'flex', alignItems: 'center' };
-  const iconStyle = { height: '0.875rem', width: '0.875rem', marginRight: '0.25rem' };
-  
-  const likeDislikeIconStyle = { height: '0.9rem', width: '0.9rem' }; // Slightly larger for action buttons
-  const likeDislikeButtonSharedStyle = {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '0.35rem',
-    fontSize: '0.8rem',
-    cursor: 'pointer',
-    padding: '0.25rem 0.5rem',
-    borderRadius: 'var(--radius)',
-    backgroundColor: 'transparent',
-    border: '1px solid transparent',
-    lineHeight: '1', // For better alignment of icon and text
-  };
-
-  const detailViewContainerStyle = {
-    paddingLeft: '2rem',
-    paddingRight: '1rem',
-    paddingBottom: '1rem',
-  };
-  const toggleRepliesButtonStyle = {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '0.25rem',
-    fontSize: '0.75rem',
-    color: 'var(--muted-foreground)',
-    cursor: 'pointer',
-    padding: '0.25rem 0.5rem',
-    borderRadius: 'var(--radius)',
-  };
-  const contentImageStyle = {
-    maxWidth: '100%',
-    maxHeight: '300px',
-    marginTop: '0.75rem',
-    borderRadius: 'var(--radius)',
-    objectFit: 'contain',
-  };
-  const actionsContainerStyle = {
-    display: 'flex',
-    justifyContent: 'flex-start',
-    alignItems: 'center',
-    gap: '1rem', // Spacing between Reply, Like, Dislike
-    padding: '0 1rem 0.5rem 1rem',
-    marginTop: '0.5rem',
-  };
-  const replyButtonStyle = { // Combined with likeDislikeButtonSharedStyle for consistency
-    ...likeDislikeButtonSharedStyle,
-    color: 'var(--primary)',
-  };
-  const replyFormContainerStyle = {
-    padding: '0 1rem 1rem 1rem',
-    marginTop: '0.5rem',
-  };
-
   return (
-    <div style={itemContainerStyle}>
-      <div style={summaryDivStyle}>
-        <Avatar style={avatarStyle}>
-          {finalProfilePicUrl ? (
-            <AvatarImage src={finalProfilePicUrl} alt={thread.authorName} />
-          ) : (
-            <AvatarFallback>{authorInitial}</AvatarFallback>
-          )}
-        </Avatar>
-        <div style={infoDivStyle}>
-          <p style={titlePStyle}>{thread.title || 'Untitled Thread'}</p>
-          <p style={authorInfoPStyle}>
-            Started by <span style={authorSpanStyle}>{thread.authorName || 'Unknown'}</span>
+    <div className={styles.itemContainerStyle} onClick={onClick}>
+      <div className={styles.summaryDivStyle}>
+        {thread.authorId ? (
+          <Link to={`/profile/${thread.authorId}`} onClick={(e) => e.stopPropagation()} className={styles.avatarLinkStyle}>
+            <Avatar className={styles.avatarStyle}>
+              {finalProfilePicUrl ? (
+                <AvatarImage src={finalProfilePicUrl} alt={thread.authorName} />
+              ) : (
+                <AvatarFallback>{authorInitial}</AvatarFallback>
+              )}
+            </Avatar>
+          </Link>
+        ) : (
+          <Avatar className={styles.avatarStyle}>
+            {finalProfilePicUrl ? (
+              <AvatarImage src={finalProfilePicUrl} alt={thread.authorName || 'Unknown Author'} />
+            ) : (
+              <AvatarFallback>{authorInitial}</AvatarFallback>
+            )}
+          </Avatar>
+        )}
+        <div className={styles.infoDivStyle}>
+          <p className={styles.titlePStyle}>{thread.title || 'Untitled Thread'}</p>
+          <p className={styles.authorInfoPStyle}>
+            Started by <span className={styles.authorSpanStyle}>{thread.authorName || 'Unknown'}</span>
           </p>
         </div>
-        <div style={statsDivStyle}>
-          <div style={statItemStyle} title={`Last post: ${lastPostTimeText}`}>
-            <Clock style={iconStyle} />
-            <span>{lastPostTimeText}</span>
+        <div className={styles.statsDivStyle}>
+          <div className="flex items-center text-xs text-muted-foreground space-x-2">
+            <span>{thread.replyCount || 0} replies</span>
+            <span className="text-muted-foreground">·</span>
+            <Clock className="h-3 w-3" />
+            <span>Last post: {lastPostTimeText}</span>
           </div>
-          <div 
-            style={toggleRepliesButtonStyle}
-            onClick={onClick}
-            role="button"
-            tabIndex={0}
-            onKeyDown={(e) => e.key === 'Enter' && onClick()}
-            title={isExpanded ? "Hide Replies" : "Show Replies"}
-          >
-            {isExpanded ? <ChevronUp style={iconStyle} /> : <ChevronDown style={iconStyle} />}
-            <span>{isExpanded ? "Hide Replies" : `Show Replies (${thread.messageCount ?? thread.replyCount ?? 0})`}</span>
-          </div>
+          {canDelete && (
+            <button
+              onClick={handleDeleteThread}
+              className={`ml-auto p-1 text-red-500 hover:text-red-700 transition-colors ${styles.deleteButton}`}
+              aria-label="Delete thread"
+              title="Delete Thread"
+            >
+              <Trash2 className="h-4 w-4" />
+            </button>
+          )}
         </div>
       </div>
 
-      {/* Always visible thread content - uses initialPost */}
       {thread.initialPost?.content && thread.initialPost.content.trim() !== '' ? (
-        <div style={threadContentStyle}>
+        <div className={styles.threadContentStyle}>
           <p>{thread.initialPost.content}</p>
           {finalContentImageUrl && (
             <img 
               src={finalContentImageUrl} 
               alt="Thread initial content image" 
-              style={contentImageStyle} 
+              className={styles.contentImageStyle} 
             />
           )}
         </div>
       ) : (
-        <div style={{ ...threadContentStyle, color: 'var(--muted-foreground)', fontStyle: 'italic' }}>
+        <div className={styles.noContentPlaceholder}>
           <p>[This thread has no initial content]</p>
-          {finalContentImageUrl && ( // Still show image if content is empty but image exists
+          {finalContentImageUrl && (
             <img 
               src={finalContentImageUrl} 
               alt="Thread initial content image" 
-              style={contentImageStyle} 
+              className={styles.contentImageStyle}
             />
           )}
         </div>
       )}
 
-      {/* Actions: Reply, Like, Dislike buttons */}
-      <div style={actionsContainerStyle}>
+      <div className={styles.actionsContainerStyle}>
         <button 
-          style={replyButtonStyle} 
+          className={styles.replyButtonStyle} 
           onClick={toggleInlineReplyForm}
           title="Reply to this thread"
-          disabled={isSubmittingReply || !currentUser} // Disable if not logged in or submitting
+          disabled={isSubmittingReply || !currentUser}
         >
           {isSubmittingReply && showInlineReplyForm ? (
-            <Spinner size="sm" style={{marginRight: '0.35rem'}} />
+            <Spinner size="sm" className={styles.replyButtonSpinner} />
           ) : (
-            <CornerDownRight style={{ ...likeDislikeIconStyle, marginRight: '0.1rem' }} />
+            <CornerDownRight className={`${styles.likeDislikeIconStyle} ${styles.replyButtonIcon}`} />
           )}
           Reply
         </button>
 
-        {/* Like/Dislike only if initialPost exists and user is logged in */}
         {thread.initialPost?._id && currentUser && (
           <>
             <button
-              style={{ 
-                ...likeDislikeButtonSharedStyle, 
-                color: isLiked ? 'var(--primary)' : 'var(--muted-foreground)',
-              }}
+              className={`${styles.likeDislikeButtonSharedStyle} ${isLiked ? styles.liked : ''}`}
               onClick={() => handleInitialPostLikeDislike('like')}
               disabled={isLikingOrDisliking}
               title={isLiked ? "Unlike" : "Like"}
             >
-              {isLikingOrDisliking && (isLiked || (!isLiked && !isDisliked)) ? <Spinner size="sm" /> : <ThumbsUp style={likeDislikeIconStyle} />}
-              <span style={{ marginLeft: '0.25rem' }}>{localLikeCount}</span>
+              {isLikingOrDisliking && (isLiked || (!isLiked && !isDisliked)) ? <Spinner size="sm" /> : <ThumbsUp className={styles.likeDislikeIconStyle} />}
+              <span className={styles.likeDislikeCount}>{localLikeCount}</span>
             </button>
-
             <button
-              style={{ 
-                ...likeDislikeButtonSharedStyle, 
-                color: isDisliked ? 'var(--destructive)' : 'var(--muted-foreground)',
-              }}
+              className={`${styles.likeDislikeButtonSharedStyle} ${isDisliked ? styles.disliked : ''}`}
               onClick={() => handleInitialPostLikeDislike('dislike')}
               disabled={isLikingOrDisliking}
               title={isDisliked ? "Undislike" : "Dislike"}
             >
-              {isLikingOrDisliking && (isDisliked || (!isLiked && !isDisliked)) ? <Spinner size="sm" /> : <ThumbsDown style={likeDislikeIconStyle} />}
-              <span style={{ marginLeft: '0.25rem' }}>{localDislikeCount}</span>
+              {isLikingOrDisliking && (isDisliked || (!isLiked && !isDisliked)) ? <Spinner size="sm" /> : <ThumbsDown className={styles.likeDislikeIconStyle} />}
+              <span className={styles.likeDislikeCount}>{localDislikeCount}</span>
             </button>
           </>
         )}
       </div>
 
       {showInlineReplyForm && (
-        <div style={replyFormContainerStyle}>
+        <div className={styles.replyFormContainerStyle}>
           <ReplyForm 
             threadId={thread._id}
-            parentId={null} // Direct reply to the thread's initial post conceptually
+            parentId={null}
             onReplySubmit={handleInlineReplySubmit}
             isLoading={isSubmittingReply}
           />
@@ -363,15 +263,15 @@ const ThreadItem = ({ thread, onClick, isExpanded, onReplyPosted, ensureThreadOp
       )}
 
       {isExpanded && (
-        <div style={detailViewContainerStyle}>
+        <div className={styles.detailViewContainerStyle}>
           <ThreadDetailView
             key={detailViewKey}
             threadId={thread._id}
-            originalThreadContent={thread.initialPost?.content} // Use initialPost content
+            originalThreadContent={thread.initialPost?.content}
             onPostReply={handleInlineReplySubmit}
             isPostingReply={isSubmittingReply}
-            currentUserId={currentUser?._id} // Pass currentUserId
-            onDeleteMessage={handleDeleteMessageInDetailView} // Pass the delete handler
+            currentUserId={currentUserId} // Pass currentUserId prop
+            onDeleteMessage={onDeleteMessage} // Pass onDeleteMessage prop
           />
         </div>
       )}

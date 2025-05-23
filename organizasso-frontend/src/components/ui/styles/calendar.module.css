@@ -1,0 +1,35 @@
+/* CSS module for Calendar component */
+.calendar {
+  padding: 0.75rem;
+}
+
+/* Icon styles */
+.calendarIcon {
+  width: 1rem;
+  height: 1rem;
+}
+
+/* The following classes can be used to style specific parts of the calendar
+   when needed. These correspond to the baseClassNames in the component */
+.months {}
+.month {}
+.caption {}
+.caption_label {}
+.nav {}
+.nav_button {}
+.nav_button_previous {}
+.nav_button_next {}
+.table {}
+.head_row {}
+.head_cell {}
+.row {}
+.cell {}
+.day {}
+.day_range_start {}
+.day_range_end {}
+.day_selected {}
+.day_today {}
+.day_outside {}
+.day_disabled {}
+.day_range_middle {}
+.day_hidden {}
